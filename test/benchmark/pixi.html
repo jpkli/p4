@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/two.js/0.6.0/two.min.js"></script> -->
+
+  </head>
+
+  <body>
+      <div id='two'>
+
+      </div>
+      <script>
+      var app = new PIXI.Application(1000, 1000, { antialias: false });
+      document.body.appendChild(app.view);
+
+      var graphics = new PIXI.Graphics();
+
+
+      // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+      graphics.lineStyle(0);
+      var start = new Date();
+
+      var dataSize = 5000000;
+      var dataX = new Array(dataSize);
+      var dataY = new Array(dataSize);
+      for(var i = 0; i < dataSize; i++) {
+          dataX[i] = Math.random() *  1000;
+          dataY[i] = Math.random() *  1000;
+      }
+
+      graphics.beginFill(0xFFFF0B, 0.15);
+
+      var start = new Date();
+
+      for(var i = 0; i < dataSize; i++) {
+          graphics.drawCircle(dataX[i], dataY[i], 8);
+      }
+      graphics.endFill();
+
+      console.log( new Date() - start);
+    //   app.stage.addChild(graphics);
+      </script>
+
+
+
+  </body>
+
+</html>

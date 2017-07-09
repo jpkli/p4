@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>i2v Test</title>
+        <!-- data-main attribute tells require.js to load
+             scripts/main.js after require.js loads. -->
+        <style>
+        .i2v-viz {
+          -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+             -khtml-user-select: none; /* Konqueror HTML */
+               -moz-user-select: none; /* Firefox */
+                -ms-user-select: none; /* Internet Explorer/Edge */
+                    user-select: none; /* Non-prefixed version, currently
+                                          supported by Chrome and Opera */
+        }
+        </style>
+    </head>
+    <body>
+        <h1>i2v Test</h1>
+        <div id="i2vCanvas">
+
+        </div>
+
+        <script src="/npm/requirejs/require.js"></script>
+        <script>
+
+        require(["../src/pipeline"],function(pipeline){
+            var test = {
+                protocol: 'http',
+                path: '../Nat200k.csv',
+                attributes: {
+                    Month: "int",
+                    Time: "int",
+                    DayOfWeek: "int",
+                    MotherAge: "int",
+                    MotherRace: "string",
+                    MotherMartialStatus: "string",
+                    MotherEducation: "string",
+                    FatherAge: "int",
+                    FatherRace: "string",
+                    FatherEducation: "string",
+                    MotherHeight: "float",
+                    MotherWeight: "float",
+                    MotherWeightGain: "int",
+                    BabyGender: "string",
+                    BabyWeight: "float"
+                },
+                transform: [
+                    {
+                        $render: {
+                            mark: "point",
+                            y: "MotherWeight",
+                            x: 'BabyWeight'
+                        }
+                    },
+                    {
+                        $derive: {
+                            AgeDiff : "abs(FatherAge - MotherAge)"
+                        }
+                    },
+                    {
+                        $filter: {
+                            AgeDiff: [0, 10],
+                            // MotherWeight:  [100, 150],
+                            FatherAge: [20, 60]
+                        }
+                    },
+                    {
+                        $aggregate: {
+                            $group: ["AgeDiff"],
+                            BabyCount: { $count: "*"},
+                            AvgWeight: { $sum: "BabyWeight"}
+                        }
+                    },
+                    {
+                        $render: {
+                            mark: "bar",
+                            x: "AgeDiff",
+                            // y: "FatherRace",
+                            y: "BabyCount",
+                            // color: 'AvgWeight'
+                        }
+                    }
+                ],
+
+            };
+
+
+            var t = pipeline();
+            t.init(test, true);
+            // t.data(data)
+            // t.run(test, true);
+        });
+
+
+        </script>
+    </body>
+</html>

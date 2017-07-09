@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>i2v Test</title>
+        <!-- data-main attribute tells require.js to load
+             scripts/main.js after require.js loads. -->
+
+    </head>
+    <body>
+        <h1>i2v Test</h1>
+        <div id="i2vCanvas">
+
+        </div>
+
+        <script src="npm/requirejs/require.js"></script>
+        <script>
+        require([
+            "flexgl/flexgl",
+            "p4/core/arrays"
+        ],
+        function(
+            FlexGL,
+            arrays
+        ){
+
+            var fgl = FlexGL({
+                container: "i2vCanvas",
+                width: 800,
+                height: 800
+            });
+
+            fgl.attribute("i", "float", new Float32Array(arrays.seq(0, 5)))
+                .attribute("j", "float", new Float32Array(arrays.seq(0, 4)))
+                .attribute("k", "float", new Float32Array(arrays.seq(0, 8)))
+                .uniform("dim", "vec2", [800, 800]);
+
+
+            fgl.shader.vertex(function(i, j, k) {
+                var x, y;
+                x = j * 80.0;
+                y = k * 80.0;
+
+                if(i == 1.0) {x += 30.0;}
+                if(i == 2.0) {x += 30.; y+= 30.;}
+                if(i == 4.0) {y += 30.;}
+                if(i == 5.0) {y+= 30.; x+=30.; }
+
+
+                 gl_Position = vec4(x / 800. * 2.0 -1. , y / 800. * 2. - 1., 0, 1);
+            });
+
+            fgl.shader.fragment(function() {
+                 gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            });
+
+            var gl = fgl.program();
+
+            gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+
+            var ext = gl.getExtension("ANGLE_instanced_arrays");
+            ext.vertexAttribDivisorANGLE(fgl.attribute.i.location, 0);
+            ext.vertexAttribDivisorANGLE(fgl.attribute.j.location, 2);
+            ext.vertexAttribDivisorANGLE(fgl.attribute.k.location, 1);
+
+            ext.drawArraysInstancedANGLE(gl.TRIANGLES, 0, 6, 9);
+
+        });
+        </script>
+    </body>
+</html>

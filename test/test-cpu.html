@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>i2v Test</title>
+        <!-- data-main attribute tells require.js to load
+             scripts/main.js after require.js loads. -->
+        <style>
+        .i2v-viz {
+          -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+             -khtml-user-select: none; /* Konqueror HTML */
+               -moz-user-select: none; /* Firefox */
+                -ms-user-select: none; /* Internet Explorer/Edge */
+                    user-select: none; /* Non-prefixed version, currently
+                                          supported by Chrome and Opera */
+        }
+        </style>
+    </head>
+    <body>
+        <h1>i2v Test</h1>
+        <div id="i2vCanvas">
+
+        </div>
+
+        <script src="/npm/requirejs/require.js"></script>
+        <script>
+        require([
+            "p4/io/ajax",
+            "p4/io/parser",
+            "p4/cquery/ctypes",
+            "p4/cquery/cstore",
+            "p4/core/datastruct",
+            "p4/core/pipeline",
+            "p4/core/arrays",
+            "p4/dataopt/stats",
+            "i2v/chart/parallelCoordinate",
+            "../src/adav",
+            // "glCompute",
+        ],
+        function(
+            ajax,
+            parser,
+            ctypes,
+            CStore,
+            dataStruct,
+            pipeline,
+            arrays,
+            stats,
+            adav
+            // glCompute
+        ){
+            ajax.getAll([
+                 {url: "../Nat200k.csv", dataType: "text"},
+                //  {url: "/metadata", dataType: "json"},
+                //  {url: "/data", dataType: "arraybuffer"}
+            ]).then(function(response){
+                var attributes = {
+                    Month: "int",//0
+                    Time: "int",//1
+                    DayOfWeek: "int",//2
+                    MotherAge: "int", //3
+                    MotherRace: "string", //4
+                    MotherMartialStatus: "string", //5
+                    MotherEducation: "string", //6
+                    FatherAge: "int", //7
+                    FatherRace: "string", //8
+                    FatherEducation: "string", //9
+                    MotherHeight: "int", //10
+                    MotherWeight: "int", //11
+                    MotherWeightGain: "int", //12
+                    Gender: "string",//13
+                    Weight: "int" //14
+                }
+
+                var csv = parser(response[0], ',');
+
+                var objectArray = dataStruct({
+                    array: csv,
+                    types: Object.keys(attributes).map(function(k){return attributes[k];}),
+                    header: Object.keys(attributes),
+                }).objectArray();
+                //
+                start = new Date();
+
+                var checkResult = pipeline()
+                // .derive({
+                //     AgeDiff : "@FatherAge - @MotherAge",
+                //
+                // })
+                .match({
+                    FatherAge: {$inRange: [23,24]},
+                    MotherAge: {$inRange: [23,23]},
+                })
+                .group({
+                    $by:"FatherAge",
+                    // rank: "$sum",
+                    Weight: "$sum",
+                    BabyCount: {FatherAge: "$count"},
+                    // Baby: {"Gender": "$sum"},
+                })
+                .sortBy({FatherAge:1})
+                // .group({
+                //     $by: ['timestamp', 'group_id'],
+                //     // rank: "$sum",
+                //     // rank: "$sum",d
+                //     numeric1: "$sum",
+                //     // numeric2: "$sum",
+                //     // numeric3: "$sum",
+                // })
+                (objectArray);
+
+                // console.log(new Date() - start);
+                console.log(checkResult);
+                // console.log(stats(checkResult, ['AgeDiff']));
+                // // console.log(checkResult.map(function(d){return d.rank}));
+                // console.log(arrays.min(checkResult.map(function(d){return d.numeric1})));
+
+
+            });
+        });
+        </script>
+    </body>
+</html>
