@@ -141,7 +141,7 @@ define(function(){
                 gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
                 gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
             }
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            fxgl.ctx.bindFramebuffer(fxgl.ctx.FRAMEBUFFER, null);
             return filterRanges;
         }
 
