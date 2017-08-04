@@ -66,8 +66,8 @@ define(function(require) {
             viewMappings = [],
             views = [
                 {
-                    width: viewport[0],
-                    height: viewport[1],
+                    width: viewport[0] - padding.left - padding.right,
+                    height: viewport[1] - padding.top - padding.bottom,
                     offset: [0, 0]
                 }
             ];
@@ -98,11 +98,10 @@ define(function(require) {
 
         var fxgl;
         if (context === null) {
-
             fxgl = new FlexGL({
                 container: container,
-                width: viewport[0],
-                height: viewport[1],
+                width: viewport[0] - padding.left - padding.right,
+                height: viewport[1] - padding.top - padding.bottom,
                 padding: padding
             });
             fxgl.container = container;
@@ -643,7 +642,7 @@ define(function(require) {
                     }
                 }  else {
                     viewOptions.interaction = function(d) {
-            
+
                         fxgl._update = true;
                         rerun = true;
                         Object.keys(d).forEach(function(k) {
