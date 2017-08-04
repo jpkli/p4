@@ -7,25 +7,31 @@ define(function(require){
         Color = require('i2v/colors'),
         bar = require('i2v/charts/column');
 
-        function seq(dtype, start, end, interval) {
-            var step = interval || 1,
-                size = (end - start) / step + 1,
-                buf;
+    function seq(dtype, start, end, interval) {
+        var step = interval || 1,
+            size = (end - start) / step + 1,
+            buf;
 
-            buf = new ctypes[dtype](size);
-            for(var i = 0; i < size; i++) {
-                buf[i] = start + i * step;
-            }
-            return buf;
+        buf = new ctypes[dtype](size);
+        for(var i = 0; i < size; i++) {
+            buf[i] = start + i * step;
         }
+        return buf;
+    }
 
-        var seqInt = seq.bind(null, "int"),
-            seqFloat = seq.bind(null, "float");
+    var seqInt = seq.bind(null, "int"),
+        seqFloat = seq.bind(null, "float");
+
+    var defaultRenderer = require('./render/default'),
+        interleaveRenderer = require('./render/interleave');
 
     return function visualize(fxgl) {
         var colorManager = colors(fxgl);
-        var viewport = fxgl.viewport,
-            padding = fxgl.padding || {left: 0, right: 0, top: 0, bottom: 0};
+        var padding = fxgl.padding || {left: 0, right: 0, top: 0, bottom: 0},
+            viewport = [
+                fxgl.viewport[0] - padding.left - padding.right,
+                fxgl.viewport[1] - padding.top - padding.bottom,
+            ];
 
         var vis = new chart({
             container: fxgl.container,
@@ -60,124 +66,27 @@ define(function(require){
             .framebuffer("visStats", "float", [1, 1]);
 
         fxgl.framebuffer.enableRead("offScreenFBO");
-        fxgl.subroutine(
-            "visualMap",
-            "float",
-            function($int_fieldId, $float_rf, $float_cf, $float_v0, $float_exp){
-                var value;
-                if(fieldId >-1) {
-                    $vec2(d);
-                    d = this.uVisDomains[fieldId];
-                    value = this.getData(fieldId, rf, cf);
-                    value = (value - d.x) / (d.y - d.x);
-                } else {
-                    value = v0;
-                }
-                if(exp != 0.0)
-                    value = pow(value, exp);
-                return value;
-            });
+
+        var renderer = {
+            contig: defaultRenderer(fxgl),
+            interleave: interleaveRenderer(fxgl)
+        };
 
         fxgl.subroutine(
-            "visualMap2",
-            "float",
-            function($int_fieldId, $float_rf, $float_cf, $float_v0, $float_exp){
-                var value, t;
-                if(fieldId >= this.uIndexCount) {
-                    if (fieldId >= this.uFieldCount + this.uIndexCount) {
-                        t = (float(fieldId - this.uFieldCount - this.uIndexCount) + cf) /
-                            float(this.uDeriveCount);
-                        value = texture2D(this.fDerivedValues, vec2(rf, t)).a;
-                    } else {
-                        t = (float(fieldId - this.uIndexCount) + cf) / float(this.uFieldCount);
-                        value = texture2D(this.uDataInput, vec2(rf, t)).a;
-                    }
+            renderer.contig.visualMap.fname,
+            renderer.contig.visualMap.returnType,
+            renderer.contig.visualMap
+        );
 
-                    $vec2(d);
-                    d = this.uVisDomains[fieldId];
-                    value = (value - d.x) / (d.y - d.x);
+        fxgl.subroutine(
+            renderer.interleave.visualMap.fname,
+            renderer.interleave.visualMap.returnType,
+            renderer.interleave.visualMap
+        );
 
-                } else if(fieldId > -1 && fieldId < this.uIndexCount) {
-                    value = (fieldId == 0) ? rf : cf;
-                } else {
-                    value = v0;
-                }
-                if(exp != 0.0)
-                    value = pow(value, exp) ;
-                // value = rf;
-                return value;
-            });
-
-        var vs = fxgl.shader.vertex(function(visualMap){
-            var i, j;
-            $vec3(rgb);
-            var posX, posY, size, color, alpha;
-            gl_PointSize = this.uMarkSize;
-            i = (this.aIndex0+0.5) / this.uDataDim.x;
-            j = (this.aIndex1+0.5) / this.uDataDim.y;
-
-            this.vResult = 1.0;
-            if(this.uFilterFlag == 1) {
-                if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
-                    this.vResult = 0.0;
-            }
-
-            posX = visualMap(this.uVisMapPosX, i, j, 0.0, 0.0);
-            posY = visualMap(this.uVisMapPosY, i, j, 0.0,  0.0);
-            size = visualMap(this.uVisMapSize, i, j, 1.0,  0.0);
-            color = visualMap(this.uVisMapColor, i, j, -1.0,  0.0);
-            alpha = visualMap(this.uVisMapAlpha, i, j, this.uDefaultAlpha, 0.0);
-
-            posX = posX * 2.0 - 1.0;
-            posY = posY * 2.0 - 1.0;
-
-            if(color == -1.0)
-                rgb = this.uDefaultColor;
-            else
-                rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
-            this.vColorRGBA = vec4(rgb*alpha, alpha);
-            gl_Position = vec4(posX, posY, 0.0, 1.0);
-        });
-
-        var vs2 = fxgl.shader.vertex(function(visualMap2){
-            var i, j;
-            $vec3(rgb);
-            var posX, posY, size, color, alpha;
-            gl_PointSize = this.uMarkSize;
-            i = (mod(this._vid, this.uDataDim.x) + 0.5) / this.uDataDim.x;
-            j = (floor(this._vid / this.uDataDim.x) + 0.5) / this.uDataDim.y;
-
-            this.vResult = 1.0;
-            if(this.uFilterFlag == 1) {
-                if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
-                    this.vResult = 0.0;
-            }
-
-            // posX = visualMap(this.uVisMapPosX, i, j, 0.0, 0.0);
-            // if(this.uVisMapPosY == -1) {
-                posX = this._fid.y / float(this.uFeatureCount-1);
-                posY = visualMap2(int(this._fid.x), i, j, 1.0,  0.0);
-            // } else {
-            //     posY = this._fid.y / float(this.uFeatureCount-1);
-            //     posX = visualMap2(int(this._fid.x), i, j, 1.0,  0.0);
-            // }
-            size = visualMap2(this.uVisMapSize, i, j, 1.0,  0.0);
-            color = visualMap2(this.uVisMapColor, i, j, -1.0,  0.0);
-            alpha = visualMap2(this.uVisMapAlpha, i, j, this.uDefaultAlpha, 0.0);
-
-            posX = posX * 2.0 - 1.0;
-            posY = posY * 2.0 - 1.0;
-
-            if(color == -1.0)
-                rgb = this.uDefaultColor;
-            else
-                rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
-            this.vColorRGBA = vec4(rgb*alpha, alpha);
-
-            gl_Position = vec4(posX, posY, 0.0, 1.0);
-        });
-
-        var fs = fxgl.shader.fragment(function() {
+        var vs1 = fxgl.shader.vertex(renderer.contig.vs),
+            vs2 = fxgl.shader.vertex(renderer.interleave.vs),
+            fs = fxgl.shader.fragment(function() {
             // if(this.vResult == 0.0) discard;
             // var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
             // if (dist > 0.5) discard;
@@ -192,7 +101,7 @@ define(function(require){
                 discard;
         });
 
-        fxgl.program("visualize", vs, fs);
+        fxgl.program("visualize", vs1, fs);
         fxgl.program("interleave", vs2, fs);
         var svgViews = [];
         // fxgl.program("$interleave", vs2, fs);
@@ -214,7 +123,6 @@ define(function(require){
                 viewLevel = options.viewLevel,
                 categories = options.categories,
                 viewOrder = options.viewOrder;
-
 
             // console.log(viewOrder, offset, width, height);
 
@@ -245,7 +153,6 @@ define(function(require){
 
             if(Array.isArray(vmap.x) || Array.isArray(vmap.y))
                 interleave = true;
-
 
             if(perceptual)
                 fxgl.bindFramebuffer("offScreenFBO");
