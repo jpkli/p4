@@ -84,7 +84,9 @@ define(function(require){
             renderer.interleave.visualMap
         );
 
-        var fs = fxgl.shader.fragment(function() {
+        var vs1 = fxgl.shader.vertex(renderer.contig.vs),
+            vs2 = fxgl.shader.vertex(renderer.interleave.vs),
+            fs = fxgl.shader.fragment(function() {
             // if(this.vResult == 0.0) discard;
             // var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
             // if (dist > 0.5) discard;
@@ -99,9 +101,8 @@ define(function(require){
                 discard;
         });
 
-
-        fxgl.program("visualize", fxgl.shader.vertex(renderer.contig.vs), fs);
-        fxgl.program("interleave", fxgl.shader.vertex(renderer.interleave.vs), fs);
+        fxgl.program("visualize", vs1, fs);
+        fxgl.program("interleave", vs2, fs);
         var svgViews = [];
         // fxgl.program("$interleave", vs2, fs);
 
@@ -122,7 +123,6 @@ define(function(require){
                 viewLevel = options.viewLevel,
                 categories = options.categories,
                 viewOrder = options.viewOrder;
-
 
             // console.log(viewOrder, offset, width, height);
 
@@ -153,7 +153,6 @@ define(function(require){
 
             if(Array.isArray(vmap.x) || Array.isArray(vmap.y))
                 interleave = true;
-
 
             if(perceptual)
                 fxgl.bindFramebuffer("offScreenFBO");

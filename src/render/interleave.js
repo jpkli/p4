@@ -37,8 +37,8 @@ define(function(){
             $vec3(rgb);
             var posX, posY, size, color, alpha;
             gl_PointSize = this.uMarkSize;
-            i = (this.aIndex0+0.5) / this.uDataDim.x;
-            j = (this.aIndex1+0.5) / this.uDataDim.y;
+            i = (mod(this._vid, this.uDataDim.x) + 0.5) / this.uDataDim.x;
+            j = (floor(this._vid / this.uDataDim.x) + 0.5) / this.uDataDim.y;
 
             this.vResult = 1.0;
             if(this.uFilterFlag == 1) {
@@ -46,8 +46,14 @@ define(function(){
                     this.vResult = 0.0;
             }
 
-            posX = this.interleaveVisualMap(this.uVisMapPosX, i, j, 0.0, 0.0);
-            posY = this.interleaveVisualMap(this.uVisMapPosY, i, j, 0.0,  0.0);
+            // posX = visualMap(this.uVisMapPosX, i, j, 0.0, 0.0);
+            // if(this.uVisMapPosY == -1) {
+                posX = this._fid.y / float(this.uFeatureCount-1);
+                posY = this.interleaveVisualMap(int(this._fid.x), i, j, 1.0,  0.0);
+            // } else {
+            //     posY = this._fid.y / float(this.uFeatureCount-1);
+            //     posX = this.interleaveVisualMap(int(this._fid.x), i, j, 1.0,  0.0);
+            // }
             size = this.interleaveVisualMap(this.uVisMapSize, i, j, 1.0,  0.0);
             color = this.interleaveVisualMap(this.uVisMapColor, i, j, -1.0,  0.0);
             alpha = this.interleaveVisualMap(this.uVisMapAlpha, i, j, this.uDefaultAlpha, 0.0);
@@ -60,6 +66,7 @@ define(function(){
             else
                 rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
             this.vColorRGBA = vec4(rgb*alpha, alpha);
+
             gl_Position = vec4(posX, posY, 0.0, 1.0);
         }
 
