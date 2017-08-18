@@ -52,6 +52,7 @@ define(function(){
     }
 
     return function select(fxgl, fields) {
+        const SELECT_MAX = 500;
         var select = {},
             dataDimension = fxgl.uniform.uDataDim.data,
             fieldCount = fields.length,
@@ -60,13 +61,18 @@ define(function(){
             filterRanges = fxgl.uniform.uFieldDomains.data.concat(
                 fxgl.uniform.uDeriveDomains.data
             ),
-            inSelections = new Array(500).fill(0);
+            inSelections = new Float32Array(SELECT_MAX);
 
         fxgl.uniform("uFilterControls","int", filterControls)
             .uniform("uFilterRanges","vec2", filterRanges)
             .uniform("uMatchValue", "float", 1.0)
             .uniform("uInSelections", "float", inSelections)
+            .uniform("uSelectMax", "int", SELECT_MAX)
             .uniform("uSelectCount", "int", 0);
+
+        // fxgl.env({
+        //     selectMax: SELECT_MAX
+        // })
 
         var filter = {
             vs: fxgl.shader.vertex(vsFilter),
@@ -85,12 +91,14 @@ define(function(){
             filterControls = ctrl;
         }
 
-        select.execute = function(spec, fields){
+        select.execute = function(spec){
+            var fields = fxgl.fields
             var gl;
             var selectFields = Object.keys(spec).filter(function(s){
                 return spec[s].hasOwnProperty('$in');
             });
             fxgl.bindFramebuffer("fFilterResults");
+            fxgl.framebuffer.enableRead("fDerivedValues");
             if(selectFields.length) {
 
                 gl = fxgl.program("select");
@@ -122,9 +130,13 @@ define(function(){
 
             if(filterSelections.length){
                 filterControls = new Array(fieldTotal).fill(0);
+
                 filterSelections.forEach(function(k){
                     var fieldId = fields.indexOf(k);
+
                     if(fieldId === -1) throw new Error('Invalid data field ' + k);
+                    if(spec[k].length < 2) spec[k][1] = spec[k][0];
+                    console.log(k, fieldId, spec[k]);
                     filterControls[fieldId] = 1;
                     filterRanges[fieldId*2] = spec[k][0];
                     filterRanges[fieldId*2+1] = spec[k][1];

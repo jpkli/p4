@@ -4,8 +4,7 @@ define(function(require){
         ctypes = require('./ctypes'),
         perceive = require('./perceptual'),
         chart = require('./chart'),
-        Color = require('i2v/colors'),
-        bar = require('i2v/charts/column');
+        Color = require('i2v/colors');
 
     function seq(dtype, start, end, interval) {
         var step = interval || 1,
@@ -29,8 +28,8 @@ define(function(require){
         var colorManager = colors(fxgl);
         var padding = fxgl.padding || {left: 0, right: 0, top: 0, bottom: 0},
             viewport = [
-                fxgl.viewport[0] - padding.left - padding.right,
-                fxgl.viewport[1] - padding.top - padding.bottom,
+                fxgl.viewport[0],
+                fxgl.viewport[1],
             ];
 
         var vis = new chart({
@@ -196,7 +195,12 @@ define(function(require){
                 gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
                 // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
 
-            gl.viewport(offset[0], offset[1], width, height);
+            gl.viewport(
+                offset[0],
+                offset[1],
+                width-padding.left-padding.right,
+                height-padding.top-padding.bottom
+            );
 
             // clear screen
             // if(viewOrder == 0) {
@@ -236,7 +240,6 @@ define(function(require){
                 viewSetting.fields = fields;
             }
 
-
             if(!fxgl._update) {
                 domains = fxgl.uniform.uFieldDomains.data.slice();
                 fxgl.uniform.uVisDomains = domains;
@@ -258,15 +261,13 @@ define(function(require){
                 primitive = gl.LINE_STRIP;
 
             function draw() {
-                if(interleave)
-                    gl.ext.drawArraysInstancedANGLE(
-                        primitive,
-                        0,
-                        fxgl.attribute._fid.data.length / fxgl.attribute._fid.size,
-                        dataDim[0]* dataDim[1]
-                    );
-                else
+                if(interleave) {
+                    var count = fxgl.attribute._fid.data.length / fxgl.attribute._fid.size,
+                        primcount = dataDim[0]* dataDim[1];
+                    gl.ext.drawArraysInstancedANGLE(primitive, 0, count, primcount);
+                } else {
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, dataDim[0], dataDim[1]);
+                }
             }
 
             if(mark!='bar') {

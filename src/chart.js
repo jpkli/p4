@@ -36,8 +36,8 @@ define(function(require){
                 onhover = options.onhover || function(d) {console.log(d);},
                 marks = [];
 
-            // width -= padding.left + padding.right;
-            // height -= padding.top + padding.bottom;
+            width -= padding.left + padding.right;
+            height -= padding.top + padding.bottom;
             var brush = {
                 brushstart: function(){},
                 brush: function(){},
@@ -68,7 +68,7 @@ define(function(require){
                 ticks: 5,
                 labelPos: {x: -5, y: -5},
                 // grid: 1,
-                // format: function(d) { return format(".3s")(d/1000000000) + 's';}
+                format: format(".3s"),
             };
 
             var brushOptions = {
@@ -167,10 +167,11 @@ define(function(require){
 
                 xAxisOption.domain = data.map(function(d) { return d[vmap.x];});
                 xAxisOption.ticks = (xAxisOption.domain.length < 16) ? xAxisOption.domain.length : 16;
+                // xAxisOption.width = width+padding.left+padding.right;
                 x = Axis(xAxisOption);
 
                 yAxisOption.domain[0] = 0;
-                yAxisOption.scale = 'power';
+                // yAxisOption.scale = 'power';
                 // yAxisOption.exponent = 0.5;
                 y = Axis(yAxisOption);
 
@@ -217,7 +218,7 @@ define(function(require){
                         plot.highlight(selected);
                         // bar.svg.attr("fill", "#A00");
                         var filter = {};
-                        console.log(selectedData[0][vmap.x]);
+                        // console.log(selectedData[0][vmap.x]);
                         filter[vmap.x] = [selectedData[0][vmap.x]];
                         if(onclick !== null) onclick(filter);
                         // if(onhover !== null) onhover(selectedData);
@@ -280,7 +281,7 @@ define(function(require){
                         var spec = {};
                         spec[vmap.x] = d.x;
                         spec[vmap.y] = d.y.reverse();
-                        console.log(spec);
+                        // console.log(spec);
                         onclick(spec);
                     }
                     selector = new Selector(brushOptions);

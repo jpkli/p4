@@ -155,9 +155,6 @@ define(function(require){
                     gl.drawArrays(gl.TRIANGLES, 0, 6);
                 })
 
-                if(thirdPass) {
-
-                }
             }
 
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);

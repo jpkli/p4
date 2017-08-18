@@ -1,4 +1,5 @@
 define(function(require) {
+
     var arrays = require('p4/core/arrays'),
         ctypes = require('./ctypes'),
         cstore = require('./cstore'),
@@ -66,8 +67,8 @@ define(function(require) {
             viewMappings = [],
             views = [
                 {
-                    width: viewport[0] - padding.left - padding.right,
-                    height: viewport[1] - padding.top - padding.bottom,
+                    width: viewport[0],
+                    height: viewport[1],
                     offset: [0, 0]
                 }
             ];
@@ -161,7 +162,7 @@ define(function(require) {
 
             fieldWidths[fi] = getDataWidth(fi, [min, max]);
         });
-
+        fxgl.fields = fields;
         var dataDimension = [];
         dataDimension[0] = 8192,
             dataDimension[1] = Math.ceil(dataSize / dataDimension[0]);
@@ -448,7 +449,7 @@ define(function(require) {
             //
             dataDimension = resultDimension;
             //
-            newFieldIds = groupFieldIds.filter(function(f) {
+            var newFieldIds = groupFieldIds.filter(function(f) {
                 return f !== -1
             }).concat(resultFieldIds);
             fields = groupFields.concat(newFieldNames);
@@ -471,7 +472,7 @@ define(function(require) {
             //     fxgl.cachedResult = adav.result('row');
             //     console.log(fxgl.cachedResult);
             // }
-            resultDomains = opt.stats(resultFieldIds, dataDimension);
+            var resultDomains = opt.stats(resultFieldIds, dataDimension);
             gl.finish();
             // console.log("stats time:", new Date() - statStart);
             for (var ii = indexes.length; ii < indexes.length + resultFieldIds.length; ii++) {
@@ -536,7 +537,7 @@ define(function(require) {
 
             fxgl.uniform.uFilterFlag = 1;
 
-            var newDomains = opt.filter.execute(spec, fields);
+            var newDomains = opt.filter.execute(spec);
             getResult = opt.filter.result;
 
             if(!fxgl._update){
@@ -579,7 +580,7 @@ define(function(require) {
                 derive = optDerive(fxgl, fields, spec);
 
             fields = fields.concat(deriveFields);
-
+            fxgl.fields = fields;
             var newDomains = derive.execute();
             newDomains.forEach(function(d, i) {
                 deriveDomains[i] = d;
@@ -601,8 +602,7 @@ define(function(require) {
             // console.log(cache.result());
             return adav;
         }
-
-
+        
         adav.visualize = function(vmap) {
             var optID = addToPipeline('visualize', vmap);
             var viewDim = viewDim || fxgl.viewport;
@@ -640,7 +640,8 @@ define(function(require) {
                         vmap.interact(d);
                         rerun = false;
                     }
-                }  else {
+                }
+                else {
                     viewOptions.interaction = function(d) {
 
                         fxgl._update = true;
