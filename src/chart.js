@@ -27,6 +27,7 @@ define(function(require){
                 left = options.left || 0,
                 data = options.data || [],
                 vmap = options.vmap || {},
+                isHistogram = options.isHistogram || options.hist || false,
                 features = options.fields || [],
                 domain = options.domain,
                 categories = options.categories,
@@ -43,7 +44,7 @@ define(function(require){
                 brush: function(){},
                 brushend: function() {}
             };
-
+            console.log(data);
             var xAxisOption = {
                 container: plot,
                 dim: "x",
@@ -141,7 +142,7 @@ define(function(require){
                 colorSchemes = options.colorScheme,
                 cf = features.indexOf(vmap.color);
 
-            var color = function() { return 'steelblue' };
+            var color = function() { return vmap.color || 'steelblue' };
             if(cf !== -1) {
                 var colorScale = scale({
                     domain: domain[map.color],
@@ -157,16 +158,23 @@ define(function(require){
                 hMarks = [],
                 barWidth;
 
-
-
             if(data.length) {
                 // x.remove();
-                xAxisOption.scale = "ordinal";
-                xAxisOption.labelAngel = -40;
-                xAxisOption.labelPos = {x: 15, y: -10};
-
+                console.log(data);
+                barWidth = width / data.length;
                 xAxisOption.domain = data.map(function(d) { return d[vmap.x];});
-                xAxisOption.ticks = (xAxisOption.domain.length < 16) ? xAxisOption.domain.length : 16;
+                if(isHistogram)
+                    xAxisOption.tickPosition = [barWidth/2, 0];
+                var maxStrLength = Math.max.apply(null, xAxisOption.domain.map(
+                    function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
+                );
+                if(maxStrLength > 10) {
+                    xAxisOption.labelAngel = -40;
+                    xAxisOption.labelPos = {x: 15, y: -10};
+                }
+                xAxisOption.scale = "ordinal";
+                xAxisOption.ticks = (xAxisOption.domain.length < 16)
+                    ? xAxisOption.domain.length : 16;
                 // xAxisOption.width = width+padding.left+padding.right;
                 x = Axis(xAxisOption);
 
@@ -185,15 +193,18 @@ define(function(require){
                     });
                 }
 
-                barWidth = width / data.length;
+
                 data.forEach(function(d, i){
+                    var barHeight = isFinite(y(d[vmap.y])) ? y(d[vmap.y]) : height;
+
                     var bar = plot.append("rect")
                         .Attr({
-                            x: x(d[vmap.x]) - barWidth*0.4,
-                            y: y(d[vmap.y]),
-                            width: barWidth * 0.8,
-                            height: height - y(d[vmap.y]),
-                            fill: color(d[vmap.color])
+                            x: x(d[vmap.x]) - barWidth*0.48,
+                            y: barHeight,
+                            width: barWidth * 0.96,
+                            height: height - barHeight ,
+                            fill: color(d[vmap.color]),
+                            // stroke: color(d[vmap.color])
                         });
                     marks.push(bar);
 
@@ -238,57 +249,56 @@ define(function(require){
                             plot.highlight(selected, color);
                         }
                     }
-
-
                 });
             } else {
-                if(vmap.hasOwnProperty('x') && !Array.isArray(vmap.y)) {
-                    // xAxisOption.grid = 1;
-                    x = Axis(xAxisOption);
-                    brushOptions.x = x.invert;
+                x = Axis(xAxisOption);
+                y = Axis(yAxisOption);
+            }
+            if(vmap.hasOwnProperty('x') && !Array.isArray(vmap.y)) {
+                // xAxisOption.grid = 1;
 
+                brushOptions.x = x.invert;
+
+                labels.append("g")
+                  .append("text")
+                    .attr("x", width/2)
+                    .attr("y", height + padding.bottom/2 )
+                    .attr("dy", "1em")
+                    .css("text-anchor", "middle")
+                    .css("font-size", "1.2em")
+                    .css(" text-transform", "capitalize")
+                    .text(vmap.x);
+            }
+            if(vmap.hasOwnProperty('y') && !Array.isArray(vmap.x)) {
+                // yAxisOption.grid = 1;
+
+                brushOptions.y = y.invert;
+
+                if(!Array.isArray(vmap.y)) {
                     labels.append("g")
                       .append("text")
-                        .attr("x", width/2)
-                        .attr("y", height + padding.bottom/2 )
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", -padding.left )
+                        .attr("x", -height/2 )
                         .attr("dy", "1em")
                         .css("text-anchor", "middle")
                         .css("font-size", "1.2em")
                         .css(" text-transform", "capitalize")
-                        .text(vmap.x);
+                        .text(vmap.y);
                 }
-                if(vmap.hasOwnProperty('y') && !Array.isArray(vmap.x)) {
-                    // yAxisOption.grid = 1;
-                    y = Axis(yAxisOption);
-                    brushOptions.y = y.invert;
-
-                    if(!Array.isArray(vmap.y)) {
-                        labels.append("g")
-                          .append("text")
-                            .attr("transform", "rotate(-90)")
-                            .attr("y", -padding.left / 1.5)
-                            .attr("x", -height/2 )
-                            .attr("dy", "1em")
-                            .css("text-anchor", "middle")
-                            .css("font-size", "1.2em")
-                            .css(" text-transform", "capitalize")
-                            .text(vmap.y);
-                    }
-                }
-                if(brushOptions.hasOwnProperty('x') && brushOptions.hasOwnProperty('y')) {
-                    brushOptions.container = plot;
-                    brushOptions.brush = function(d) {
-                        var spec = {};
-                        spec[vmap.x] = d.x;
-                        spec[vmap.y] = d.y.reverse();
-                        // console.log(spec);
-                        onclick(spec);
-                    }
-                    selector = new Selector(brushOptions);
-                }
-
-
             }
+            if(!data.length && brushOptions.hasOwnProperty('x') && brushOptions.hasOwnProperty('y')) {
+                brushOptions.container = plot;
+                brushOptions.brush = function(d) {
+                    var spec = {};
+                    spec[vmap.x] = d.x;
+                    spec[vmap.y] = d.y.reverse();
+                    // console.log(spec);
+                    onclick(spec);
+                }
+                selector = new Selector(brushOptions);
+            }
+
             plot.translate(padding.left+left, padding.top+top);
 
             return function(spec) {
@@ -310,10 +320,11 @@ define(function(require){
                 // console.log(vmap.x);
                 if(data.length) {
                     data.forEach(function(d, i){
+                        var barHeight = isFinite(y(d[vmap.y])) ? y(d[vmap.y]) : height;
                         if(hMarks[i]) {
                             hMarks[i].Attr({
-                                y: y(d[vmap.y]),
-                                height: height - y(d[vmap.y]),
+                                y: barHeight,
+                                height: height - barHeight,
                                 fill: "orange"
                             });
                         }

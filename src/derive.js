@@ -114,11 +114,10 @@ define(function(){
                 gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
                 gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, min);
 
-                // var minValue = (max[0] > 0) ? max[1] : min[3],
-                //     maxValue = (max[2] > 0) ? max[3] : min[1];
-                deriveDomains[i] = [min[1], max[3]];
+                var minValue = (max[0] > 0) ? max[1] : min[3],
+                    maxValue = (max[2] > 0) ? max[3] : min[1];
+                deriveDomains[i] = [minValue, maxValue];
                 // deriveDomains[i] = [Math.min(min[0], min[3]), Math.max(max[0], max[3])];
-
             });
             gl.viewport(0, 0, dataDimension[0], dataDimension[1]*deriveMax);
             gl.disable( gl.BLEND );

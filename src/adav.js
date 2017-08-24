@@ -143,7 +143,9 @@ define(function(require) {
                 var interval = stats[fields[fid]].min;
                 if (interval === 0) interval = (data[fid][1] - data[fid][0]) || 1;
                 console.log('*******interval', interval, data[fid][1], data[fid][0]);
-                intervals[keys[fid]] = interval;
+                intervals[keys[fid]].interval = interval;
+                intervals[keys[fid]].min = stats[keys[fid]].min;
+                intervals[keys[fid]].max = stats[keys[fid]].max;
                 return range / interval + 1;
             } else if (["nominal", "ordinal", "categorical"].indexOf(types[fid]) > -1) {
                 return data.TLB.length;
@@ -362,6 +364,7 @@ define(function(require) {
                 throw new Error('"' + tag + '" is not found in regesters.');
 
             var reg = registers[tag];
+
             indexes = reg.indexes;
             deriveCount = reg.deriveCount;
             fieldCount = reg.fields.length - indexes.length - deriveCount;
@@ -376,6 +379,7 @@ define(function(require) {
             // fxgl.uniform.uFilterControls.data = reg.filterControls;
             fxgl.uniform.uDataInput.data = reg.dataInput;
             fields = reg.fields;
+            fxgl.fields = fields;
             fieldWidths = reg.fieldWidths;
             fieldDomains = reg.fieldDomains;
             deriveDomains = reg.deriveDomains;
@@ -397,7 +401,49 @@ define(function(require) {
             return adav;
         }
 
+
+        var binAggr = function(spec) {
+            var deriveSpec = {},
+                binAttr,
+                binCount;
+
+            if (typeof spec.$bin == 'object') {
+                binAttr = Object.keys(spec.$bin)[0];
+                binCount = spec.$bin[binAttr];
+            } else {
+                binAttr = spec.$bin;
+                //Apply Sturges' formula for determining the number of bins
+                binCount = Math.ceil(Math.log2(dataSize)) + 1;
+                // binCount = 7;
+            }
+
+            var binInterval = (stats[binAttr].max - stats[binAttr].min) / binCount;
+
+            var histFunction = (function() {max(ceil(binAttr / float(binInterval)), 1.0)})
+                .toString()
+                .slice(13, -1) // remove "function () {" from function.toString
+                .replace('binAttr', binAttr)
+                .replace('binInterval', binInterval)
+
+            deriveSpec['bin@'+binAttr] = histFunction;
+            intervals[binAttr] = {};
+            intervals[binAttr].interval = binInterval;
+            intervals[binAttr].min = stats[binAttr].min;
+            intervals[binAttr].max = stats[binAttr].max;
+            intervals[binAttr].align = 'right';
+            adav.derive(deriveSpec);
+            // var deriveFields = fields.slice(-deriveCount),
+            //     dfid = deriveFields.indexOf('bin@'+binAttr);
+            // deriveDomains[dfid] = [stats[binAttr].min, stats[binAttr].max];
+            return 'bin@'+binAttr;
+        }
+
         adav.aggregate = function(spec) {
+            if(spec.$bin) {
+                spec.$group = binAggr(spec);
+                delete spec.$bin;
+            }
+
             addToPipeline('aggregate', spec);
             if(Object.keys(crossfilters).length)
                 fxgl.uniform.uFilterFlag = 1;
@@ -446,13 +492,19 @@ define(function(require) {
             // indexes = groupFields;
             if (!Array.isArray(groupFields)) groupFields = [groupFields];
             indexes = groupFields;
-            //
+
             dataDimension = resultDimension;
-            //
+
             var newFieldIds = groupFieldIds.filter(function(f) {
                 return f !== -1
             }).concat(resultFieldIds);
-            fields = groupFields.concat(newFieldNames);
+
+            fields = groupFields
+                .map(function(gf) {
+                    return (gf.substring(0,4) == 'bin@')? gf.slice(4) : gf;
+                })
+                .concat(newFieldNames);
+            fxgl.fields = fields;
             fxgl.uniform.uDataDim.data = resultDimension;
             fxgl.uniform.uIndexCount.data = indexes.length;
             fxgl.uniform.uFieldCount.data = fields.length - indexes.length;
@@ -467,7 +519,7 @@ define(function(require) {
                 return fieldWidths[f];
             });
             fxgl.uniform.uDataInput.data = fxgl.framebuffer.fGroupResults.texture;
-
+            console.log(fields);
             // if(groupFields.length == 1) {
             //     fxgl.cachedResult = adav.result('row');
             //     console.log(fxgl.cachedResult);
@@ -484,21 +536,19 @@ define(function(require) {
             // fxgl.attribute._vid = seqFloat(0, resultDimension[0] * resultDimension[1] - 1);
             // fxgl.attribute._fid = seqFloat(0, fields.length);
 
+
             fxgl.uniform.uFieldDomains.data = fieldDomains;
             fxgl.uniform.uFieldWidths.data = fieldWidths;
             fxgl.uniform.uFilterFlag.data = 0;
-
-
-            // adav.cache('cacheResult');
-            // fxgl.uniform.uDataInput.data = fxgl.framebuffer.cacheResult.texture;
-            // fxgl.framebuffer.enableRead('cacheResult');
-
 
             // fxgl.ctx.finish();
             // console.log('pregroup time', new Date() - start);
             indexes.forEach(function(d, i) {
                 fxgl.attribute['aIndex' + i] = seqFloat(0, resultDimension[i] - 1);
-                var interval = intervals[d] || 1;
+                var interval = 1;
+
+                if(intervals.hasOwnProperty(d))
+                    interval = intervals[d].interval;
 
                 fxgl.attribute['aIndex' + i + 'Value'] = seqFloat(fieldDomains[i][0], fieldDomains[i][1], interval);
 
@@ -560,12 +610,12 @@ define(function(require) {
                         deriveWidths[di] = range[1] - range[0] + 1;
                     }
                 });
+
                 fxgl.uniform.uFieldDomains.data = fieldDomains;
                 fxgl.uniform.uFieldWidths.data = fieldWidths;
                 fxgl.uniform.uDeriveDomains.data = deriveDomains;
                 fxgl.uniform.uDeriveWidths.data = deriveWidths;
             }
-
             return adav;
         }
 
@@ -582,18 +632,19 @@ define(function(require) {
             fields = fields.concat(deriveFields);
             fxgl.fields = fields;
             var newDomains = derive.execute();
-            newDomains.forEach(function(d, i) {
-                deriveDomains[i] = d;
-                deriveWidths[i] = d[1] - d[0] + 1;
-            });
-            deriveCount += deriveFields.length;
-            // console.log(derive.result());
-            getResult = derive.result;
-            // console.log(deriveDomains, fields);
+            if(!fxgl._update) {
+                newDomains.forEach(function(d, i) {
+                    deriveDomains[deriveCount+i] = d;
+                    deriveWidths[deriveCount+i] = d[1] - d[0] + 1;
+                });
+                deriveCount += deriveFields.length;
+                // console.log(derive.result());
+                getResult = derive.result;
+                // console.log(deriveDomains, fields);
 
-            fxgl.uniform.uDeriveDomains.data = deriveDomains;
-            fxgl.uniform.uDeriveWidths.data = deriveWidths;
-
+                fxgl.uniform.uDeriveDomains.data = deriveDomains;
+                fxgl.uniform.uDeriveWidths.data = deriveWidths;
+            }
             return adav;
         }
 
@@ -602,12 +653,11 @@ define(function(require) {
             // console.log(cache.result());
             return adav;
         }
-        
+
         adav.visualize = function(vmap) {
             var optID = addToPipeline('visualize', vmap);
             var viewDim = viewDim || fxgl.viewport;
             var filters = {};
-
             if(typeof vmap.id == 'string') {
                 var viewIndex = viewNames.indexOf(vmap.id);
                 if( viewIndex == -1) {
@@ -624,6 +674,7 @@ define(function(require) {
                 domains: fieldDomains,
                 dataDim: dataDimension,
                 categories: categoryLookup,
+                intervals: intervals,
                 viewOrder: vmap.id,
                 width: adav.views[vmap.id].width,
                 height: adav.views[vmap.id].height,
@@ -647,9 +698,17 @@ define(function(require) {
                         fxgl._update = true;
                         rerun = true;
                         Object.keys(d).forEach(function(k) {
+                            if(d[k].length < 2) {
+                                if(intervals.hasOwnProperty(k)) {
+                                    var value = (Array.isArray(d[k])) ? d[k][0] : d[k];
+                                    d[k] = [value-intervals[k].interval, value];
+                                }
+                            }
                             crossfilters[k] = d[k];
                         });
                         adav.update();
+                        console.log('crossfilters::::::', crossfilters, fieldDomains);
+
                         // var operations = pipeline.slice(0, optID);
                         // var filtering = false;
                         // for (var i = 0, l = pipeline.length; i < l; i++) {
@@ -677,7 +736,6 @@ define(function(require) {
                 viewID++;
 
             }
-
 
             opt.visualize(viewOptions);
 
@@ -741,6 +799,8 @@ define(function(require) {
 
                         if (dtype == 'string' && categoryLookup.hasOwnProperty(f)) {
                             obj[f] = categoryLookup[f][res[f][i] - 1];
+                        } else if (intervals.hasOwnProperty(f)) {
+                            obj[f] =  intervals[f].min + res[f][i] * intervals[f].interval;
                         } else {
                             obj[f] = res[f][i];
                         }
@@ -802,7 +862,7 @@ define(function(require) {
             fxgl._update = true;
             adav.resume('__init__');
             adav.filter(crossfilters);
-
+            adav.register('__init__');
             return adav;
         }
         return adav;

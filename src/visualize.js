@@ -121,6 +121,7 @@ define(function(require){
                 interaction = options.interaction,
                 viewLevel = options.viewLevel,
                 categories = options.categories,
+                intervals = options.intervals,
                 viewOrder = options.viewOrder;
 
             // console.log(viewOrder, offset, width, height);
@@ -237,7 +238,10 @@ define(function(require){
                 var start = performance.now();
                 var result = fxgl.readResult('row');
                 viewSetting.data = sortData(result);
+                console.log(viewSetting.data);
                 viewSetting.fields = fields;
+                if(intervals.hasOwnProperty(vmap.x))
+                    viewSetting.isHistogram = true;
             }
 
             if(!fxgl._update) {
