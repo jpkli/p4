@@ -33,8 +33,8 @@ define(function(require){
                 categories = options.categories,
                 selector,
                 labels = plot.append('g'),
-                onclick = options.onclick || function(d) {console.log(d);},
-                onhover = options.onhover || function(d) {console.log(d);},
+                onclick = options.onclick || null,
+                onhover = options.onhover || null,
                 marks = [];
 
             width -= padding.left + padding.right;
@@ -44,7 +44,7 @@ define(function(require){
                 brush: function(){},
                 brushend: function() {}
             };
-            console.log(data);
+
             var xAxisOption = {
                 container: plot,
                 dim: "x",
@@ -134,7 +134,7 @@ define(function(require){
                       .attr("dy", "1em")
                       .css("text-anchor", "middle")
                       .css("font-size", "1em")
-                      .text(d);
+                      .text(d.replace(/_/g, ' '));
                 });
             }
 
@@ -168,7 +168,7 @@ define(function(require){
                 var maxStrLength = Math.max.apply(null, xAxisOption.domain.map(
                     function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
                 );
-                if(maxStrLength > 10) {
+                if(maxStrLength > 10 || barWidth < 40) {
                     xAxisOption.labelAngel = -40;
                     xAxisOption.labelPos = {x: 15, y: -10};
                 }
@@ -267,7 +267,7 @@ define(function(require){
                     .css("text-anchor", "middle")
                     .css("font-size", "1.2em")
                     .css(" text-transform", "capitalize")
-                    .text(vmap.x);
+                    .text(vmap.x.replace(/_/g, ' '));
             }
             if(vmap.hasOwnProperty('y') && !Array.isArray(vmap.x)) {
                 // yAxisOption.grid = 1;
@@ -284,7 +284,7 @@ define(function(require){
                         .css("text-anchor", "middle")
                         .css("font-size", "1.2em")
                         .css(" text-transform", "capitalize")
-                        .text(vmap.y);
+                        .text(vmap.y.replace(/_/g, ' '));
                 }
             }
             if(!data.length && brushOptions.hasOwnProperty('x') && brushOptions.hasOwnProperty('y')) {

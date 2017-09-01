@@ -56,6 +56,7 @@ define(function(require){
             .uniform("uDefaultAlpha",   "float", 1.0)
             .uniform("uMaxRGBA",        "vec4",  [0, 0, 0, 0])
             .uniform("uDefaultColor",   "vec3",  [0.8, 0, 0])
+            .uniform("uColorMode",      "int",   1)
             .uniform("uViewDim",        "vec2",  fxgl.viewport)
             .varying("vColorRGBA",      "vec4"   )
 
@@ -182,7 +183,7 @@ define(function(require){
                 fxgl.uniform.uVisMapColor = vmapColor;
             }
 
-            if(vmapColor == -1 && typeof(vmap.alpha) == "number") {
+            if(typeof(vmap.alpha) == "number") {
                 fxgl.uniform.uVisMapAlpha = -1;
                 fxgl.uniform.uDefaultAlpha = vmap.alpha;
             } else {

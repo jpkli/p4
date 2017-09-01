@@ -75,6 +75,8 @@ define(function(require) {
 
         adav.views = options.views || views;
 
+        var interactions = options.interactions || 'auto';
+
         var categoryLookup = data.TLBs || {},
             categoryIndex = data.CAMs || {};
 
@@ -143,6 +145,7 @@ define(function(require) {
                 var interval = stats[fields[fid]].min;
                 if (interval === 0) interval = (data[fid][1] - data[fid][0]) || 1;
                 console.log('*******interval', interval, data[fid][1], data[fid][0]);
+                intervals[keys[fid]] = {};
                 intervals[keys[fid]].interval = interval;
                 intervals[keys[fid]].min = stats[keys[fid]].min;
                 intervals[keys[fid]].max = stats[keys[fid]].max;
@@ -692,7 +695,7 @@ define(function(require) {
                         rerun = false;
                     }
                 }
-                else {
+                else if(interactions == 'auto') {
                     viewOptions.interaction = function(d) {
 
                         fxgl._update = true;

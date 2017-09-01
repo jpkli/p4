@@ -47,13 +47,13 @@ define(function(){
             }
 
             // posX = visualMap(this.uVisMapPosX, i, j, 0.0, 0.0);
-            // if(this.uVisMapPosY == -1) {
+            if(this.uVisMapPosY == -1) {
                 posX = this._fid.y / float(this.uFeatureCount-1);
                 posY = this.interleaveVisualMap(int(this._fid.x), i, j, 1.0,  0.0);
-            // } else {
-            //     posY = this._fid.y / float(this.uFeatureCount-1);
-            //     posX = this.interleaveVisualMap(int(this._fid.x), i, j, 1.0,  0.0);
-            // }
+            } else {
+                posY = this._fid.y / float(this.uFeatureCount-1);
+                posX = this.interleaveVisualMap(int(this._fid.x), i, j, 1.0,  0.0);
+            }
             size = this.interleaveVisualMap(this.uVisMapSize, i, j, 1.0,  0.0);
             color = this.interleaveVisualMap(this.uVisMapColor, i, j, -1.0,  0.0);
             alpha = this.interleaveVisualMap(this.uVisMapAlpha, i, j, this.uDefaultAlpha, 0.0);
@@ -63,8 +63,13 @@ define(function(){
 
             if(color == -1.0)
                 rgb = this.uDefaultColor;
-            else
-                rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
+            else {
+                var t = (float(this.uVisMapColor - this.uIndexCount) + j) / float(this.uFieldCount);
+                var value = texture2D(this.uDataInput, vec2(i, t)).a;
+                rgb = this.uColorTable[int(value)+1];
+            }
+                // rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
+
             this.vColorRGBA = vec4(rgb*alpha, alpha);
 
             gl_Position = vec4(posX, posY, 0.0, 1.0);
