@@ -146,6 +146,7 @@ define(function(require) {
                 if (interval === 0) interval = (data[fid][1] - data[fid][0]) || 1;
                 console.log('*******interval', interval, data[fid][1], data[fid][0]);
                 intervals[keys[fid]] = {};
+                intervals[keys[fid]].dtype = 'time';
                 intervals[keys[fid]].interval = interval;
                 intervals[keys[fid]].min = stats[keys[fid]].min;
                 intervals[keys[fid]].max = stats[keys[fid]].max;
@@ -430,6 +431,7 @@ define(function(require) {
 
             deriveSpec['bin@'+binAttr] = histFunction;
             intervals[binAttr] = {};
+            intervals[binAttr].dtype = 'historgram';
             intervals[binAttr].interval = binInterval;
             intervals[binAttr].min = stats[binAttr].min;
             intervals[binAttr].max = stats[binAttr].max;
@@ -802,7 +804,7 @@ define(function(require) {
 
                         if (dtype == 'string' && categoryLookup.hasOwnProperty(f)) {
                             obj[f] = categoryLookup[f][res[f][i] - 1];
-                        } else if (intervals.hasOwnProperty(f)) {
+                        } else if (intervals.hasOwnProperty(f) && intervals[f].dtype == 'historgram') {
                             obj[f] =  intervals[f].min + res[f][i] * intervals[f].interval;
                         } else {
                             obj[f] = res[f][i];
