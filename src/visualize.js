@@ -248,12 +248,14 @@ define(function(require){
             if(!fxgl._update) {
                 domains = fxgl.uniform.uFieldDomains.data.slice();
                 fxgl.uniform.uVisDomains = domains;
+                if(svgViews[viewOrder])
+                    svgViews[viewOrder].svg.remove();
                 svgViews[viewOrder] = vis.addLayer(viewSetting);
 
             } else {
                 if(mark == 'bar'){
                     var result = fxgl.readResult('row');
-                    svgViews[viewOrder]({
+                    svgViews[viewOrder].update({
                         data: sortData(result)
                     })
                 }

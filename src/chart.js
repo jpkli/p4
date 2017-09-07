@@ -81,7 +81,7 @@ define(function(require){
                 brushend: null,
             };
 
-            var x, y;
+            var x, y, ypAxes = [];
 
             // For parallel coordinates
 
@@ -121,6 +121,7 @@ define(function(require){
                     }
 
                     y = Axis(yAxisOption);
+                    ypAxes[i] = y;
 
                     brushOptions.container = axisSelect;
                     brushOptions.y = y.invert;
@@ -301,7 +302,9 @@ define(function(require){
 
             plot.translate(padding.left+left, padding.top+top);
 
-            return function(spec) {
+            var chartLayer = {};
+
+            chartLayer.update =  function(spec) {
                 var domain = spec.domain || {},
                     data = spec.data || [];
 
@@ -335,6 +338,20 @@ define(function(require){
                     })
                 }
             }
+
+            chartLayer.removeAxis = function() {
+                x.remove();
+                y.remove();
+                if(ypAxes.length) {
+                    ypAxes.forEach(function(yp) {
+                        yp.remove();
+                    })
+                }
+            }
+
+            chartLayer.svg = plot;
+
+            return chartLayer;
         };
 
         this.canvas.push(canvas);
