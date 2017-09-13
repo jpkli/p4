@@ -1,6 +1,5 @@
 define(function(require){
-    var arrays = require("p4/core/arrays"),
-        ctypes = require('./ctypes'),
+    var ctypes = require('./ctypes'),
         cstore = require('./cstore');
 
     return function allocate(options) {

@@ -123,7 +123,12 @@ define( function(require) {
             return count;
         }
 
-        cstore.addColumns = function(columnArray, columnName, columnType) {
+        cstore.addColumn = function(arg) {
+            var props = arg || {},
+                columnData = props.data || props.array,
+                columnName = props.name,
+                columnType = props.dtype;
+
             var cid = keys.indexOf(columnName);
             if( cid < 0) {
                 keys.push(columnName);
@@ -135,14 +140,17 @@ define( function(require) {
                 });
             }
 
-            if(columnArray instanceof ctypes[types[cid]]) {
-                columns[cid] = columnArray;
-            } else if(ArrayBuffer.isView(columnArray)){
-                columns[cid] = new colAlloc[columnName](columnArray);
+            if(columnData instanceof ctypes[types[cid]]) {
+                columns[cid] = columnData;
+            } else if(ArrayBuffer.isView(columnData)){
+                columns[cid] = new colAlloc[columnName](size);
+                for(var di = 0; di < size; di++) {
+                    columns[cid][di] = colRead[columnName](columnData[di]);
+                }
             } else {
                 throw new Error("Error: Invalid data type for columnArray!");
             }
-            count = columnArray.length;
+            count = columnData.length;
         }
 
         cstore.metadata = cstore.info = function() {
