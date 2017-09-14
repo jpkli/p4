@@ -8,19 +8,6 @@ define(function(require) {
 
     var optDerive = require('./derive');
 
-    var kernelSources = [
-        './aggregate',
-        './filter',
-        './derive',
-        './cache',
-        './stats',
-        './visualize'
-    ];
-
-    var kernels = kernelSources.map(function(k){
-        return require(k);
-    });
-
     function seq(dtype, start, end, interval) {
         var step = interval || 1,
             size = (end - start) / step + 1,
@@ -36,7 +23,7 @@ define(function(require) {
     var seqInt = seq.bind(null, "int"),
         seqFloat = seq.bind(null, "float");
 
-    return function ADAV(options) {
+    return function p4gl(options) {
         var adav = {},
             container    = options.container || document.body,
             context      = options.context || null;
@@ -414,6 +401,7 @@ define(function(require) {
             if (typeof spec.$bin == 'object') {
                 binAttr = Object.keys(spec.$bin)[0];
                 binCount = spec.$bin[binAttr];
+                console.log('binCount', binCount);
             } else {
                 binAttr = spec.$bin;
                 //Apply Sturges' formula for determining the number of bins
@@ -421,22 +409,28 @@ define(function(require) {
                 // binCount = 7;
             }
 
-            var binInterval = (stats[binAttr].max - stats[binAttr].min) / binCount;
+            var binDomain = fieldDomains[fields.indexOf(binAttr)];
+            console.log(binDomain);
+            var binInterval = (binDomain[1] - binDomain[0]) / binCount;
+            console.log('binInterval', binInterval);
 
-            var histFunction = (function() {max(ceil(binAttr / float(binInterval)), 1.0)})
+            var histFunction = (function() {max(ceil((binAttr - binMin) / float(binInterval)), 1.0)})
                 .toString()
                 .slice(13, -1) // remove "function () {" from function.toString
                 .replace('binAttr', binAttr)
+                // .replace('binCount', binCount + '.0')
+                .replace('binMin', binDomain[0] + '.0')
                 .replace('binInterval', binInterval)
 
             deriveSpec['bin@'+binAttr] = histFunction;
             intervals[binAttr] = {};
             intervals[binAttr].dtype = 'historgram';
             intervals[binAttr].interval = binInterval;
-            intervals[binAttr].min = stats[binAttr].min;
-            intervals[binAttr].max = stats[binAttr].max;
+            intervals[binAttr].min = binDomain[0];
+            intervals[binAttr].max = binDomain[1];
             intervals[binAttr].align = 'right';
             adav.derive(deriveSpec);
+            console.log(deriveDomains, fieldDomains);
             // var deriveFields = fields.slice(-deriveCount),
             //     dfid = deriveFields.indexOf('bin@'+binAttr);
             // deriveDomains[dfid] = [stats[binAttr].min, stats[binAttr].max];

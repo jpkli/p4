@@ -1,4 +1,5 @@
-require('amdefine/intercept');
+if(typeof define !== 'function' && typeof global === 'object')
+    require('amdefine/intercept');
 
 const genData = require('./generate-data');
 
@@ -10,6 +11,3 @@ var data = genData({
         {name: 'age', dtype: 'int', min: 16, max: 99}
     ]
 })
-
-
-console.log(data.stats());

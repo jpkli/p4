@@ -16,8 +16,7 @@ define( function(require) {
             size     = option.size  || 0,   // max size
             count    = option.count || 0,   // number of entries stored
             types    = option.types || [],  // types of the columns
-            keys     = option.keys  || option.names || [],  // column keys
-            semantics = option.semantics || [],
+            attributes = option.attributes || option.keys || option.names || [],  // column attributes
             struct   = option.struct|| {},
             CAMs     = option.CAMs  || {},  // content access memory
             TLBs     = option.TLBs  || {},  // table lookaside buffer
@@ -29,8 +28,8 @@ define( function(require) {
         if(option.struct) initStruct(option.struct);
 
         function initCStore() {
-            if(size && types.length === keys.length && types.length > 0) {
-                keys.forEach(function(c, i){
+            if(size && types.length === attributes.length && types.length > 0) {
+                attributes.forEach(function(c, i){
                     configureColumn(i);
                     columns[i] = new colAlloc[c](size);
                     if(!columns.hasOwnProperty(c))
@@ -38,14 +37,15 @@ define( function(require) {
                             get: function() { return columns[i]; }
                         });
                 });
-                columns.keys = keys;
+                columns.attributes = attributes;
+                columns.keys = attributes;
                 columns.types = types;
                 columns.struct = struct;
                 columns.TLBs = TLBs;
                 columns.CAMs = CAMs;
                 columns.size = size;
                 columns.get = function(c) {
-                    var index = keys.indexOf(c);
+                    var index = attributes.indexOf(c);
                     if(index < 0 ) throw new Error("Error: No column named " + c);
                     return columns[index];
                 }
@@ -57,13 +57,12 @@ define( function(require) {
             struct = s;
             if(Array.isArray(struct)) {
                 struct.forEach(function(s){
-                    keys.push(s.name);
+                    attributes.push(s.name);
                     types.push(s.type);
-                    semantics.push(s.semantic || "numerical");
                 })
             } else {
                 for(var k in struct){
-                    keys.push(k);
+                    attributes.push(k);
                     types.push(struct[k]);
                 }
             }
@@ -71,8 +70,8 @@ define( function(require) {
         }
 
         function configureColumn(cid) {
-            if(typeof(cid) == "string") cid = keys.indexOf(cid);
-            var f = keys[cid];
+            if(typeof(cid) == "string") cid = attributes.indexOf(cid);
+            var f = attributes[cid];
             colAlloc[f] = ctypes[types[cid]];
 
             if(colAlloc[f] === ctypes.string){
@@ -116,7 +115,7 @@ define( function(require) {
             }
             rowArray.forEach(function(row){
                 row.forEach(function(v,j){
-                    columns[j][count] = colRead[keys[j]](v);
+                    columns[j][count] = colRead[attributes[j]](v);
                 });
                 count++;
             });
@@ -129,9 +128,9 @@ define( function(require) {
                 columnName = props.name,
                 columnType = props.dtype;
 
-            var cid = keys.indexOf(columnName);
+            var cid = attributes.indexOf(columnName);
             if( cid < 0) {
-                keys.push(columnName);
+                attributes.push(columnName);
                 types.push(columnType);
                 configureColumn(columnName);
                 cid = types.length - 1;
@@ -150,17 +149,15 @@ define( function(require) {
             } else {
                 throw new Error("Error: Invalid data type for columnArray!");
             }
-            count = columnData.length;
+            size = count = columnData.length;
         }
 
         cstore.metadata = cstore.info = function() {
             return {
                 size: size,
                 count: count,
-                keys: keys,
-                names: keys,
+                attributes: attributes,
                 types: types,
-                semantics: semantics,
                 TLBs: TLBs,
                 CAMs: CAMs,
                 stats: cstore.stats()
@@ -172,7 +169,7 @@ define( function(require) {
         }
 
         cstore.stats = function(col){
-            var col = col || keys;
+            var col = col || attributes;
             col.forEach(function(name, c){
                 if(!colStats[c]){
                     var min, max, avg;
@@ -192,7 +189,7 @@ define( function(require) {
         }
 
         cstore.domains = function(col){
-            var col = col || keys,
+            var col = col || attributes,
                 domains = [];
 
             col.forEach(function(name, c){
