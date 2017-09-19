@@ -1,6 +1,6 @@
 define(function(){
-    'use strict';
-    function vsFilter(){
+    // 'use strict';
+    function vertexShaderFilter(){
         gl_PointSize = 1.0;
 
         var i, j, k, value;
@@ -12,7 +12,7 @@ define(function(){
         for( $int(f) = 0; f < $(fieldCount)+$(indexCount); f++) {
             if(this.uFilterControls[f] == 1) {
                 value = this.getData(f, i, j);
-                if(value < this.uFilterRanges[f].x || value > this.uFilterRanges[f].y)
+                if(value <= this.uFilterRanges[f].x || value > this.uFilterRanges[f].y)
                     this.vResult = 0.0;
             }
         }
@@ -23,7 +23,7 @@ define(function(){
         gl_Position = vec4(x, y, 0.0, 1.0);
     }
 
-    function vsSelect(){
+    function vertexShaderSelect(){
         gl_PointSize = 1.0;
 
         var i, j, k, value;
@@ -48,61 +48,61 @@ define(function(){
         gl_Position = vec4(x, y, 0.0, 1.0);
     }
 
-    function fsWriteResult() {
+    function fragmentShader() {
         gl_FragColor = vec4(this.vResult);
     }
 
-    return function select(fxgl, fields) {
+    return function program(context, fields) {
         const SELECT_MAX = 500;
         var select = {},
-            dataDimension = fxgl.uniform.uDataDim.data,
+            dataDimension = context.uniform.uDataDim.data,
             fieldCount = fields.length,
-            fieldTotal = fxgl.uniform.uDeriveCount.data + fields.length,
+            fieldTotal = context.uniform.uDeriveCount.data + fields.length,
             filterControls = new Array(fieldTotal).fill(0),
-            filterRanges = fxgl.uniform.uFieldDomains.data.concat(
-                fxgl.uniform.uDeriveDomains.data
+            filterRanges = context.uniform.uFieldDomains.data.concat(
+                context.uniform.uDeriveDomains.data
             ),
             inSelections = new Float32Array(SELECT_MAX);
 
-        fxgl.uniform("uFilterControls","int", filterControls)
+        context.uniform("uFilterControls","int", filterControls)
             .uniform("uFilterRanges","vec2", filterRanges)
             .uniform("uMatchValue", "float", 1.0)
             .uniform("uInSelections", "float", inSelections)
             .uniform("uSelectMax", "int", SELECT_MAX)
             .uniform("uSelectCount", "int", 0);
 
-        // fxgl.env({
+        // context.env({
         //     selectMax: SELECT_MAX
         // })
 
         var filter = {
-            vs: fxgl.shader.vertex(vsFilter),
-            fs: fxgl.shader.fragment(fsWriteResult)
+            vs: context.shader.vertex(vertexShaderFilter),
+            fs: context.shader.fragment(fragmentShader)
         };
 
         var sel = {
-            vs: fxgl.shader.vertex(vsSelect),
-            fs: fxgl.shader.fragment(fsWriteResult)
+            vs: context.shader.vertex(vertexShaderSelect),
+            fs: context.shader.fragment(fragmentShader)
         };
 
-        fxgl.program("filter", filter.vs, filter.fs);
-        fxgl.program("select", sel.vs, sel.fs);
+        context.program("filter", filter.vs, filter.fs);
+        context.program("select", sel.vs, sel.fs);
 
         select.control = function(ctrl) {
             filterControls = ctrl;
         }
 
-        select.execute = function(spec){
-            var fields = fxgl.fields
+        function _execute(spec){
+            var fields = context.fields
             var gl;
             var selectFields = Object.keys(spec).filter(function(s){
                 return spec[s].hasOwnProperty('$in');
             });
-            fxgl.bindFramebuffer("fFilterResults");
-            fxgl.framebuffer.enableRead("fDerivedValues");
+            context.bindFramebuffer("fFilterResults");
+            context.framebuffer.enableRead("fDerivedValues");
             if(selectFields.length) {
 
-                gl = fxgl.program("select");
+                gl = context.program("select");
                 gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
 
                 gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
@@ -116,9 +116,9 @@ define(function(){
                     spec[k].$in.forEach(function(v, i){
                         if(i<500) inSelections[i] = v;
                     });
-                    fxgl.uniform.uSelectCount = spec[k].$in.length;
-                    fxgl.uniform.uInSelections = inSelections;
-                    fxgl.uniform.uFieldId = fieldId;
+                    context.uniform.uSelectCount = spec[k].$in.length;
+                    context.uniform.uInSelections = inSelections;
+                    context.uniform.uFieldId = fieldId;
                     gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
                     filterRanges[fieldId*2] = Math.min.apply(null, spec[k].$in);
                     filterRanges[fieldId*2+1] = Math.max.apply(null, spec[k].$in);
@@ -143,10 +143,10 @@ define(function(){
                     filterRanges[fieldId*2+1] = spec[k][1];
                 });
 
-                fxgl.uniform.uFilterControls = filterControls;
-                fxgl.uniform.uFilterRanges= filterRanges;
+                context.uniform.uFilterControls = filterControls;
+                context.uniform.uFilterRanges= filterRanges;
 
-                gl = fxgl.program("filter");
+                gl = context.program("filter");
                 gl.disable(gl.BLEND);
                 // gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
                 // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
@@ -154,13 +154,65 @@ define(function(){
                 gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
                 gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
             }
-            fxgl.ctx.bindFramebuffer(fxgl.ctx.FRAMEBUFFER, null);
+            context.ctx.bindFramebuffer(context.ctx.FRAMEBUFFER, null);
             return filterRanges;
         }
 
+        select.execute = function(spec) {
+            var filterSpec = spec;
+
+            console.log(context);
+            Object.keys(context.crossfilters).forEach(function(c){
+                filterSpec[c] = context.crossfilters[c];
+            });
+
+            Object.keys(filterSpec).forEach(function(k, i) {
+                var fid = context.fields.indexOf(k);
+                if(context.categoryIndex.hasOwnProperty(k)) {
+                    var min, max, values;
+                    values = spec[k].map(function(v) { return context.categoryIndex[k][v]; });
+                    min = arrays.min(values);
+                    max = arrays.max(values);
+                    spec[k] = [min, max];
+                }
+            });
+
+            context.uniform.uFilterFlag = 1;
+
+            var newDomains = _execute(spec);
+
+
+            if(!context._update){
+                Object.keys(spec).forEach(function(k, i) {
+                    var fid = context.fields.indexOf(k);
+                    if (fid === -1) throw new Error('Invalid data field ' + k);
+                    var range = [];
+                    if(spec[k].hasOwnProperty('$in')) {
+                        range[0] = Math.min.apply(null, spec[k].$in);
+                        range[1] = Math.max.apply(null, spec[k].$in);
+                    } else {
+                        range = spec[k];
+                    }
+                    if (fid < context.fieldCount + context.indexes.length) {
+                        context.fieldDomains[fid] = range;
+                        context.fieldWidths[fid] = context.getDataWidth(context.dkeys.indexOf(k), range);
+                    } else {
+                        var di = fid - context.fieldCount - context.indexes.length;
+                        context.deriveDomains[di] = range;
+                        context.deriveWidths[di] = range[1] - range[0] + 1;
+                    }
+                });
+
+                context.uniform.uFieldDomains.data = context.fieldDomains;
+                context.uniform.uFieldWidths.data = context.fieldWidths;
+                context.uniform.uDeriveDomains.data = context.deriveDomains;
+                context.uniform.uDeriveWidths.data = context.deriveWidths;
+            }
+        }
+
         select.result = function() {
-            fxgl.bindFramebuffer("fFilterResults");
-            var gl = fxgl.ctx;
+            context.bindFramebuffer("fFilterResults");
+            var gl = context.ctx;
             var bitmap = new Uint8Array(dataDimension[0]*dataDimension[1]*4);
             gl.readPixels(0, 0, dataDimension[0], dataDimension[1], gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
             // console.log(result.filter(function(d, i){ return i%4===0;} ));
@@ -172,4 +224,6 @@ define(function(){
 
         return select;
     }
+
+
 })

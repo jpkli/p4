@@ -1,8 +1,7 @@
 define(function(require){
-    var arrays = require("p4/core/arrays"),
-        colors = require('./colorManager'),
+    var colors = require('./colorManager'),
         ctypes = require('./ctypes'),
-        perceive = require('./perceptual'),
+        perceive = require('./perceptualize'),
         chart = require('./chart'),
         Color = require('i2v/colors');
 

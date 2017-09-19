@@ -5,16 +5,16 @@ define(function(){
             fieldCount =  fxgl.uniform.uFieldCount.data,
             cacheTag;
 
-        var vs = fxgl.shader.vertex(function() {
+        var vs = fxgl.shader.vertex(function () {
              gl_Position = vec4(this._square, 0, 1);
         });
 
-        var fs = fxgl.shader.fragment(function(uDataDim, uFieldCount, uDataInput) {
+        var fs = fxgl.shader.fragment(function () {
             var x, y;
             $vec4(value);
-            x = (gl_FragCoord.x) / uDataDim.x;
-            y = (gl_FragCoord.y) / (uDataDim.y * float(uFieldCount));
-            value = texture2D(uDataInput, vec2(x, y));
+            x = (gl_FragCoord.x) / this.uDataDim.x;
+            y = (gl_FragCoord.y) / (this.uDataDim.y * float(this.uFieldCount));
+            value = texture2D(this.uDataInput, vec2(x, y));
             gl_FragColor = value;
         });
 

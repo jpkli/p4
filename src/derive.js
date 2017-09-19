@@ -1,10 +1,12 @@
 define(function(){
-    return function optDerive(fxgl,fields,spec) {
+    return function optDerive(context, spec) {
 
         var derive = {},
-            dataDimension = fxgl.uniform.uDataDim.data,
-            deriveMax = fxgl.uniform.uDeriveCount.data,
+            dataDimension = context.uniform.uDataDim.data,
+            deriveMax = context.uniform.uDeriveCount.data,
             deriveFields = Object.keys(spec);
+
+        fields = context.fields;
 
         var marco = "\t";
 
@@ -32,32 +34,31 @@ define(function(){
         //     return value;
         // }
 
-        fxgl.uniform("uOptMode", "float", 0)
+        console.log(marco);
+
+        context.uniform("uOptMode", "float", 0)
             .uniform("uDeriveId", "int", 0)
             // .subroutine("getDataValue", "float", getDataValue)
             .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
 
-        function vsDeriveStats(
-            uOptMode, uDataDim, tData,
-            aIndex0, aIndex1, aIndex0Value, aIndex1Value,  uIndexCount,
-            uFieldCount, uDeriveId, uDeriveCount,
-            vResult, fDerivedValues,
-            getData, getDerivedValue
-        ) {
+
+
+
+        function vertexShader(getData) {
             gl_PointSize = 1.0;
 
             var i, j;
 
-            i = (aIndex0+0.5) / uDataDim.x;
-            j = (aIndex1+0.5) / uDataDim.y;
+            i = (this.aIndex0+0.5) / this.uDataDim.x;
+            j = (this.aIndex1+0.5) / this.uDataDim.y;
 
-            vResult = getDerivedValue(uDeriveId, vec2(i, j));
+            this.vResult = this.getDerivedValue(this.uDeriveId, vec2(i, j));
             if(this.uFilterFlag == 1) {
                 if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
-                    vResult = 0.0;
+                    this.vResult = 0.0;
             }
             var x, y;
-            if(uOptMode == 0.0){
+            if(this.uOptMode == 0.0){
                 x = 0.5;
                 y = 0.5;
             } else {
@@ -68,37 +69,37 @@ define(function(){
             gl_Position = vec4(x, y, 0.0, 1.0);
         }
 
-        function fsWriteDerivedValues(uOptMode, vResult) {
-            if(vResult == 0.0) discard;
-            if(uOptMode > 0.0 || vResult > 0.0)
-                gl_FragColor = vec4(0.0, 0.0, 1.0, vResult);
+        function fragmentShader() {
+            if(this.vResult == 0.0) discard;
+            if(this.uOptMode > 0.0 || this.vResult > 0.0)
+                gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
             else
-                gl_FragColor = vec4(1.0, vResult, 0.0, 0.0);
+                gl_FragColor = vec4(1.0, this.vResult, 0.0, 0.0);
         }
 
-        var vs = fxgl.shader.vertex(vsDeriveStats),
-            fs = fxgl.shader.fragment(fsWriteDerivedValues),
-            gl = fxgl.program("derive", vs, fs);
+        var vs = context.shader.vertex(vertexShader),
+            fs = context.shader.fragment(fragmentShader),
+            gl = context.program("derive", vs, fs);
 
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0Value.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1.location, 1);
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1Value.location, 1);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0.location, 0);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0Value.location, 0);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
 
-        derive.execute = function() {
+        function _execute() {
 
-            var gl = fxgl.program("derive");
-            fxgl.framebuffer.enableRead("fFilterResults");
-            fxgl.bindFramebuffer("fDerivedValues");
+            var gl = context.program("derive");
+            context.framebuffer.enableRead("fFilterResults");
+            context.bindFramebuffer("fDerivedValues");
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
             gl.enable( gl.BLEND );
             gl.blendFunc( gl.ONE, gl.ONE );
 
-            // fxgl.uniform.uDeriveCount = deriveFieldCount;
+            // context.uniform.uDeriveCount = deriveFieldCount;
             var deriveDomains = [];
             deriveFields.forEach(function(d, i){
-                fxgl.uniform.uDeriveId = i;
+                context.uniform.uDeriveId = i;
                 gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
                 gl.viewport(0, 0, 1,  1);
@@ -124,11 +125,10 @@ define(function(){
             gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
             gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-            console.log(deriveDomains[0]);
-            fxgl.uniform.uOptMode = 1.0;
+            context.uniform.uOptMode = 1.0;
 
             deriveFields.forEach(function(d, i){
-                fxgl.uniform.uDeriveId = i;
+                context.uniform.uDeriveId = i;
                 gl.viewport(0, dataDimension[1]*i, dataDimension[0], dataDimension[1]);
                 gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
             });
@@ -136,6 +136,25 @@ define(function(){
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
             return deriveDomains;
+        }
+
+        derive.execute = function(spec) {
+            var deriveFields = Object.keys(spec);
+            context.fields = context.fields.concat(deriveFields);
+            var newDomains = _execute();
+            if(!context._update) {
+                newDomains.forEach(function(d, i) {
+                    context.deriveDomains[context.deriveCount+i] = d;
+                    context.deriveWidths[context.deriveCount+i] = d[1] - d[0] + 1;
+                });
+                context.deriveCount += deriveFields.length;
+                // console.log(derive.result());
+                getResult = derive.result;
+                // console.log(context.deriveDomains, fields);
+
+                context.uniform.uDeriveDomains.data = context.deriveDomains;
+                context.uniform.uDeriveWidths.data = context.deriveWidths;
+            }
         }
 
         derive.result = function(deriveFieldId) {

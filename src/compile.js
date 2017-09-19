@@ -3,10 +3,10 @@ define(function(require){
     return function(fxgl, fields, spec) {
         var kernels = {
             derive    : require('./derive'),
-            perceptual: require('./perceptual'),
+            perceptual: require('./perceptualize'),
             aggregate : require('./aggregate'),
             cache     : require('./cache'),
-            filter    : require('./select'),
+            select    : require('./select'),
             stats     : require('./stats'),
             visualize : require('./visualize'),
         };
@@ -14,7 +14,7 @@ define(function(require){
         var operations = {
             aggregate : kernels.aggregate(fxgl),
             cache     : kernels.cache(fxgl),
-            filter    : kernels.filter(fxgl, fields),
+            select    : kernels.select(fxgl, fields),
             stats     : kernels.stats(fxgl),
             visualize : kernels.visualize(fxgl),
         }

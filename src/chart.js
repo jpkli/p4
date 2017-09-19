@@ -252,8 +252,8 @@ define(function(require){
                     }
                 });
             } else {
-                x = Axis(xAxisOption);
-                y = Axis(yAxisOption);
+                if(vmap.hasOwnProperty('x')) x = Axis(xAxisOption);
+                if(vmap.hasOwnProperty('y')) y = Axis(yAxisOption);
             }
             if(vmap.hasOwnProperty('x') && !Array.isArray(vmap.y)) {
                 // xAxisOption.grid = 1;

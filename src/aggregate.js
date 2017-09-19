@@ -1,13 +1,13 @@
 define(function(require){
-
-    return function group(fxgl) {
-        var group = {},
+    const utils = require('./utils');
+    return function aggregate(context) {
+        var aggregate = {},
             aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
 
-        fxgl.uniform('uGroupGetStat', 'float', 0.0)
+        context.uniform('uGroupGetStat', 'float', 0.0)
             .uniform('uAggrOpt', 'int', 2);
 
-        function vsGroupByAggregation(){
+        function vertexShader(){
             gl_PointSize = 1.0;
 
             var i, j, k;
@@ -49,7 +49,7 @@ define(function(require){
             gl_Position = vec4(pos, 0.0, 1.0);
         }
 
-        function fsWriteGroupResult() {
+        function fragmentShader() {
             if(this.vResult == 0.0) discard;
 
             if(this.uAggrOpt == 2)
@@ -58,16 +58,16 @@ define(function(require){
                 gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
         }
 
-        var vs = fxgl.shader.vertex(vsGroupByAggregation),
-            fs = fxgl.shader.fragment(fsWriteGroupResult);
+        var vs = context.shader.vertex(vertexShader),
+            fs = context.shader.fragment(fragmentShader);
 
-        fxgl.program("group", vs, fs);
+        context.program("group", vs, fs);
 
-        var vs2 = fxgl.shader.vertex(function() {
+        var vs2 = context.shader.vertex(function main() {
              gl_Position = vec4(this._square, 0, 1);
         });
 
-        var fs2 = fxgl.shader.fragment(function() {
+        var fs2 = context.shader.fragment(function () {
             var x, y, res;
             $vec4(value);
             x = (gl_FragCoord.x) / this.uResultDim.x;
@@ -81,19 +81,19 @@ define(function(require){
             gl_FragColor = vec4(0.0, 0.0, 0.0, res);
         });
 
-        fxgl.program("group2", vs2, fs2);
+        context.program("group2", vs2, fs2);
 
-        var resultFieldCount;
+        var resultFieldCount,
+            secondPass = false,
+            thirdPass = false;
 
-        group.execute = function(opts, groupFieldIds, resultFieldIds, dataDim, resultDim) {
-            dataDimension = dataDim;
-            resultDimension = resultDim;
+        function _execute(opts, groupFieldIds, resultFieldIds) {
             resultFieldCount = resultFieldIds.length;
-            var gl = fxgl.program("group");
-            fxgl.bindFramebuffer("fGroupResults");
-            fxgl.framebuffer.enableRead("fDerivedValues");
-            fxgl.framebuffer.enableRead("fFilterResults");
-            fxgl.uniform.uGroupFields = groupFieldIds;
+            var gl = context.program("group");
+            context.bindFramebuffer("fGroupResults");
+            context.framebuffer.enableRead("fDerivedValues");
+            context.framebuffer.enableRead("fFilterResults");
+            context.uniform.uGroupFields = groupFieldIds;
             gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
             gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             gl.disable(gl.CULL_FACE);
@@ -101,21 +101,26 @@ define(function(require){
             gl.enable( gl.BLEND );
             gl.blendFunc( gl.ONE, gl.ONE );
             gl.blendEquation(gl.FUNC_ADD);
-            fxgl.uniform.uGroupGetStat = 0.0;
+            context.uniform.uGroupGetStat = 0.0;
             var resultDomains = new Array(resultFieldIds.length);
-            fxgl.uniform.uResultDim = resultDim;
-            var secondPass = false,
-                thirdPass = false;
+            context.uniform.uResultDim = context.resultDimension;
+
+            secondPass = false;
+            thirdPass = false;
             resultFieldIds.forEach(function(f, i){
                 var opt = aggrOpts.indexOf(opts[i]);
                 if(opt == -1) throw Error("unknow operator for aggreation: " + opts[i]);
-                gl.viewport(0, i*resultDimension[1], resultDimension[0], resultDimension[1]);
+                gl.viewport(0, i*context.resultDimension[1], context.resultDimension[0], context.resultDimension[1]);
                 if(opt == 0) gl.blendEquation(gl.MIN_EXT);
                 else if(opt == 1) gl.blendEquation(gl.MAX_EXT);
                 else gl.blendEquation(gl.FUNC_ADD);
-                fxgl.uniform.uFieldId = f;
-                fxgl.uniform.uAggrOpt = opt;
-                gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
+                context.uniform.uFieldId = f;
+                context.uniform.uAggrOpt = opt;
+                gl.ext.drawArraysInstancedANGLE(
+                    gl.POINTS, 0,
+                    context.dataDimension[0],
+                    context.dataDimension[1]
+                );
                 if(opt > 3) {
                     secondPass = true;
                     if(opt > 4) thirdPass = true;
@@ -124,34 +129,34 @@ define(function(require){
 
             if(secondPass) {
                 console.log('*** Second Pass for Aggregation');
-                var fieldCount = fxgl.uniform.uFieldCount.data,
-                    preAggrData = fxgl.uniform.uDataInput.data;
+                var fieldCount = context.uniform.uFieldCount.data,
+                    preAggrData = context.uniform.uDataInput.data;
 
-                fxgl.uniform.uDataInput.data = fxgl.framebuffer.fGroupResults.texture;
-                fxgl.uniform.uFieldCount.data = resultFieldIds.length;
+                context.uniform.uDataInput.data = context.framebuffer.fGroupResults.texture;
+                context.uniform.uFieldCount.data = resultFieldIds.length;
 
                 if(thirdPass){
-                    fxgl.framebuffer(
+                    context.framebuffer(
                         "fAggrStats",
-                        "float", [resultDimension[0], resultDimension[1] * resultFieldIds.length]
+                        "float", [context.resultDimension[0], context.resultDimension[1] * resultFieldIds.length]
                     );
-                    fxgl.bindFramebuffer("fAggrStats");
+                    context.bindFramebuffer("fAggrStats");
                 } else {
-                    fxgl.framebuffer(
+                    context.framebuffer(
                         "fGroupResults",
                         "float",
-                        [resultDimension[0], resultDimension[1] * resultFieldIds.length]
+                        [context.resultDimension[0], context.resultDimension[1] * resultFieldIds.length]
                     );
-                    fxgl.bindFramebuffer("fGroupResults");
+                    context.bindFramebuffer("fGroupResults");
                 }
 
-                gl = fxgl.program("group2");
+                gl = context.program("group2");
                 gl.disable( gl.BLEND );
                 resultFieldIds.forEach(function(f, i){
                     var opt = aggrOpts.indexOf(opts[i]);
-                    fxgl.uniform.uAggrOpt = opt;
-                    fxgl.uniform.uFieldId = i;
-                    gl.viewport(0, i*resultDimension[1], resultDimension[0], resultDimension[1]);
+                    context.uniform.uAggrOpt = opt;
+                    context.uniform.uFieldId = i;
+                    gl.viewport(0, i*context.resultDimension[1], context.resultDimension[0], context.resultDimension[1]);
                     gl.drawArrays(gl.TRIANGLES, 0, 6);
                 })
 
@@ -160,18 +165,138 @@ define(function(require){
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         }
 
-        group.result =  function() {
+        aggregate.execute = function(spec) {
+            var groupFields = spec.$by || spec.$group,
+                groupFieldIds = [-1, -1];
 
-            fxgl.bindFramebuffer("fGroupResults");
-            var gl = fxgl.program("group"),
-                result = new Float32Array(resultDimension[0]*resultDimension[1]*4*resultFieldCount);
+            if (Array.isArray(groupFields)) {
+                groupFieldIds[0] = context.fields.indexOf(groupFields[0]);
+                groupFieldIds[1] = context.fields.indexOf(groupFields[1]);
+            } else {
+                groupFieldIds[0] = context.fields.indexOf(groupFields);
+            }
 
-            gl.readPixels(0, 0, resultDimension[0], resultDimension[1]*resultFieldCount, gl.RGBA, gl.FLOAT, result);
+            context.resultDimension = context.getGroupKeyDimension(groupFieldIds);
+            console.log(context.intervals, context.fieldWidths, context.resultDimension);
+            // var resultFields = Object.keys(spec).filter(function(d){return d!='$by' && d!='$group';}),
+            //     resultFieldIds = resultFields.map(function(f) { return fields.indexOf(f); }),
+            //     operators = resultFields.map(function(r){return spec[r]; });
+
+            var newFieldNames = Object.keys(spec).filter(function(d) {
+                    return d != '$by' && d != '$group';
+                }),
+                resultFields = newFieldNames.map(function(f) {
+                    return spec[f][Object.keys(spec[f])[0]];
+                }),
+                resultFieldIds = resultFields.map(function(f) {
+                    return context.fields.indexOf(f);
+                }),
+                operators = resultFields.map(function(f, i) {
+                    return Object.keys(spec[newFieldNames[i]])[0];
+                });
+
+            context.framebuffer(
+                "fGroupResults",
+                "float", [context.resultDimension[0], context.resultDimension[1] * resultFields.length]
+            );
+
+            _execute(operators, groupFieldIds, resultFieldIds);
+            context.ctx.finish();
+
+            context.getResult = aggregate.result;
+
+            // console.log(context.getResult());
+            //
+            // context.indexes = groupFields;
+            if (!Array.isArray(groupFields)) groupFields = [groupFields];
+            context.indexes = groupFields;
+
+            context.dataDimension = context.resultDimension;
+
+            var newFieldIds = groupFieldIds.filter(function(f) {
+                return f !== -1
+            }).concat(resultFieldIds);
+
+            context.fields = groupFields
+                .map(function(gf) {
+                    return (gf.substring(0,4) == 'bin@')? gf.slice(4) : gf;
+                })
+                .concat(newFieldNames);
+
+            context.uniform.uDataDim.data = context.resultDimension;
+            context.uniform.uIndexCount.data = context.indexes.length;
+            context.uniform.uFieldCount.data = context.fields.length - context.indexes.length;
+
+            context.fieldWidths = context.fieldWidths.concat(context.deriveWidths);
+            context.fieldDomains = context.fieldDomains.concat(context.deriveDomains);
+
+            context.fieldDomains = newFieldIds.map(function(f) {
+                return context.fieldDomains[f];
+            });
+            context.fieldWidths = newFieldIds.map(function(f) {
+                return context.fieldWidths[f];
+            });
+            context.uniform.uDataInput.data = context.framebuffer.fGroupResults.texture;
+            // if(groupFields.length == 1) {
+            //     context.cachedResult = p4gl.result('row');
+            //     console.log(context.cachedResult);
+            // }
+            var resultDomains = context.opt.stats(resultFieldIds, context.dataDimension);
+            // context.ctx.finish();
+            // console.log("stats time:", new Date() - statStart);
+            for (var ii = context.indexes.length; ii < context.indexes.length + resultFieldIds.length; ii++) {
+                context.fieldDomains[ii] = resultDomains[ii - context.indexes.length];
+                context.fieldWidths[ii] = resultDomains[ii - context.indexes.length][1] - resultDomains[ii - context.indexes.length][0];
+            }
+            // console.log( resultFieldIds, fieldWidths, fieldDomains, fields, context.indexes, context.resultDimension);
+
+            // context.attribute._vid = utils.seqFloat(0, context.resultDimension[0] * context.resultDimension[1] - 1);
+            // context.attribute._fid = utils.seqFloat(0, fields.length);
+
+
+            context.uniform.uFieldDomains.data = context.fieldDomains;
+            context.uniform.uFieldWidths.data = context.fieldWidths;
+            context.uniform.uFilterFlag.data = 0;
+
+            // context.ctx.finish();
+            // console.log('pregroup time', new Date() - start);
+            context.indexes.forEach(function(d, i) {
+                context.attribute['aIndex' + i] = utils.seqFloat(0, context.resultDimension[i] - 1);
+                var interval = 1;
+
+                if(context.intervals.hasOwnProperty(d))
+                    interval = context.intervals[d].interval;
+
+                context.attribute['aIndex' + i + 'Value'] = utils.seqFloat(
+                    context.fieldDomains[i][0],
+                    context.fieldDomains[i][1],
+                    interval
+                );
+
+                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex' + i].location, i);
+                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex' + i + 'Value'].location, i);
+            });
+
+            if (context.indexes.length == 1) {
+                context.attribute.aIndex1 = utils.seqFloat(0, 1);
+                context.attribute.aIndex1Value = utils.seqFloat(0, 1);
+                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
+                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
+            }
+        }
+
+        aggregate.result =  function() {
+
+            context.bindFramebuffer("fGroupResults");
+            var gl = context.program("group"),
+                result = new Float32Array(context.resultDimension[0]*context.resultDimension[1]*4*resultFieldCount);
+
+            gl.readPixels(0, 0, context.resultDimension[0], context.resultDimension[1]*resultFieldCount, gl.RGBA, gl.FLOAT, result);
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
             return result.filter(function(d, i){ return i%4===3;} );
         }
 
-        return group;
+        return aggregate;
     }
 });

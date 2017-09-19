@@ -32,7 +32,7 @@ define(function(require){
 
         fxgl.program("post-processing", vs, fs);
 
-        var vs2 = fxgl.shader.vertex(function() {
+        var vs2 = fxgl.shader.vertex(function () {
              gl_Position = vec4(this._square, 0, 1);
         });
 
