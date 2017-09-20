@@ -1,12 +1,11 @@
 define(function(require){
     const FlexGL = require('flexgl/flexgl');
 
-
     return function(options) {
         var container   = options.container || document.body,
             context     = options.context || null,
             viewport    = options.viewport || [800, 450],
-            padding     = options.padding || {left: 70, right: 20,top: 20, bottom: 50};
+            padding     = options.padding || {left: 60, right: 20,top: 20, bottom: 50};
 
         var defaultView = {
             width: viewport[0],

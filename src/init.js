@@ -21,6 +21,7 @@ define(function(require){
             dtypes = context.dtypes,
             stats =  data.stats || null;
 
+
         if (data.hasOwnProperty("size"))
             context.dataSize = data.size;
         else
@@ -72,13 +73,14 @@ define(function(require){
             context.fieldWidths[fi] = getDataWidth(fi, [min, max]);
         });
 
-
         context.getDataWidth = getDataWidth;
 
         context.dataDimension = [
             8192,
             Math.ceil(context.dataSize / 8192)
         ];
+
+        console.log(context.dataDimension, context.dataSize);
 
         context.deriveDomains = new Array(context.deriveMax).fill([0, 1]);
         context.deriveWidths = new Array(context.deriveMax).fill(1);
@@ -104,8 +106,8 @@ define(function(require){
 
         context.attribute("_vid", "float", utils.seqFloat(0, context.dataDimension[0] * context.dataDimension[1] - 1));
         context.attribute("_fid", "vec2", utils.seqFloat(0, context.fields.length * 2));
-        context.attribute("_qid", "float", [0, 1, 2, 3, 4, 5]);
-        context.ctx.ext.vertexAttribDivisorANGLE(context.attribute._qid.location, 0);
+        // context.attribute("_qid", "float", [0, 1, 2, 3, 4, 5]);
+        // context.ctx.ext.vertexAttribDivisorANGLE(context.attribute._qid.location, 0);
         context.ctx.ext.vertexAttribDivisorANGLE(context.attribute._fid.location, 0);
         context.ctx.ext.vertexAttribDivisorANGLE(context.attribute._vid.location, 1);
 

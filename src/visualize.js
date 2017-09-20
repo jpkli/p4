@@ -238,7 +238,6 @@ define(function(require){
                 var start = performance.now();
                 var result = fxgl.readResult('row');
                 viewSetting.data = sortData(result);
-                console.log(viewSetting.data);
                 viewSetting.fields = fields;
                 if(intervals.hasOwnProperty(vmap.x))
                     viewSetting.isHistogram = true;

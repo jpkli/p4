@@ -5,7 +5,24 @@
   <body>
       <script src="/npm/requirejs/require.js"></script>
       <script>
-        require(['./benchmark'], function(benchmark){
+        requirejs.config({
+            paths: {
+              'jstat': '/npm/jStat/dist/jstat.min'
+            },
+            shim: {
+              jstat: {
+                exports: ['j$', 'jStat'],
+                init: function () {
+                  return {
+                    j$: j$,
+                    jStat: jStat
+                  };
+                }
+              }
+            }
+        });
+
+        require(['jstat', './benchmark'], function(jstat, benchmark){
             benchmark();
         });
 

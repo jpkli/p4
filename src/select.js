@@ -36,7 +36,7 @@ define(function(){
 
         for($int(l) = 0; l < 500; l++){
             if(l < this.uSelectCount) {
-                if(value == this.uInSelections[l]) {
+                if(this.uInSelections[l] == value) {
                     this.vResult = 1.0;
                 }
             }
@@ -101,7 +101,7 @@ define(function(){
             context.bindFramebuffer("fFilterResults");
             context.framebuffer.enableRead("fDerivedValues");
             if(selectFields.length) {
-
+                console.log(dataDimension);
                 gl = context.program("select");
                 gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
 
@@ -114,11 +114,12 @@ define(function(){
                 selectFields.forEach(function(k){
                     var fieldId = fields.indexOf(k);
                     spec[k].$in.forEach(function(v, i){
-                        if(i<500) inSelections[i] = v;
+                        inSelections[i] = v;
                     });
                     context.uniform.uSelectCount = spec[k].$in.length;
                     context.uniform.uInSelections = inSelections;
                     context.uniform.uFieldId = fieldId;
+                    console.log(k, spec[k].$in.length, fieldId, inSelections);
                     gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
                     filterRanges[fieldId*2] = Math.min.apply(null, spec[k].$in);
                     filterRanges[fieldId*2+1] = Math.max.apply(null, spec[k].$in);
@@ -137,11 +138,11 @@ define(function(){
 
                     if(fieldId === -1) throw new Error('Invalid data field ' + k);
                     if(spec[k].length < 2) spec[k][1] = spec[k][0];
-                    console.log(k, fieldId, spec[k]);
                     filterControls[fieldId] = 1;
                     filterRanges[fieldId*2] = spec[k][0];
                     filterRanges[fieldId*2+1] = spec[k][1];
                 });
+
 
                 context.uniform.uFilterControls = filterControls;
                 context.uniform.uFilterRanges= filterRanges;
@@ -161,7 +162,6 @@ define(function(){
         select.execute = function(spec) {
             var filterSpec = spec;
 
-            console.log(context);
             Object.keys(context.crossfilters).forEach(function(c){
                 filterSpec[c] = context.crossfilters[c];
             });
@@ -180,7 +180,6 @@ define(function(){
             context.uniform.uFilterFlag = 1;
 
             var newDomains = _execute(spec);
-
 
             if(!context._update){
                 Object.keys(spec).forEach(function(k, i) {
@@ -212,6 +211,7 @@ define(function(){
 
         select.result = function() {
             context.bindFramebuffer("fFilterResults");
+
             var gl = context.ctx;
             var bitmap = new Uint8Array(dataDimension[0]*dataDimension[1]*4);
             gl.readPixels(0, 0, dataDimension[0], dataDimension[1], gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
@@ -219,11 +219,10 @@ define(function(){
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             var result = [];
             bitmap.forEach(function(d, i){ if(i%4===0 && d!==0) result.push(i/4);});
+            console.log(dataDimension, result.length, bitmap.length /4);
             return result;
         }
 
         return select;
     }
-
-
 })

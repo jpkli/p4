@@ -78,10 +78,18 @@ define(function(require) {
                 throw new Error('"' + tag + '" is not found in regesters.');
 
             var reg = registers[tag];
-
+            //resume CPU registers
             context.indexes = reg.indexes;
             context.deriveCount = reg.deriveCount;
             context.fieldCount = reg.fields.length - reg.indexes.length - reg.deriveCount;
+            context.fields = reg.fields;
+            context.fieldWidths = reg.fieldWidths;
+            context.fieldDomains = reg.fieldDomains;
+            context.deriveDomains = reg.deriveDomains;
+            context.deriveWidths = reg.deriveWidths;
+            context.dataDimension = reg.dataDim;
+
+            //resume GPU Uniforms
             context.uniform.uFieldCount.data = context.fieldCount;
             context.uniform.uDataDim.data = reg.dataDim;
             context.uniform.uIndexCount.data = reg.indexes.length;
@@ -93,23 +101,15 @@ define(function(require) {
             // context.uniform.uFilterControls.data = reg.filterControls;
             context.uniform.uDataInput.data = reg.dataInput;
 
-            context.fields = reg.fields;
-            context.fieldWidths = reg.fieldWidths;
-            context.fieldDomains = reg.fieldDomains;
-            context.deriveDomains = reg.deriveDomains;
-            context.deriveWidths = reg.deriveWidths;
-            context.dataDimension = reg.dataDim;
-
+            //resume GPU Attribute Buffers
             context.attribute['aIndex0'] = reg.attribute[0].id;
             context.attribute['aIndex1'] = reg.attribute[1].id;
-
             context.attribute['aIndex0Value'] = reg.attribute[0].value;
             context.attribute['aIndex1Value'] = reg.attribute[1].value;
-
-            gl.ext.vertexAttribDivisorANGLE(context.attribute['aIndex0'].location, 0);
-            gl.ext.vertexAttribDivisorANGLE(context.attribute['aIndex1'].location, 1);
-            gl.ext.vertexAttribDivisorANGLE(context.attribute['aIndex0Value'].location, 0);
-            gl.ext.vertexAttribDivisorANGLE(context.attribute['aIndex1Value'].location, 1);
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex0'].location, 0);
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex1'].location, 1);
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex0Value'].location, 0);
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex1Value'].location, 1);
 
             return pipeline;
         }
@@ -135,7 +135,6 @@ define(function(require) {
                 .toString()
                 .slice(13, -1) // remove "function () {" from function.toString
                 .replace('binAttr', binAttr)
-                // .replace('binCount', binCount + '.0')
                 .replace('binMin', binDomain[0] + '.0')
                 .replace('binInterval', binInterval)
 
@@ -173,6 +172,7 @@ define(function(require) {
 
             opt.select.execute(spec);
             context.getResult = opt.select.result;
+            // console.log(context.getResult());
             return pipeline;
         }
 
@@ -253,18 +253,18 @@ define(function(require) {
                         pipeline.update();
                         console.log('context.crossfilters::::::', context.crossfilters, context.fieldDomains);
 
-                        // var operations = context.pipeline.slice(0, optID);
-                        // var filtering = false;
-                        // for (var i = 0, l = context.pipeline.length; i < l; i++) {
-                        //     var p = context.pipeline[i];
-                        //     if(Object.keys(p)[0] == 'filter') {
-                        //         Object.keys(d).forEach(function(k) {
-                        //             p.filter[k] = d[k];
-                        //         });
-                        //         filtering = true;
-                        //         break;
-                        //     }
-                        // }
+                        var operations = context.pipeline.slice(0, optID);
+                        var filtering = false;
+                        for (var i = 0, l = context.pipeline.length; i < l; i++) {
+                            var p = context.pipeline[i];
+                            if(Object.keys(p)[0] == 'filter') {
+                                Object.keys(d).forEach(function(k) {
+                                    p.filter[k] = d[k];
+                                });
+                                filtering = true;
+                                break;
+                            }
+                        }
 
                         pipeline.run();
                         // Object.keys(d).forEach(function(k) {

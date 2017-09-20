@@ -128,7 +128,7 @@ define(function(require){
             });
 
             if(secondPass) {
-                console.log('*** Second Pass for Aggregation');
+                // console.log('*** Second Pass for Aggregation');
                 var fieldCount = context.uniform.uFieldCount.data,
                     preAggrData = context.uniform.uDataInput.data;
 
@@ -177,7 +177,7 @@ define(function(require){
             }
 
             context.resultDimension = context.getGroupKeyDimension(groupFieldIds);
-            console.log(context.intervals, context.fieldWidths, context.resultDimension);
+            // console.log(context.intervals, context.fieldWidths, context.resultDimension);
             // var resultFields = Object.keys(spec).filter(function(d){return d!='$by' && d!='$group';}),
             //     resultFieldIds = resultFields.map(function(f) { return fields.indexOf(f); }),
             //     operators = resultFields.map(function(r){return spec[r]; });
@@ -195,10 +195,11 @@ define(function(require){
                     return Object.keys(spec[newFieldNames[i]])[0];
                 });
 
-            context.framebuffer(
-                "fGroupResults",
-                "float", [context.resultDimension[0], context.resultDimension[1] * resultFields.length]
-            );
+            if(!context._update)
+                context.framebuffer(
+                    "fGroupResults",
+                    "float", [context.resultDimension[0], context.resultDimension[1] * resultFields.length]
+                );
 
             _execute(operators, groupFieldIds, resultFieldIds);
             context.ctx.finish();
