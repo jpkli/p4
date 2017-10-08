@@ -1,40 +1,40 @@
 define(function(){
 
-    return function(context) {
+    return function($p) {
         return function(format) {
-            var buf = context.getResult(),
+            var buf = $p.getResult(),
                 res = {},
                 offset = 0;
 
             var rs = 0;
 
-            if (context.resultDimension[0] > 1) {
-                res[context.fields[rs]] = context.attribute.aIndex0Value.data;
+            if ($p.resultDimension[0] > 1) {
+                res[$p.fields[rs]] = $p.attribute.aIndex0Value.data;
                 rs++;
             }
 
-            if (context.resultDimension[1] > 1) {
-                bx = context.attribute.aIndex0Value.data;
-                by = context.attribute.aIndex1Value.data;
-                var ax = new Array(context.resultDimension[0] * context.resultDimension[1]),
-                    ay = new Array(context.resultDimension[0] * context.resultDimension[1]);
+            if ($p.resultDimension[1] > 1) {
+                bx = $p.attribute.aIndex0Value.data;
+                by = $p.attribute.aIndex1Value.data;
+                var ax = new Array($p.resultDimension[0] * $p.resultDimension[1]),
+                    ay = new Array($p.resultDimension[0] * $p.resultDimension[1]);
 
-                for (var y = 0; y < context.resultDimension[1]; y++) {
-                    for (var x = 0; x < context.resultDimension[0]; x++) {
+                for (var y = 0; y < $p.resultDimension[1]; y++) {
+                    for (var x = 0; x < $p.resultDimension[0]; x++) {
 
-                        ax[y * context.resultDimension[0] + x] = bx[x];
-                        ay[y * context.resultDimension[0] + x] = by[y]
+                        ax[y * $p.resultDimension[0] + x] = bx[x];
+                        ay[y * $p.resultDimension[0] + x] = by[y]
                     }
                 }
-                res[context.fields[0]] = ax;
-                res[context.fields[rs]] = ay;
+                res[$p.fields[0]] = ax;
+                res[$p.fields[rs]] = ay;
                 rs++;
             }
 
-            var arraySize = context.resultDimension[0] * context.resultDimension[1];
+            var arraySize = $p.resultDimension[0] * $p.resultDimension[1];
 
-            for (var i = rs; i < context.fields.length; i++) {
-                res[context.fields[i]] = buf.subarray(offset, offset + arraySize);
+            for (var i = rs; i < $p.fields.length; i++) {
+                res[$p.fields[i]] = buf.subarray(offset, offset + arraySize);
                 offset += arraySize;
             };
 
@@ -44,13 +44,13 @@ define(function(){
                 for (var i = 0; i < arraySize; i++) {
                     var obj = {};
                     Object.keys(res).forEach(function(f) {
-                        var kid = context.dkeys.indexOf(f),
-                            dtype = context.dtypes[kid];
+                        var kid = $p.dkeys.indexOf(f),
+                            dtype = $p.dtypes[kid];
 
-                        if (dtype == 'string' && context.categoryLookup.hasOwnProperty(f)) {
-                            obj[f] = context.categoryLookup[f][res[f][i] - 1];
-                        } else if (context.intervals.hasOwnProperty(f) && context.intervals[f].dtype == 'historgram') {
-                            obj[f] =  context.intervals[f].min + res[f][i] * context.intervals[f].interval;
+                        if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
+                            obj[f] = $p.categoryLookup[f][res[f][i] - 1];
+                        } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
+                            obj[f] =  $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
                         } else {
                             obj[f] = res[f][i];
                         }

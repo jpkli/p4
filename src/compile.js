@@ -7,7 +7,7 @@ define(function(require){
             aggregate : require('./aggregate'),
             cache     : require('./cache'),
             select    : require('./select'),
-            stats     : require('./stats'),
+            extent    : require('./extent'),
             visualize : require('./visualize'),
         };
 
@@ -15,15 +15,16 @@ define(function(require){
             aggregate : kernels.aggregate(fxgl),
             cache     : kernels.cache(fxgl),
             select    : kernels.select(fxgl, fields),
-            stats     : kernels.stats(fxgl),
+            extent    : kernels.extent(fxgl),
             visualize : kernels.visualize(fxgl),
+            // perceive  : kernels.perceptual(fxgl)
         }
 
-        if(spec.hasOwnProperty('perceptual'))
-            operations.perceptual = kernels.perceptual(fxgl);
-
-        if(spec.hasOwnProperty('derive'))
-            operations.derive = kernels.derive(fxgl, spec.derive);
+        // if(spec.hasOwnProperty('perceptual'))
+        //     operations.perceptual = kernels.perceptual(fxgl);
+        //
+        // if(spec.hasOwnProperty('derive'))
+        //     operations.derive = kernels.derive(fxgl, spec.derive);
 
         return operations;
     }

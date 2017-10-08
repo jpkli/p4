@@ -36,7 +36,7 @@ define(function(){
 
         for($int(l) = 0; l < 500; l++){
             if(l < this.uSelectCount) {
-                if(this.uInSelections[l] == value) {
+                if(value == this.uInSelections[l]) {
                     this.vResult = 1.0;
                 }
             }
@@ -52,9 +52,10 @@ define(function(){
         gl_FragColor = vec4(this.vResult);
     }
 
-    return function program(context, fields) {
+    return function program(context) {
         const SELECT_MAX = 500;
         var select = {},
+            fields = context.fields,
             dataDimension = context.uniform.uDataDim.data,
             fieldCount = fields.length,
             fieldTotal = context.uniform.uDeriveCount.data + fields.length,
@@ -100,6 +101,8 @@ define(function(){
             });
             context.bindFramebuffer("fFilterResults");
             context.framebuffer.enableRead("fDerivedValues");
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
             if(selectFields.length) {
                 console.log(dataDimension);
                 gl = context.program("select");
@@ -148,6 +151,7 @@ define(function(){
                 context.uniform.uFilterRanges= filterRanges;
 
                 gl = context.program("filter");
+
                 gl.disable(gl.BLEND);
                 // gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
                 // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
@@ -209,18 +213,25 @@ define(function(){
             }
         }
 
-        select.result = function() {
+        select.result = function(arg) {
+            var options = arg || {},
+                offset = options.offset || [0, 0],
+                resultSize = options.size || context.dataDimension[0]* context.dataDimension[1],
+                rowSize = Math.min(resultSize, context.dataDimension[0]),
+                colSize = Math.ceil(resultSize/context.dataDimension[0]);
+
             context.bindFramebuffer("fFilterResults");
 
             var gl = context.ctx;
-            var bitmap = new Uint8Array(dataDimension[0]*dataDimension[1]*4);
-            gl.readPixels(0, 0, dataDimension[0], dataDimension[1], gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
+            var bitmap = new Uint8Array(rowSize*colSize*4);
+            gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
             // console.log(result.filter(function(d, i){ return i%4===0;} ));
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-            var result = [];
-            bitmap.forEach(function(d, i){ if(i%4===0 && d!==0) result.push(i/4);});
-            console.log(dataDimension, result.length, bitmap.length /4);
-            return result;
+            // var result = [];
+            // bitmap.forEach(function(d, i){ if(i%4===0 && d!==0) result.push(i/4);});
+            // console.log(dataDimension, result.length, bitmap.length /4);
+            // return result;
+            return  bitmap;
         }
 
         return select;

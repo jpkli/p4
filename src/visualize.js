@@ -20,8 +20,8 @@ define(function(require){
     var seqInt = seq.bind(null, "int"),
         seqFloat = seq.bind(null, "float");
 
-    var defaultRenderer = require('./render/default'),
-        interleaveRenderer = require('./render/interleave');
+    var contRenderer = require('./renderer/contiguous'),
+        intlRenderer = require('./renderer/interleave');
 
     return function visualize(fxgl) {
         var colorManager = colors(fxgl);
@@ -57,6 +57,7 @@ define(function(require){
             .uniform("uDefaultColor",   "vec3",  [0.8, 0, 0])
             .uniform("uColorMode",      "int",   1)
             .uniform("uViewDim",        "vec2",  fxgl.viewport)
+            .uniform("uVisShape",       "int",   0)
             .varying("vColorRGBA",      "vec4"   )
 
         var enhance = perceive(fxgl);
@@ -67,8 +68,8 @@ define(function(require){
         fxgl.framebuffer.enableRead("offScreenFBO");
 
         var renderer = {
-            contig: defaultRenderer(fxgl),
-            interleave: interleaveRenderer(fxgl)
+            contig: contRenderer(fxgl),
+            interleave: intlRenderer(fxgl)
         };
 
         fxgl.subroutine(
@@ -84,24 +85,15 @@ define(function(require){
         );
 
         var vs1 = fxgl.shader.vertex(renderer.contig.vs),
-            vs2 = fxgl.shader.vertex(renderer.interleave.vs),
-            fs = fxgl.shader.fragment(function() {
-            // if(this.vResult == 0.0) discard;
-            // var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
-            // if (dist > 0.5) discard;
-            // var delta = 0.2;
-            // var alpha = 1.0 - smoothstep(0.45-delta, 0.45, dist);
+            fs1 = fxgl.shader.fragment(renderer.contig.fs);
 
-            // dist = 1.0 - (dist * 2.);
-            // dist = max(0., dist);
-            if(this.vResult == this.uVisLevel)
-                gl_FragColor = this.vColorRGBA;
-            else
-                discard;
-        });
+        fxgl.program("visualize", vs1, fs1);
 
-        fxgl.program("visualize", vs1, fs);
-        fxgl.program("interleave", vs2, fs);
+        var vs2 = fxgl.shader.vertex(renderer.interleave.vs),
+            fs2 = fxgl.shader.fragment(renderer.interleave.fs);
+
+
+        fxgl.program("interleave", vs2, fs2);
         var svgViews = [];
         // fxgl.program("$interleave", vs2, fs);
 
@@ -124,8 +116,6 @@ define(function(require){
                 intervals = options.intervals,
                 viewOrder = options.viewOrder;
 
-            // console.log(viewOrder, offset, width, height);
-
             var vmapX = fields.indexOf(vmap.x),
                 vmapY = fields.indexOf(vmap.y),
                 vmapColor = fields.indexOf(vmap.color),
@@ -146,6 +136,11 @@ define(function(require){
                     fxgl.attribute._fid = fv;
                     fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute._fid.location, 0);
                     fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute._vid.location, 1);
+                } else {
+                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0.location, 0);
+                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0Value.location, 0);
+                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1.location, 1);
+                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1Value.location, 1);
                 }
             }
             updateInstancedAttribute(vmap.x);

@@ -1,4 +1,5 @@
 define(function(){
+    var smallest = -Math.pow(2, 128);
     return function stats(fxgl) {
         var fieldCount = fxgl.uniform.uFieldCount.data;
         fxgl.framebuffer("fStats", "float", [2, fieldCount]);
@@ -14,10 +15,10 @@ define(function(){
         });
 
         var fs = fxgl.shader.fragment(function() {
-            if(this.vResult > 0.0)
+            if(this.vResult >= 0.0)
                 gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
             else
-                gl_FragColor = vec4(1.0, this.vResult, 0.0, 0.0);
+                gl_FragColor = vec4(-1.0, this.vResult, 0.0, 0.0);
         });
 
         var gl = fxgl.program("stats", vs, fs);
@@ -25,8 +26,13 @@ define(function(){
         return function(fieldIds, dataDimension) {
             // fxgl.framebuffer("fStats", "float", [2, fieldIds.length]);
             var gl = fxgl.program("stats");
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0.location, 0);
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0Value.location, 0);
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1.location, 1);
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1Value.location, 1);
+
             fxgl.bindFramebuffer("fStats");
-            gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            gl.clearColor( smallest, smallest, smallest, smallest );
             gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
@@ -67,9 +73,11 @@ define(function(){
 
             fieldIds.forEach(function(d, i){
                 var ext = extent.slice(i*8, i*8+8);
-                var minValue = (ext[0] > 0) ? ext[1] : ext[7],
-                    maxValue = (ext[2] > 0) ? ext[3] : ext[5];
+                // console.log(ext);
+                var minValue = (ext[4] < 0) ? ext[5] : ext[7],
+                    maxValue = (ext[2] > 0) ? ext[3] : ext[1];
                  extents[i] = [minValue, maxValue];
+
              });
 
             //  console.log(extent);

@@ -90,6 +90,11 @@ define(function(require){
         function _execute(opts, groupFieldIds, resultFieldIds) {
             resultFieldCount = resultFieldIds.length;
             var gl = context.program("group");
+            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0.location, 0);
+            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0Value.location, 0);
+            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
+            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
+
             context.bindFramebuffer("fGroupResults");
             context.framebuffer.enableRead("fDerivedValues");
             context.framebuffer.enableRead("fFilterResults");
@@ -242,7 +247,7 @@ define(function(require){
             //     context.cachedResult = p4gl.result('row');
             //     console.log(context.cachedResult);
             // }
-            var resultDomains = context.opt.stats(resultFieldIds, context.dataDimension);
+            var resultDomains = context.opt.extent(resultFieldIds, context.dataDimension);
             // context.ctx.finish();
             // console.log("stats time:", new Date() - statStart);
             for (var ii = context.indexes.length; ii < context.indexes.length + resultFieldIds.length; ii++) {
@@ -260,7 +265,6 @@ define(function(require){
             context.uniform.uFilterFlag.data = 0;
 
             // context.ctx.finish();
-            // console.log('pregroup time', new Date() - start);
             context.indexes.forEach(function(d, i) {
                 context.attribute['aIndex' + i] = utils.seqFloat(0, context.resultDimension[i] - 1);
                 var interval = 1;
@@ -286,13 +290,19 @@ define(function(require){
             }
         }
 
-        aggregate.result =  function() {
+        aggregate.result = function(arg) {
+            var options = arg || {},
+                offset = options.offset || [0, 0],
+                resultSize = options.size || context.resultDimension[0]* context.resultDimension[1],
+                rowSize = Math.min(resultSize, context.resultDimension[0]),
+                colSize = Math.ceil(resultSize/context.resultDimension[0]);
+
 
             context.bindFramebuffer("fGroupResults");
             var gl = context.program("group"),
-                result = new Float32Array(context.resultDimension[0]*context.resultDimension[1]*4*resultFieldCount);
+                result = new Float32Array(rowSize * colSize * 4 * resultFieldCount);
 
-            gl.readPixels(0, 0, context.resultDimension[0], context.resultDimension[1]*resultFieldCount, gl.RGBA, gl.FLOAT, result);
+            gl.readPixels(offset[0], offset[1], rowSize, colSize * resultFieldCount, gl.RGBA, gl.FLOAT, result);
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
             return result.filter(function(d, i){ return i%4===3;} );

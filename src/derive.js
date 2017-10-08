@@ -34,8 +34,6 @@ define(function(){
         //     return value;
         // }
 
-        console.log(marco);
-
         context.uniform("uOptMode", "float", 0)
             .uniform("uDeriveId", "int", 0)
             // .subroutine("getDataValue", "float", getDataValue)
@@ -71,10 +69,10 @@ define(function(){
 
         function fragmentShader() {
             if(this.vResult == 0.0) discard;
-            if(this.uOptMode > 0.0 || this.vResult > 0.0)
+            if(this.uOptMode > 0.0 || this.vResult >= 0.0)
                 gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
             else
-                gl_FragColor = vec4(1.0, this.vResult, 0.0, 0.0);
+                gl_FragColor = vec4(-1.0, this.vResult, 0.0, 0.0);
         }
 
         var vs = context.shader.vertex(vertexShader),
@@ -104,20 +102,23 @@ define(function(){
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
                 gl.viewport(0, 0, 1,  1);
 
-                var min = new Float32Array(4),
-                    max = new Float32Array(4);
+                var result = new Float32Array(8);
 
                 gl.blendEquation(gl.MAX_EXT);
                 gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-                gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
+                // gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
+
+                gl.viewport(1, 0, 1,  1);
+                gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
 
                 gl.blendEquation(gl.MIN_EXT);
                 gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-                gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, min);
+                gl.readPixels(0, 0, 2, 1, gl.RGBA, gl.FLOAT, result);
 
-                var minValue = (max[0] > 0) ? max[1] : min[3],
-                    maxValue = (max[2] > 0) ? max[3] : min[1];
+                var minValue = (result[4] < 0) ? result[5] : result[7],
+                    maxValue = (result[2] > 0) ? result[3] : result[1];
                 deriveDomains[i] = [minValue, maxValue];
+
                 // deriveDomains[i] = [Math.min(min[0], min[3]), Math.max(max[0], max[3])];
             });
             gl.viewport(0, 0, dataDimension[0], dataDimension[1]*deriveMax);
@@ -157,10 +158,16 @@ define(function(){
             }
         }
 
-        derive.result = function(deriveFieldId) {
-            var fid = deriveFieldId || 0;
-            var result = new Float32Array(dataDimension[0]*dataDimension[1]*4);
-            gl.readPixels(0, dataDimension[1]*fid, dataDimension[0], dataDimension[1], gl.RGBA, gl.FLOAT, result);
+        derive.result = function(arg) {
+            var options = arg || {},
+                offset = options.offset || [0, 0],
+                resultSize = options.size || context.dataDimension[0]* context.dataDimension[1],
+                fid = options.fieldId || options.deriveFieldId || 0,
+                rowSize = Math.min(resultSize, context.dataDimension[0]),
+                colSize = Math.ceil(resultSize/context.dataDimension[0]);
+
+            var result = new Float32Array(rowSize * colSize * 4);
+            gl.readPixels(0, dataDimension[1]*fid, rowSize, colSize, gl.RGBA, gl.FLOAT, result);
             return result.filter(function(d, i){ return i%4===3;} ); //return channel alpha in rgba
         }
 

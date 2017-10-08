@@ -1,6 +1,5 @@
 define(function(require){
     const rand = require('./rand'),
-        jstat = require('jstat')(),
         ctypes = require('../src/ctypes'),
         cstore = require('../src/cstore');
 

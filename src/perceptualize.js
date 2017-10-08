@@ -2,7 +2,6 @@ define(function(require){
     var arrays = require("p4/core/arrays");
 
     return function perceptual(fxgl) {
-
         var viewport = fxgl.viewport,
             padding = fxgl.padding;
 
@@ -49,13 +48,11 @@ define(function(require){
 
             gl_FragColor = vec4(value.rgb, a);
             // gl_FragColor = vec4(texture2D(this.tColorGraident, vec2(a, 1.0)).rgb, a+0.2);
-
         });
 
         fxgl.program("vis-render", vs2, fs2);
 
         return function(viewDim) {
-
             var gl = fxgl.program("post-processing");
             fxgl.framebuffer.enableRead("offScreenFBO");
             fxgl.bindFramebuffer("visStats");
@@ -79,8 +76,6 @@ define(function(require){
             gl.disable( gl.BLEND );
             gl.drawArrays(gl.TRIANGLES, 0, 6);
             gl.blendEquation(gl.FUNC_ADD);
-
         }
-
     }
 });

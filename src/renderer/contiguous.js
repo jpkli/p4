@@ -47,12 +47,24 @@ define(function(){
                 rgb = this.uDefaultColor;
             else
                 rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
-            this.vColorRGBA = vec4(rgb*alpha, alpha);
+            this.vColorRGBA = vec4(rgb, alpha);
             gl_Position = vec4(posX, posY, 0.0, 1.0);
         };
 
         renderer.fs = function() {
-
+            if(this.vResult == this.uVisLevel) {
+                if(this.uVisShape == 1) {
+                    var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
+                    if (dist > 0.5) discard;
+                    var delta = 0.2;
+                    var alpha = this.vColorRGBA.a - smoothstep(0.45-delta, 0.45, dist);
+                    gl_FragColor = vec4(this.vColorRGBA.rgb, alpha);
+                } else {
+                    gl_FragColor = vec4(this.vColorRGBA.rgb * this.vColorRGBA.a,  this.vColorRGBA.a);
+                }
+            } else {
+                discard;
+            }
         }
 
         return renderer;

@@ -76,7 +76,10 @@ define(function(){
         }
 
         renderer.fs = function() {
-
+            if(this.vResult == this.uVisLevel)
+                gl_FragColor = this.vColorRGBA;
+            else
+                discard;
         }
 
         return renderer;
