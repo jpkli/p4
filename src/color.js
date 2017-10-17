@@ -1,6 +1,5 @@
 define(function(require){
-    var Color = require('i2v/colors'),
-        colorSchemes = require('./colorSchemes'),
+    var colorSchemes = require('./gradients'),
         colorResolution = 1024,
         colorCountMax = 32;
 
@@ -27,6 +26,28 @@ define(function(require){
         [23,190,207]
     ];
 
+
+    function rgb(hexStr) {
+        var hex, r, g, b;
+
+        if(hexStr.slice(0,1) == "#")
+            hex = hexStr.slice(1);
+        else
+            hex = colorStrToHex(hexStr).slice(1);
+
+        r = parseInt(hex.substring(0,2), 16) / 255;
+        g = parseInt(hex.substring(2,4), 16) / 255;
+        b = parseInt(hex.substring(4,6), 16) / 255;
+        return [r, g, b];
+    }
+
+    function rgba(hexStr, alpha) {
+        var a = alpha || 1.0,
+            c = rgb(hexStr);
+
+        return [c[0]*a, c[1]*a, c[2]*a, a];
+    }
+
     function rgba2hex(c) {
         var r = c[0],
             g = c[1],
@@ -43,8 +64,8 @@ define(function(require){
             colorGradient = new Float32Array(colorResolution * 4);
         colors.push(colors[cc]);
         for(var i = 0; i < cc+1; i++) {
-            var c0 = Color.rgba(colors[i]),
-                c1 = Color.rgba(colors[i+1]),
+            var c0 = rgba(colors[i]),
+                c1 = rgba(colors[i+1]),
                 offset = Math.floor(i * step)*4;
 
             for(var x = 0; x < step; x++) {
@@ -60,12 +81,12 @@ define(function(require){
 
     function setColorTable(colors) {
         var colorTable = new Float32Array(colorCountMax * 3),
-            rgb = false;
+            isRgb = false;
 
-        if(colors[0].length == 3) rgb = true;
+        if(colors[0].length == 3) isRgb = true;
         colors.forEach(function(c, i){
             var colorValue = c;
-            if(!rgb) colorValue = Color.rgb(c) * 255;
+            if(!isRgb) colorValue = rgb(c) * 255;
             colorTable[i*3] = colorValue[0] / 255;
             colorTable[i*3+1] = colorValue[1] / 255;
             colorTable[i*3+2] = colorValue[2] / 255;
@@ -101,6 +122,9 @@ define(function(require){
         colorManager.colorSchemes = function() {
             return colorSchemes["viridis"];
         }
+
+        colorManager.rgb = rgb;
+        colorManager.rgba = rgba;
 
         return colorManager;
 

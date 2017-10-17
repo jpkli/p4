@@ -1,6 +1,5 @@
 define(function(require){
-    const FlexGL = require('flexgl/flexgl');
-
+    const FlexGL = require('flexgl');
     return function(options) {
         var container   = options.container || document.body,
             context     = options.context || null,

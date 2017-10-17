@@ -23,7 +23,8 @@ define(function(require){
             }
 
             $vec2(pos);
-            for ($int(ii) = 0; ii < 2; ii++) {
+
+            for ( $int(ii) = 0; ii < 2; ii++) {
                 $int(gid);
                 gid = this.uGroupFields[ii];
                 if(gid != -1) {

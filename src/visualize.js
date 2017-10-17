@@ -1,9 +1,8 @@
 define(function(require){
-    var colors = require('./colorManager'),
+    var colors = require('./color'),
         ctypes = require('./ctypes'),
-        perceive = require('./perceptualize'),
-        chart = require('./chart'),
-        Color = require('i2v/colors');
+        reveal = require('./reveal'),
+        chart = require('./chart');
 
     function seq(dtype, start, end, interval) {
         var step = interval || 1,
@@ -60,7 +59,7 @@ define(function(require){
             .uniform("uVisShape",       "int",   0)
             .varying("vColorRGBA",      "vec4"   )
 
-        var enhance = perceive(fxgl);
+        var enhance = reveal(fxgl);
 
         fxgl.framebuffer("offScreenFBO", "float", fxgl.viewport)
             .framebuffer("visStats", "float", [1, 1]);
@@ -172,7 +171,7 @@ define(function(require){
 
             if(vmapColor == -1 && typeof(vmap.color) == "string"){
                 fxgl.uniform.uVisMapColor = vmapColor;
-                fxgl.uniform.uDefaultColor = Color.rgb(vmap.color);
+                fxgl.uniform.uDefaultColor = colors.rgb(vmap.color);
             } else {
                 fxgl.uniform.uVisMapColor = vmapColor;
             }

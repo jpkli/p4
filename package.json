@@ -1,0 +1,33 @@
+{
+  "name": "p4-gl",
+  "version": "0.1.0",
+  "description": "Portable parallel processing pipleines via WebGL",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpkli/p4-gl.git"
+  },
+  "keywords": [
+    "parallel",
+    "processing",
+    "data",
+    "processing",
+    "data",
+    "transformation"
+  ],
+  "author": "Kelvin Li",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/jpkli/p4-gl/issues"
+  },
+  "homepage": "https://github.com/jpkli/p4-gl#readme"
+}

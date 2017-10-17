@@ -5,7 +5,6 @@ define(function(require){
     var Viz = require('i2v/viz'),
         Axis = require('i2v/svg/axis'),
         Selector = require('i2v/selector'),
-        stats = require('p4/dataopt/stats'),
         format = require('i2v/format'),
         scale = require('i2v/scale');
 

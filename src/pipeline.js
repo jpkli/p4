@@ -1,6 +1,6 @@
 define(function(require) {
 
-    var arrays = require('p4/core/arrays'),
+    var arrays = require('./arrays'),
         packData = require('./pack'),
         output = require('./output'),
         utils = require('./utils'),
@@ -185,6 +185,9 @@ define(function(require) {
 
         pipeline.derive = function(spec) {
             addToPipeline('derive', spec);
+
+            //TODO: support JS function as expression for deriving new variable
+            //.replace(/function\s*[\w|\d]+\s*\((.+)\)/g, "$1")
 
             //TODO: recompile the kernel for derive by checking if deriving equations/functions changed.
             if (!opt.hasOwnProperty('derive')) {

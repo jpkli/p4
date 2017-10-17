@@ -1,5 +1,5 @@
 define(function(require){
-    var arrays = require("p4/core/arrays");
+    var arrays = require("./arrays");
 
     return function perceptual(fxgl) {
         var viewport = fxgl.viewport,

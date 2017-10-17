@@ -4,10 +4,6 @@ define( function(require) {
 
     var ctypes = require('./ctypes');
 
-    var query = {
-        filter: require('./filter'),
-    }
-    var filter = require('./filter');
 
     return function ColumnStore(option){
         "use strict";
@@ -204,11 +200,6 @@ define( function(require) {
 
         cstore.size = size;
 
-        cstore.filter = function(spec) {
-            columns = filter(columns, spec);
-            count = size = columns.rows;
-            return cstore;
-        }
 
         return initCStore();
     }

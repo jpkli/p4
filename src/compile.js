@@ -3,7 +3,7 @@ define(function(require){
     return function(fxgl, fields, spec) {
         var kernels = {
             derive    : require('./derive'),
-            perceptual: require('./perceptualize'),
+            reveal    : require('./reveal'),
             aggregate : require('./aggregate'),
             cache     : require('./cache'),
             select    : require('./select'),
@@ -17,7 +17,7 @@ define(function(require){
             select    : kernels.select(fxgl, fields),
             extent    : kernels.extent(fxgl),
             visualize : kernels.visualize(fxgl),
-            // perceive  : kernels.perceptual(fxgl)
+            // perceive  : kernels.reveal(fxgl)
         }
 
         // if(spec.hasOwnProperty('perceptual'))
