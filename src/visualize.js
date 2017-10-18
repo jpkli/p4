@@ -2,7 +2,7 @@ define(function(require){
     var colors = require('./color'),
         ctypes = require('./ctypes'),
         reveal = require('./reveal'),
-        chart = require('./chart');
+        chart = require('./chart/chart');
 
     function seq(dtype, start, end, interval) {
         var step = interval || 1,
@@ -171,7 +171,7 @@ define(function(require){
 
             if(vmapColor == -1 && typeof(vmap.color) == "string"){
                 fxgl.uniform.uVisMapColor = vmapColor;
-                fxgl.uniform.uDefaultColor = colors.rgb(vmap.color);
+                fxgl.uniform.uDefaultColor = colorManager.rgb(vmap.color);
             } else {
                 fxgl.uniform.uVisMapColor = vmapColor;
             }

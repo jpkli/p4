@@ -1,9 +1,10 @@
 define(function(require){
-    var colorSchemes = require('./gradients'),
-        colorResolution = 1024,
-        colorCountMax = 32;
+    const colorSchemes = require('./gradients');
+    const colorHex = require('./colorhex');
+    const colorResolution = 1024;
+    const colorCountMax = 32;
 
-    var t20 = [
+    const defaultColors = [
         [255,187,120],
         [255,127,14],
         [174,199,232],
@@ -26,6 +27,12 @@ define(function(require){
         [23,190,207]
     ];
 
+    function colorStrToHex(colorStr) {
+        if (typeof colorHex[colorStr.toLowerCase()] != 'undefined')
+            return colorHex[colorStr.toLowerCase()];
+        else
+            return false;
+    }
 
     function rgb(hexStr) {
         var hex, r, g, b;
@@ -97,7 +104,7 @@ define(function(require){
 
     var gradient = setColorScheme(colorSchemes["viridis"]),
     // var gradient = setColorScheme(["blue", "green", "red"]),
-        table = setColorTable(t20);
+        table = setColorTable(defaultColors);
 
     return function(fxgl) {
         var colorManager = {};
@@ -115,7 +122,7 @@ define(function(require){
             fxgl.uniform.uColorTable = setColorTable(colors);
         }
 
-        colorManager.colorTable = t20.map(function(t){
+        colorManager.colorTable = defaultColors.map(function(t){
             return rgba2hex(t);
         });
 

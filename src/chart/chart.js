@@ -2,11 +2,11 @@ if (typeof(define) !== 'function') var define = require('amdefine')(module);
 
 define(function(require){
     "use strict";
-    var Viz = require('i2v/viz'),
-        Axis = require('i2v/svg/axis'),
-        Selector = require('i2v/selector'),
-        format = require('i2v/format'),
-        scale = require('i2v/scale');
+    var Viz = require('./base'),
+        Axis = require('./axis'),
+        Selector = require('./selector'),
+        format = require('./format'),
+        scale = require('./scale');
 
     return Viz.extend(function Chart(option){
         var chart = this,

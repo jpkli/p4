@@ -1,7 +1,7 @@
 define(function(require) {
-    const jstat = require('jstat')(),
-        ctypes = require('src/ctypes'),
-        cstore = require('src/cstore');
+    const normalDist = require('../../test/dist-normal'),
+        ctypes = require('../../src/ctypes'),
+        cstore = require('../../src/cstore');
 
     function rand(arg){
         var options = arg || {},
@@ -14,7 +14,9 @@ define(function(require) {
             size = options.size || 0;
 
         var tuples = new dtype(size),
-            random = (dist == 'normal') ? function() { return jstat.normal(mean, std).sample() } : Math.random;
+            random = (dist == 'normal')
+                ? normalDist(mean, std)
+                : function() { return min + (max - min) * Math.random(); };
 
         for(var i = 0; i < size; i++) {
             tuples[i] = min + (max - min) * random();

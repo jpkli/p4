@@ -1,34 +1,61 @@
-var fs = require('fs'),
-    path = require('path'),
-    express = require('express'),
-    bodyParser = require('body-parser'),
-    app = express(),
-    server = require('http').Server(app);
+const http = require('http');
+const url = require('url');
+const fs = require('fs');
+const path = require('path');
+const port = process.argv[2] || 8100;
 
-var port = process.env.PORT || 8100,
-    host = process.env.HOST || "localhost";
+http.createServer(function (req, res) {
+  // console.log(`${req.method} ${req.url}`);
 
-console.log("initializing server ");
+  // parse URL
+  const parsedUrl = url.parse(req.url);
+  // extract URL path
+  let pathname = `.${parsedUrl.pathname}`;
+  // based on the URL path, extract the file extention. e.g. .js, .doc, ...
+  const ext = path.parse(pathname).ext || '.html';
+  // maps file extention to MIME typere
+  const map = {
+    '.ico': 'image/x-icon',
+    '.html': 'text/html',
+    '.js': 'text/javascript',
+    '.json': 'application/json',
+    '.css': 'text/css',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.wav': 'audio/wav',
+    '.mp3': 'audio/mpeg',
+    '.svg': 'image/svg+xml',
+    '.pdf': 'application/pdf',
+    '.doc': 'application/msword'
+  };
 
-// ivastack libs
-let libs = {
-    i2v: '../node_modules/i2v/src',
-    flexgl : '../node_modules/flexgl/src',
-    p4: '../src',
-    p4gl: './src'
-}
+  pathname = pathname.replace('/npm/', '/node_modules/');
 
-// Static files
-Object.keys(libs).forEach(function(lib){
-    app.use('/'+lib, express.static(libs[lib]));
-})
+  fs.exists(pathname, function (exist) {
+    if(!exist) {
+      // if the file is not found, return 404
+      res.statusCode = 404;
+      res.end(`File ${pathname} not found!`);
+      return;
+    }
 
-app.use("/npm", express.static('../node_modules'));
-app.use(express.static('.'));
+    // if is a directory search for index file matching the extention
+    if (fs.statSync(pathname).isDirectory()) pathname += '/index' + ext;
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+    // read file from file system
+    fs.readFile(pathname, function(err, data){
+      if(err){
+        res.statusCode = 500;
+        res.end(`Error getting the file: ${err}.`);
+      } else {
+        // if the file is found, set Content-type and send data
+        res.setHeader('Content-type', map[ext] || 'text/plain' );
+        res.end(data);
+      }
+    });
+  });
 
-server.listen(port, host, function(){
-    console.log("server started, listening", host, port);
-});
+
+}).listen(parseInt(port));
+
+console.log(`Server listening on port ${port}`);

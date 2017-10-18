@@ -1,6 +1,6 @@
 define(function(require){
 
-    const genData = require('./gen-json');
+    const genData = require('src/gen-json');
 
     var benchmark = {
         lib: null,

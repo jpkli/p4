@@ -1,6 +1,6 @@
 define(function(require){
     const genData = require('./gen-binary'),
-        P4GL = require('src/pipeline');
+        P4GL = require('../../src/pipeline');
 
     var benchmark = {
         lib: null,

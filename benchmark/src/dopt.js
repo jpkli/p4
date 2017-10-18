@@ -1,20 +1,3 @@
-requirejs.config({
-    paths: {
-        'jstat': '/npm/jStat/dist/jstat.min'
-    },
-    shim: {
-        jstat: {
-            exports: ['j$', 'jStat'],
-            init: function() {
-                return {
-                    j$: j$,
-                    jStat: jStat
-                };
-            }
-        }
-    }
-});
-
 const dataSizeTable = {
     "14": '16K',
     "15": '32K',
@@ -53,10 +36,10 @@ const maxSize = {
 }
 
 var dataProps = [
-    {name: 'height', dtype: 'float', dist: 'normal', min: 200, max: 230, mean: 0.7, std:0.2},
-    {name: 'weight', dtype: 'float', dist: 'normal', min: 170, max: 300, mean: 0.7, std:0.2},
-    {name: 'iq', dtype: 'float', dist: 'normal', min: -10, max: 100, mean: 0.7, std:0.2},
-    {name: 'age', dtype: 'int', dist: 'normal', min: -16, max: 99, mean: 0.7, std:0.2}
+    {name: 'height', dtype: 'float', dist: 'normal', min: 50, max: 90, mean: 70, std: 10},
+    {name: 'weight', dtype: 'float', dist: 'normal', min: 60, max: 300, mean: 150, std: 50},
+    {name: 'iq', dtype: 'float', dist: 'normal', min: 10, max: 200, mean: 110, std: 30},
+    {name: 'age', dtype: 'int', dist: 'normal', min: 16, max: 99, mean: 50, std:25}
 ];
 
 var results = [];

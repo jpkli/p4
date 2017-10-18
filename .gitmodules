@@ -1,0 +1,3 @@
+[submodule "flexgl"]
+	path = flexgl
+	url = https://github.com/jpkli/flexgl

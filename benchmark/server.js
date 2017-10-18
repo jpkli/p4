@@ -12,7 +12,7 @@ console.log("initializing server ");
 
 // ivastack libs
 let libs = {
-    i2v: '../../node_modules/i2v/src',
+    i2v: '../node_modules/i2v/src',
     // flexgl : '../../node_modules/flexgl/src',
     p4: '../../src',
 }
@@ -22,7 +22,7 @@ Object.keys(libs).forEach(function(lib){
     app.use('/'+lib, express.static(libs[lib]));
 })
 
-app.use("/npm", express.static('../../node_modules'));
+app.use("/npm", express.static('../node_modules'));
 app.use("/src", express.static('../src'));
 app.use(express.static('.'));
 

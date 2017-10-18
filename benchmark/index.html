@@ -112,11 +112,6 @@
     </div>
     <script src="/npm/requirejs/require.js"></script>
     <script>
-    requirejs.config({
-        paths: {
-            flexgl: 'src/flexgl.amd'
-        }
-    })
     require(['src/result-plot'], function(plotResults) {
         $.getJSON('results/dopt-comparisons.json', function(data) {
             var dopts = ['select','derive', 'aggregate'];

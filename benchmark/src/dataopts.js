@@ -111,7 +111,7 @@ define(function(require){
                     })
 
                     benchmarks[lib].cleanUp();
-                    
+
                     //clean up process to avoid cache
                     benchmarkData.forEach(function(d){
                         delete d.hw;

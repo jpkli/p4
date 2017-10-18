@@ -1,6 +1,6 @@
 define(function(require){
 
-    const genData = require('./gen-json'),
+    const genData = require('src/gen-json'),
         scatterPlot = require('src/plots/d3-scatter-plot'),
         parallelCoordinates = require('src/plots/d3-parallel-coordinates');
 
