@@ -1,11 +1,6 @@
 define(function(require){
     var benchmarks = {};
-    const defaultDataProps = [
-        {name: 'height', dtype: 'float', dist: 'normal', min: 200, max: 230, mean: 0.7, std:0.2},
-        {name: 'weight', dtype: 'float', dist: 'normal', min: 170, max: 300, mean: 0.7, std:0.2},
-        {name: 'iq', dtype: 'float', dist: 'normal', min: -10, max: 100, mean: 0.7, std:0.2},
-        {name: 'age', dtype: 'int', dist: 'normal', min: -16, max: 99, mean: 0.7, std:0.2}
-    ];
+    const defaultDataProps = [];
     const genJsonData = require('./gen-json');
 
     benchmarks.vega = require('./bench-vega');
@@ -13,8 +8,6 @@ define(function(require){
     benchmarks.stardust = require('./bench-stardust');
     benchmarks.lodash = require('./bench-lodash');
     benchmarks.p4gl = require('./bench-p4gl');
-
-
 
     var results = {},
         dimensions = dataProps.map( d => d.name );

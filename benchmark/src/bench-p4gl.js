@@ -16,10 +16,10 @@ define(function(require){
         var dataProps = options.data;
 
         var data = genData({
-        size: dataProps.size,
+            size: dataProps.size,
             props: dataProps.props
         });
-
+        console.log(data);
         benchmark.data = data;
         var config = options,
             container = options.container;

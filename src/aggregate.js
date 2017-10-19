@@ -17,15 +17,19 @@ define(function(require){
             j = (this.aIndex1+0.5) / this.uDataDim.y;
             this.vResult = this.getData(this.uFieldId, i, j);
 
+            if(this.aIndex1 * this.uDataDim.x + this.aIndex0 >= this.uDataSize) {
+                this.vResult = 0.0;
+            }
+
             if(this.uFilterFlag == 1) {
                 if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
                     this.vResult = 0.0;
             }
 
-            $vec2(pos);
+            var pos = new Vec2();
 
-            for ( $int(ii) = 0; ii < 2; ii++) {
-                $int(gid);
+            for (var ii = 0; ii < 2; ii++) {
+                var gid = new Int();
                 gid = this.uGroupFields[ii];
                 if(gid != -1) {
                     if(this.uIndexCount > 0) {
@@ -36,7 +40,7 @@ define(function(require){
                         }
                     }
                     if(this.uIndexCount == 0 || gid > 1) {
-                        $vec2(d);
+                        var d = new Vec2();
                         d = this.getFieldDomain(gid);
                         groupKeyValue = (this.getData(gid, i, j) - d.x) / (d.y - d.x) * (this.getFieldWidth(gid)) / (this.getFieldWidth(gid)+1.);
                         groupKeyValue += 0.5/this.getFieldWidth(gid);
@@ -188,17 +192,27 @@ define(function(require){
             //     resultFieldIds = resultFields.map(function(f) { return fields.indexOf(f); }),
             //     operators = resultFields.map(function(r){return spec[r]; });
 
-            var newFieldNames = Object.keys(spec).filter(function(d) {
+
+            var newFieldSpec = spec.$calculate || spec.$out || null;
+
+            if(newFieldSpec === null) {
+                newFieldSpec = {};
+                Object.keys(spec).filter(function(d) {
                     return d != '$by' && d != '$group';
-                }),
+                }).forEach(function(d) {
+                    newFieldSpec[d] = spec[d];
+                });
+            }
+
+            var newFieldNames = Object.keys(newFieldSpec),
                 resultFields = newFieldNames.map(function(f) {
-                    return spec[f][Object.keys(spec[f])[0]];
+                    return newFieldSpec[f][Object.keys(newFieldSpec[f])[0]];
                 }),
                 resultFieldIds = resultFields.map(function(f) {
                     return context.fields.indexOf(f);
                 }),
                 operators = resultFields.map(function(f, i) {
-                    return Object.keys(spec[newFieldNames[i]])[0];
+                    return Object.keys(newFieldSpec[newFieldNames[i]])[0];
                 });
 
             if(!context._update)

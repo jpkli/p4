@@ -231,7 +231,7 @@ define(function(require){
             if(mark == 'bar') {
                 var start = performance.now();
                 var result = fxgl.readResult('row');
-                viewSetting.data = sortData(result);
+                viewSetting.data = result;
                 viewSetting.fields = fields;
                 if(intervals.hasOwnProperty(vmap.x))
                     viewSetting.isHistogram = true;

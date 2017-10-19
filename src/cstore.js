@@ -75,12 +75,10 @@ define( function(require) {
                 CAMs[f] = {};
                 colRead[f] = function(value) {
                     if(!CAMs[f][value]){
-                        TLBs[f].push(value);
                         CAMs[f][value] = TLBs[f].length;
-                        return TLBs[f].length;
-                    } else {
-                        return CAMs[f][value];
+                        TLBs[f].push(value);
                     }
+                    return CAMs[f][value];
                 };
             } else if(
                 colAlloc[f] === ctypes.int ||
@@ -122,7 +120,8 @@ define( function(require) {
             var props = arg || {},
                 columnData = props.data || props.array,
                 columnName = props.name,
-                columnType = props.dtype;
+                columnType = props.dtype,
+                values = props.values || [];
 
             var cid = attributes.indexOf(columnName);
             if( cid < 0) {
@@ -137,6 +136,13 @@ define( function(require) {
 
             if(columnData instanceof ctypes[types[cid]]) {
                 columns[cid] = columnData;
+                if(values.length) {
+                    TLBs[columnName] = values;
+                    CAMs[columnName] = {};
+                    values.forEach(function(value, vi){
+                        CAMs[columnName][value] = vi;
+                    })
+                }
             } else if(ArrayBuffer.isView(columnData)){
                 columns[cid] = new colAlloc[columnName](size);
                 for(var di = 0; di < size; di++) {

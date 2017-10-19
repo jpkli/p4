@@ -175,8 +175,8 @@ define(function(){
                 if(context.categoryIndex.hasOwnProperty(k)) {
                     var min, max, values;
                     values = spec[k].map(function(v) { return context.categoryIndex[k][v]; });
-                    min = arrays.min(values);
-                    max = arrays.max(values);
+                    min = Math.min.apply(null, values);
+                    max = Math.max.apply(null, values);
                     spec[k] = [min, max];
                 }
             });

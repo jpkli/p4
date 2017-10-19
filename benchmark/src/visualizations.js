@@ -1,11 +1,6 @@
 define(function(require){
     var benchmarks = {};
-    const defaultDataProps = [
-        {name: 'height', dtype: 'float', dist: 'normal', min: 200, max: 230, mean: 0.7, std:0.2},
-        {name: 'weight', dtype: 'float', dist: 'normal', min: 170, max: 300, mean: 0.7, std:0.2},
-        {name: 'iq', dtype: 'float', dist: 'normal', min: -10, max: 100, mean: 0.7, std:0.2},
-        {name: 'age', dtype: 'int', dist: 'normal', min: -16, max: 99, mean: 0.7, std:0.2}
-    ];
+    const defaultDataProps = [];
     const genJsonData = require('./gen-json');
     benchmarks.vega = require('./bench-vega');
     benchmarks.d3 = require('./bench-d3');
@@ -25,7 +20,9 @@ define(function(require){
             dimensions = dataProps.map( d => d.name ),
             colors = ['red', 'blue', 'green', 'blue'];
 
-        var benchmarkData = genJsonData({size: dataSize, props: dataProps});
+        var benchmarkData;
+        if(dataSize + 1 < Math.pow(2, 23) && !(libs.length == 1 && libs[0] == 'p4gl'))
+            benchmarkData = genJsonData({size: dataSize, props: dataProps});
 
         libs.forEach(function(lib) {
             console.log('benchmarking ' + lib);

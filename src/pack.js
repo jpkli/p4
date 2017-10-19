@@ -17,6 +17,7 @@ define(function(require){
         $p.resultDimension = [1, 1];
         $p.dataSize = 0;
 
+        console.log(    $p.categoryIndex);
         var dkeys = $p.dkeys,
             dtypes = $p.dtypes,
             stats =  data.stats || null;
@@ -111,6 +112,7 @@ define(function(require){
         ]));
 
         //setup all attribute, uniform, texture, varying needed by all the shaders
+        $p.uniform("uDataSize", "float", $p.dataSize);
         $p.uniform("uDataDim", "vec2", $p.dataDimension);
         $p.uniform("uResultDim", "vec2", $p.dataDimension);
         $p.uniform("uIndexCount", "int", $p.indexes.length);

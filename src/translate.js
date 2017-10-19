@@ -5,7 +5,7 @@ define(function(require){
     return function(dsl){
         var configs = dsl.configs || dsl.config || {},
             dataOptions = dsl.data || {},
-            specs = dsl.pipeline || [];
+            specs = dsl.pipeline || dsl.process || [];
 
         var program = pipeline(configs);
 

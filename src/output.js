@@ -48,7 +48,7 @@ define(function(){
                             dtype = $p.dtypes[kid];
 
                         if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
-                            obj[f] = $p.categoryLookup[f][res[f][i] - 1];
+                            obj[f] = $p.categoryLookup[f][res[f][i]];
                         } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
                             obj[f] =  $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
                         } else {
