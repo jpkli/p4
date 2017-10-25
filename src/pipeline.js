@@ -378,6 +378,33 @@ define(function(require) {
             pipeline.data(options.data);
         }
 
+        pipeline.runSpec = function(specs) {
+            pipeline.head();
+            $p.bindFramebuffer("offScreenFBO");
+            $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+            $p.bindFramebuffer("visStats");
+            $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+            $p.bindFramebuffer(null);
+            $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+            $p.pipeline = [];
+            $p.crossfilters = [];
+            $p.uniform.uFilterFlag = 0;
+            $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
+            specs.forEach(function(spec){
+                var opt = Object.keys(spec)[0],
+                    arg = spec[opt];
+
+                opt = opt.slice(1);
+                if(typeof pipeline[opt] == 'function') {
+                    pipeline[opt](arg);
+                }
+            })
+
+        }
+
         return pipeline;
     }
 });

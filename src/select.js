@@ -60,8 +60,8 @@ define(function(){
             fieldCount = fields.length,
             fieldTotal = context.uniform.uDeriveCount.data + fields.length,
             filterControls = new Array(fieldTotal).fill(0),
-            filterRanges = context.uniform.uFieldDomains.data.concat(
-                context.uniform.uDeriveDomains.data
+            filterRanges = context.fieldDomains.concat(
+                context.deriveDomains
             ),
             inSelections = new Float32Array(SELECT_MAX);
 
@@ -124,8 +124,9 @@ define(function(){
                     context.uniform.uFieldId = fieldId;
                     console.log(k, spec[k].$in.length, fieldId, inSelections);
                     gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-                    filterRanges[fieldId*2] = Math.min.apply(null, spec[k].$in);
-                    filterRanges[fieldId*2+1] = Math.max.apply(null, spec[k].$in);
+                    filterRanges[fieldId] = [Math.min.apply(null, spec[k].$in), Math.max.apply(null, spec[k].$in)];
+                    // filterRanges[fieldId*2] = Math.min.apply(null, spec[k].$in);
+                    // filterRanges[fieldId*2+1] = Math.max.apply(null, spec[k].$in);
                 })
             }
 
@@ -142,8 +143,9 @@ define(function(){
                     if(fieldId === -1) throw new Error('Invalid data field ' + k);
                     if(spec[k].length < 2) spec[k][1] = spec[k][0];
                     filterControls[fieldId] = 1;
-                    filterRanges[fieldId*2] = spec[k][0];
-                    filterRanges[fieldId*2+1] = spec[k][1];
+                    filterRanges[fieldId] = spec[k];
+                    // filterRanges[fieldId*2] = spec[k][0];
+                    // filterRanges[fieldId*2+1] = spec[k][1];
                 });
 
 
