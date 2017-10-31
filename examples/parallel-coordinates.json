@@ -1,0 +1,24 @@
+{
+    "data" : {
+        "url": "data/synthetic",
+        "format": "typedArray",
+        "attributes": {
+            "height": "float",
+            "weight": "float",
+            "iq"    : "int",
+            "age"   : "int",
+            "race"  : "string"
+        }
+    },
+    "pipeline": [
+        {
+            "$visualize": {
+                "id": "chart",
+                "mark": "line",
+                "y": ["weight", "height", "iq", "age"],
+                "color": "red",
+                "perceptual": 1
+            }
+        }
+    ]
+}

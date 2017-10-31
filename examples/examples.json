@@ -1,0 +1,40 @@
+[
+    {
+        "category": "Basic Charts",
+        "examples": [
+            {
+                "name": "Bar Chart",
+                "file": "bar-chart.json"
+            },
+            {
+                "name": "Scatter Plot",
+                "file": "scatter-plot.json"
+            },
+            {
+                "name": "Parallel Coordinates",
+                "file": "parallel-coordinates.json"
+            },
+            {
+                "name": "HeatMap",
+                "file": "heatmap.json"
+            }
+        ]
+    },
+    {
+        "category": "Mulitple Views",
+        "examples": [
+            {
+                "name": "Interactive Bushing",
+                "file": "bar-chart.json"
+            },
+            {
+                "name": "Bushing and Linking",
+                "file": "scatter-plot.json"
+            },
+            {
+                "name": "Parallel Coordinates",
+                "file": "parallel-coordinates.json"
+            }
+        ]
+    }
+]

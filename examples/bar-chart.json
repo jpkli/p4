@@ -1,0 +1,33 @@
+{
+    "data" : {
+        "url": "data/synthetic",
+        "format": "typedArray",
+        "attributes": {
+            "height": "float",
+            "weight": "float",
+            "iq"    : "int",
+            "age"   : "int",
+            "race"  : "string"
+        }
+    },
+    "pipeline": [
+        {
+            "$aggregate" : {
+                "$group": "race",
+                "$reduce" : {
+                    "avgHeight": { "$avg": "height"},
+                    "population": { "$count": "*"}
+                }
+            }
+        },
+        {
+            "$visualize": {
+                "id": "chart",
+                "mark": "bar",
+                "color": "steelblue",
+                "x": "race",
+                "y": "population"
+            }
+        }
+    ]
+}

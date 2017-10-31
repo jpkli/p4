@@ -1,0 +1,38 @@
+.sidebar {
+    background-color: #F5F5F5;
+    min-width: 180px;
+}
+
+.sidebar>h4 {
+    color: steelblue;
+    border-bottom: 1px solid steelblue;
+}
+
+.sidebar-module>h4 {
+    margin-left: 0.25em;
+}
+
+.example-list {
+    margin-left: 1em;
+}
+
+.column {
+    height: 100vh;
+    border-left: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+}
+
+.editor {
+    padding: 0;
+}
+
+.page-header {
+    margin: 0;
+    background-color: #EEE;
+}
+
+.navbar-brand {
+    font-size: 1.6em;
+    padding-right: 30px;
+    color: steelblue!important;
+}

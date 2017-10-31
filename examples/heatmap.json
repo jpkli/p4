@@ -1,0 +1,38 @@
+{
+    "data" : {
+        "url": "data/synthetic",
+        "format": "typedArray",
+        "attributes": {
+            "height": "float",
+            "weight": "float",
+            "iq"    : "int",
+            "age"   : "int",
+            "race"  : "string"
+        }
+    },
+    "pipeline": [
+        {
+            "$select" : {
+                "iq": [100, 150],
+                "age": [20, 40]
+            }
+        },
+        {
+            "$aggregate" : {
+                "$group": ["age", "iq"],
+                "$reduce" : {
+                    "count": { "$count": "*"}
+                }
+            }
+        },
+        {
+            "$visualize": {
+                "id": "chart",
+                "mark": "rect",
+                "color": "count",
+                "x": "iq",
+                "y": "age"
+            }
+        }
+    ]
+}
