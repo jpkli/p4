@@ -9,13 +9,13 @@ define(function(){
             var rs = 0;
 
             if ($p.resultDimension[0] > 1) {
-                res[$p.fields[rs]] = $p.attribute.aIndex0Value.data;
+                res[$p.fields[rs]] = $p.attribute.aDataValx.data;
                 rs++;
             }
 
             if ($p.resultDimension[1] > 1) {
-                bx = $p.attribute.aIndex0Value.data;
-                by = $p.attribute.aIndex1Value.data;
+                bx = $p.attribute.aDataValx.data;
+                by = $p.attribute.aDataValy.data;
                 var ax = new Array($p.resultDimension[0] * $p.resultDimension[1]),
                     ay = new Array($p.resultDimension[0] * $p.resultDimension[1]);
 

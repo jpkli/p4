@@ -1,4 +1,4 @@
-define(function(){
+define(function() {
     return {
         "aliceblue": "#f0f8ff",
         "antiquewhite": "#faebd7",

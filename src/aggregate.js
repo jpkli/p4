@@ -1,10 +1,10 @@
 define(function(require){
     const utils = require('./utils');
-    return function aggregate(context) {
+    return function aggregate($p) {
         var aggregate = {},
             aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
 
-        context.uniform('uGroupGetStat', 'float', 0.0)
+        $p.uniform('uGroupGetStat', 'float', 0.0)
             .uniform('uAggrOpt', 'int', 2);
 
         function vertexShader(){
@@ -13,11 +13,11 @@ define(function(require){
             var i, j, k;
             var x, groupKeyValue;
 
-            i = (this.aIndex0+0.5) / this.uDataDim.x;
-            j = (this.aIndex1+0.5) / this.uDataDim.y;
+            i = (this.aDataIdx+0.5) / this.uDataDim.x;
+            j = (this.aDataIdy+0.5) / this.uDataDim.y;
             this.vResult = this.getData(this.uFieldId, i, j);
 
-            if(this.aIndex1 * this.uDataDim.x + this.aIndex0 >= this.uDataSize) {
+            if(this.aDataIdy * this.uDataDim.x + this.aDataIdx >= this.uDataSize) {
                 this.vResult = 0.0;
             }
 
@@ -63,16 +63,16 @@ define(function(require){
                 gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
         }
 
-        var vs = context.shader.vertex(vertexShader),
-            fs = context.shader.fragment(fragmentShader);
+        var vs = $p.shader.vertex(vertexShader),
+            fs = $p.shader.fragment(fragmentShader);
 
-        context.program("group", vs, fs);
+        $p.program("group", vs, fs);
 
-        var vs2 = context.shader.vertex(function main() {
+        var vs2 = $p.shader.vertex(function main() {
              gl_Position = vec4(this._square, 0, 1);
         });
 
-        var fs2 = context.shader.fragment(function () {
+        var fs2 = $p.shader.fragment(function () {
             var x, y, res;
             $vec4(value);
             x = (gl_FragCoord.x) / this.uResultDim.x;
@@ -86,7 +86,7 @@ define(function(require){
             gl_FragColor = vec4(0.0, 0.0, 0.0, res);
         });
 
-        context.program("group2", vs2, fs2);
+        $p.program("group2", vs2, fs2);
 
         var resultFieldCount,
             secondPass = false,
@@ -94,16 +94,17 @@ define(function(require){
 
         function _execute(opts, groupFieldIds, resultFieldIds) {
             resultFieldCount = resultFieldIds.length;
-            var gl = context.program("group");
-            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0.location, 0);
-            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0Value.location, 0);
-            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
-            gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
+            var gl = $p.program("group");
+            $p.bindFramebuffer("fGroupResults");
+            $p.framebuffer.enableRead("fDerivedValues");
+            $p.framebuffer.enableRead("fFilterResults");
 
-            context.bindFramebuffer("fGroupResults");
-            context.framebuffer.enableRead("fDerivedValues");
-            context.framebuffer.enableRead("fFilterResults");
-            context.uniform.uGroupFields = groupFieldIds;
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
+
+            $p.uniform.uGroupFields = groupFieldIds;
             gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
             gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             gl.disable(gl.CULL_FACE);
@@ -111,25 +112,25 @@ define(function(require){
             gl.enable( gl.BLEND );
             gl.blendFunc( gl.ONE, gl.ONE );
             gl.blendEquation(gl.FUNC_ADD);
-            context.uniform.uGroupGetStat = 0.0;
+            $p.uniform.uGroupGetStat = 0.0;
             var resultDomains = new Array(resultFieldIds.length);
-            context.uniform.uResultDim = context.resultDimension;
+            $p.uniform.uResultDim = $p.resultDimension;
 
             secondPass = false;
             thirdPass = false;
             resultFieldIds.forEach(function(f, i){
                 var opt = aggrOpts.indexOf(opts[i]);
                 if(opt == -1) throw Error("unknow operator for aggreation: " + opts[i]);
-                gl.viewport(0, i*context.resultDimension[1], context.resultDimension[0], context.resultDimension[1]);
+                gl.viewport(0, i*$p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
                 if(opt == 0) gl.blendEquation(gl.MIN_EXT);
                 else if(opt == 1) gl.blendEquation(gl.MAX_EXT);
                 else gl.blendEquation(gl.FUNC_ADD);
-                context.uniform.uFieldId = f;
-                context.uniform.uAggrOpt = opt;
+                $p.uniform.uFieldId = f;
+                $p.uniform.uAggrOpt = opt;
                 gl.ext.drawArraysInstancedANGLE(
                     gl.POINTS, 0,
-                    context.dataDimension[0],
-                    context.dataDimension[1]
+                    $p.dataDimension[0],
+                    $p.dataDimension[1]
                 );
                 if(opt > 3) {
                     secondPass = true;
@@ -139,34 +140,34 @@ define(function(require){
 
             if(secondPass) {
                 // console.log('*** Second Pass for Aggregation');
-                var fieldCount = context.uniform.uFieldCount.data,
-                    preAggrData = context.uniform.uDataInput.data;
+                var fieldCount = $p.uniform.uFieldCount.data,
+                    preAggrData = $p.uniform.uDataInput.data;
 
-                context.uniform.uDataInput.data = context.framebuffer.fGroupResults.texture;
-                context.uniform.uFieldCount.data = resultFieldIds.length;
+                $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
+                $p.uniform.uFieldCount.data = resultFieldIds.length;
 
                 if(thirdPass){
-                    context.framebuffer(
+                    $p.framebuffer(
                         "fAggrStats",
-                        "float", [context.resultDimension[0], context.resultDimension[1] * resultFieldIds.length]
+                        "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
                     );
-                    context.bindFramebuffer("fAggrStats");
+                    $p.bindFramebuffer("fAggrStats");
                 } else {
-                    context.framebuffer(
+                    $p.framebuffer(
                         "fGroupResults",
                         "float",
-                        [context.resultDimension[0], context.resultDimension[1] * resultFieldIds.length]
+                        [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
                     );
-                    context.bindFramebuffer("fGroupResults");
+                    $p.bindFramebuffer("fGroupResults");
                 }
 
-                gl = context.program("group2");
+                gl = $p.program("group2");
                 gl.disable( gl.BLEND );
                 resultFieldIds.forEach(function(f, i){
                     var opt = aggrOpts.indexOf(opts[i]);
-                    context.uniform.uAggrOpt = opt;
-                    context.uniform.uFieldId = i;
-                    gl.viewport(0, i*context.resultDimension[1], context.resultDimension[0], context.resultDimension[1]);
+                    $p.uniform.uAggrOpt = opt;
+                    $p.uniform.uFieldId = i;
+                    gl.viewport(0, i*$p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
                     gl.drawArrays(gl.TRIANGLES, 0, 6);
                 })
 
@@ -179,21 +180,22 @@ define(function(require){
             var groupFields = spec.$by || spec.$group,
                 groupFieldIds = [-1, -1];
 
-            if (Array.isArray(groupFields)) {
-                groupFieldIds[0] = context.fields.indexOf(groupFields[0]);
-                groupFieldIds[1] = context.fields.indexOf(groupFields[1]);
+            if(!Array.isArray(groupFields)) groupFields = [groupFields];
+            if (groupFields.length == 2) {
+                groupFieldIds[0] = $p.fields.indexOf(groupFields[0]);
+                groupFieldIds[1] = $p.fields.indexOf(groupFields[1]);
             } else {
-                groupFieldIds[0] = context.fields.indexOf(groupFields);
+                groupFieldIds[0] = $p.fields.indexOf(groupFields[0]);
             }
 
-            context.resultDimension = context.getGroupKeyDimension(groupFieldIds);
-            // console.log(context.intervals, context.fieldWidths, context.resultDimension);
+            $p.resultDimension = $p.getGroupKeyDimension(groupFieldIds);
+            console.log( groupFieldIds, $p.resultDimension, $p.fieldWidths, $p.fieldDomains);
             // var resultFields = Object.keys(spec).filter(function(d){return d!='$by' && d!='$group';}),
             //     resultFieldIds = resultFields.map(function(f) { return fields.indexOf(f); }),
             //     operators = resultFields.map(function(r){return spec[r]; });
 
 
-            var newFieldSpec = spec.$calculate || spec.$out || null;
+            var newFieldSpec = spec.$calculate || spec.$reduce || spec.$out || null;
 
             if(newFieldSpec === null) {
                 newFieldSpec = {};
@@ -209,112 +211,122 @@ define(function(require){
                     return newFieldSpec[f][Object.keys(newFieldSpec[f])[0]];
                 }),
                 resultFieldIds = resultFields.map(function(f) {
-                    return context.fields.indexOf(f);
+                    return $p.fields.indexOf(f);
                 }),
                 operators = resultFields.map(function(f, i) {
                     return Object.keys(newFieldSpec[newFieldNames[i]])[0];
                 });
 
-            if(!context._update)
-                context.framebuffer(
+            if(!$p._update)
+                $p.framebuffer(
                     "fGroupResults",
-                    "float", [context.resultDimension[0], context.resultDimension[1] * resultFields.length]
+                    "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFields.length]
                 );
-
             _execute(operators, groupFieldIds, resultFieldIds);
-            context.ctx.finish();
 
-            context.getResult = aggregate.result;
+            $p.getResult = aggregate.result;
+            // console.log($p.getResult());
+            console.log(groupFields);
+            $p.indexes = groupFields;
 
-            // console.log(context.getResult());
-            //
-            // context.indexes = groupFields;
-            if (!Array.isArray(groupFields)) groupFields = [groupFields];
-            context.indexes = groupFields;
-
-            context.dataDimension = context.resultDimension;
+            $p.dataDimension = $p.resultDimension;
 
             var newFieldIds = groupFieldIds.filter(function(f) {
                 return f !== -1
             }).concat(resultFieldIds);
 
-            context.fields = groupFields
+            $p.fields = groupFields
                 .map(function(gf) {
                     return (gf.substring(0,4) == 'bin@')? gf.slice(4) : gf;
                 })
                 .concat(newFieldNames);
 
-            context.uniform.uDataDim.data = context.resultDimension;
-            context.uniform.uIndexCount.data = context.indexes.length;
-            context.uniform.uFieldCount.data = context.fields.length - context.indexes.length;
+            $p.uniform.uDataDim.data = $p.resultDimension;
+            $p.uniform.uIndexCount.data = $p.indexes.length;
+            $p.uniform.uFieldCount.data = $p.fields.length - $p.indexes.length;
 
-            context.fieldWidths = context.fieldWidths.concat(context.deriveWidths);
-            context.fieldDomains = context.fieldDomains.concat(context.deriveDomains);
+            $p.fieldWidths = $p.fieldWidths.concat($p.deriveWidths);
+            $p.fieldDomains = $p.fieldDomains.concat($p.deriveDomains);
 
-            context.fieldDomains = newFieldIds.map(function(f) {
-                return context.fieldDomains[f];
+            $p.fieldDomains = newFieldIds.map(function(f) {
+                return $p.fieldDomains[f];
             });
-            context.fieldWidths = newFieldIds.map(function(f) {
-                return context.fieldWidths[f];
+            $p.fieldWidths = newFieldIds.map(function(f) {
+                return $p.fieldWidths[f];
             });
-            context.uniform.uDataInput.data = context.framebuffer.fGroupResults.texture;
-            // if(groupFields.length == 1) {
-            //     context.cachedResult = p4gl.result('row');
-            //     console.log(context.cachedResult);
-            // }
-            var resultDomains = context.opt.extent(resultFieldIds, context.dataDimension);
-            // context.ctx.finish();
-            // console.log("stats time:", new Date() - statStart);
-            for (var ii = context.indexes.length; ii < context.indexes.length + resultFieldIds.length; ii++) {
-                context.fieldDomains[ii] = resultDomains[ii - context.indexes.length];
-                context.fieldWidths[ii] = resultDomains[ii - context.indexes.length][1] - resultDomains[ii - context.indexes.length][0];
+            $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
+
+            // $p.attribute.aDataItemId = utils.seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
+            $p.dataSize = $p.resultDimension[0] * $p.resultDimension[1];
+            $p.uniform.uDataSize.data = $p.dataSize;
+
+
+            const vecId = ['x', 'y', 'z'];
+            $p.indexes.forEach(function(d, i) {
+                // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
+                $p.attribute['aDataId' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {return i;});
+                $p.attribute['aDataVal' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId'+ vecId[i]].location, i);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal'+ vecId[i]].location, i);
+            });
+
+
+            if ($p.indexes.length == 1) {
+                $p.attribute.aDataIdy = new Float32Array(1);
+                $p.attribute.aDataValy = new Float32Array(1);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
             }
-            // console.log( resultFieldIds, fieldWidths, fieldDomains, fields, context.indexes, context.resultDimension);
-
-            // context.attribute._vid = utils.seqFloat(0, context.resultDimension[0] * context.resultDimension[1] - 1);
-            // context.attribute._fid = utils.seqFloat(0, fields.length);
 
 
-            context.uniform.uFieldDomains.data = context.fieldDomains;
-            context.uniform.uFieldWidths.data = context.fieldWidths;
-            context.uniform.uFilterFlag.data = 0;
+            console.log('results info ::::::::::',resultFields, resultFieldIds, $p.dataDimension);
+            var resultDomains = $p.opt.extent(resultFieldIds, $p.dataDimension);
 
-            // context.ctx.finish();
-            context.indexes.forEach(function(d, i) {
-                context.attribute['aIndex' + i] = utils.seqFloat(0, context.resultDimension[i] - 1);
+            console.log(resultDomains);
+
+            for (var ii = $p.indexes.length; ii < $p.indexes.length + resultFieldIds.length; ii++) {
+                $p.fieldDomains[ii] = resultDomains[ii - $p.indexes.length];
+                $p.fieldWidths[ii] = resultDomains[ii - $p.indexes.length][1] - resultDomains[ii - $p.indexes.length][0];
+            }
+            // console.log( resultFieldIds, fieldWidths, fieldDomains, fields, $p.indexes, $p.resultDimension);
+
+
+            $p.uniform.uFieldDomains.data = $p.fieldDomains;
+            $p.uniform.uFieldWidths.data = $p.fieldWidths;
+            $p.uniform.uFilterFlag.data = 0;
+
+            // $p.ctx.finish();
+            // const vecId = ['x', 'y', 'z'];
+            $p.indexes.forEach(function(d, i) {
+                // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
                 var interval = 1;
 
-                if(context.intervals.hasOwnProperty(d))
-                    interval = context.intervals[d].interval;
+                if($p.intervals.hasOwnProperty(d))
+                    interval = $p.intervals[d].interval;
 
-                context.attribute['aIndex' + i + 'Value'] = utils.seqFloat(
-                    context.fieldDomains[i][0],
-                    context.fieldDomains[i][1],
+                $p.attribute['aDataVal' + vecId[i]] = utils.seqFloat(
+                    $p.fieldDomains[i][0],
+                    $p.fieldDomains[i][1],
                     interval
                 );
 
-                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex' + i].location, i);
-                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute['aIndex' + i + 'Value'].location, i);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal' + vecId[i]].location, i);
             });
 
-            if (context.indexes.length == 1) {
-                context.attribute.aIndex1 = utils.seqFloat(0, 1);
-                context.attribute.aIndex1Value = utils.seqFloat(0, 1);
-                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
-                context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
-            }
+
         }
 
         aggregate.result = function(arg) {
             var options = arg || {},
                 offset = options.offset || [0, 0],
-                resultSize = options.size || context.resultDimension[0]* context.resultDimension[1],
-                rowSize = Math.min(resultSize, context.resultDimension[0]),
-                colSize = Math.ceil(resultSize/context.resultDimension[0]);
+                resultSize = options.size || $p.resultDimension[0]* $p.resultDimension[1],
+                rowSize = Math.min(resultSize, $p.resultDimension[0]),
+                colSize = Math.ceil(resultSize/$p.resultDimension[0]);
 
 
-            context.bindFramebuffer("fGroupResults");
-            var gl = context.program("group"),
+            $p.bindFramebuffer("fGroupResults");
+            var gl = $p.program("group"),
                 result = new Float32Array(rowSize * colSize * 4 * resultFieldCount);
 
             gl.readPixels(offset[0], offset[1], rowSize, colSize * resultFieldCount, gl.RGBA, gl.FLOAT, result);

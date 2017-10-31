@@ -1,25 +1,16 @@
 define(function(){
-    'use strict';
+
     return function(fxgl) {
         var renderer = {};
         renderer.visualMap = function($int_fieldId, $float_rf, $float_cf, $float_v0, $float_exp){
-            var value, t;
+            var value;
             if(fieldId >= this.uIndexCount) {
-                if (fieldId >= this.uFieldCount + this.uIndexCount) {
-                    t = (float(fieldId - this.uFieldCount - this.uIndexCount) + cf) /
-                        float(this.uDeriveCount);
-                    value = texture2D(this.fDerivedValues, vec2(rf, t)).a;
-                } else {
-                    t = (float(fieldId - this.uIndexCount) + cf) / float(this.uFieldCount);
-                    value = texture2D(this.uDataInput, vec2(rf, t)).a;
-                }
 
+                value = this.getNonIndexedData(fieldId, rf, cf);
                 $vec2(d);
                 d = this.uVisDomains[fieldId];
                 value = (value - d.x) / (d.y - d.x);
 
-            } else if(fieldId > -1 && fieldId < this.uIndexCount) {
-                value = (fieldId == 0) ? rf : cf;
             } else {
                 value = v0;
             }
@@ -37,8 +28,8 @@ define(function(){
             $vec3(rgb);
             var posX, posY, size, color, alpha;
             gl_PointSize = this.uMarkSize;
-            i = (mod(this._vid, this.uDataDim.x) + 0.5) / this.uDataDim.x;
-            j = (floor(this._vid / this.uDataDim.x) + 0.5) / this.uDataDim.y;
+            i = (mod(this.aDataItemId, this.uDataDim.x) + 0.5) / this.uDataDim.x;
+            j = (floor(this.aDataItemId / this.uDataDim.x) + 0.5) / this.uDataDim.y;
 
             this.vResult = 1.0;
             if(this.uFilterFlag == 1) {
@@ -46,17 +37,17 @@ define(function(){
                     this.vResult = 0.0;
             }
 
-            // posX = visualMap(this.uVisMapPosX, i, j, 0.0, 0.0);
-            if(this.uVisMapPosY == -1) {
-                posX = this._fid.y / float(this.uFeatureCount-1);
-                posY = this.interleaveVisualMap(int(this._fid.x), i, j, 1.0,  0.0);
+            // posX = visualMap(this.uVisualEncodings[0], i, j, 0.0, 0.0);
+            if(this.uVisualEncodings[0] == -1) {
+                posX = this.aDataFieldId.y / float(this.uFeatureCount-1);
+                posY = this.interleaveVisualMap(int(this.aDataFieldId.x), i, j, 1.0,  0.0);
             } else {
-                posY = this._fid.y / float(this.uFeatureCount-1);
-                posX = this.interleaveVisualMap(int(this._fid.x), i, j, 1.0,  0.0);
+                posY = this.aDataFieldId.y / float(this.uFeatureCount-1);
+                posX = this.interleaveVisualMap(int(this.aDataFieldId.x), i, j, 1.0,  0.0);
             }
-            size = this.interleaveVisualMap(this.uVisMapSize, i, j, 1.0,  0.0);
-            color = this.interleaveVisualMap(this.uVisMapColor, i, j, -1.0,  0.0);
-            alpha = this.interleaveVisualMap(this.uVisMapAlpha, i, j, this.uDefaultAlpha, 0.0);
+            size = this.interleaveVisualMap(this.uVisualEncodings[5], i, j, 1.0,  0.0);
+            color = this.interleaveVisualMap(this.uVisualEncodings[2], i, j, -1.0,  0.0);
+            alpha = this.interleaveVisualMap(this.uVisualEncodings[3], i, j, this.uDefaultAlpha, 0.0);
 
             posX = posX * 2.0 - 1.0;
             posY = posY * 2.0 - 1.0;
@@ -64,7 +55,7 @@ define(function(){
             if(color == -1.0)
                 rgb = this.uDefaultColor;
             else {
-                var t = (float(this.uVisMapColor - this.uIndexCount) + j) / float(this.uFieldCount);
+                var t = (float(this.uVisualEncodings[2] - this.uIndexCount) + j) / float(this.uFieldCount);
                 var value = texture2D(this.uDataInput, vec2(i, t)).a;
                 rgb = this.uColorTable[int(value)+1];
             }

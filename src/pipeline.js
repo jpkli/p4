@@ -1,26 +1,24 @@
 define(function(require) {
 
     var arrays = require('./arrays'),
-        packData = require('./pack'),
+        allocate = require('./allocate'),
         output = require('./output'),
         utils = require('./utils'),
         config = require('./config'),
         cstore = require('./cstore'),
-        compile = require('./compile');
-
-    var optDerive = require('./derive');
+        compile = require('./compile'),
+        optDerive = require('./derive');
 
     return function pipeline(options) {
-        var pipeline = {};
+        var pipeline = {},
+            registers = {},
+            profiles  = [],
+            opt = {},
+            optID = 0,
+            rerun = false;
 
         var $p = config(options);
-
-        var registers = {},
-            profiles  = [];
-
-        var rerun = false,
-            opt = {},
-            optID = 0;
+        $p.getResult = function() {};
 
         function addToPipeline(opt, arg) {
             if(!rerun || !$p._update) {
@@ -34,11 +32,11 @@ define(function(require) {
         }
 
         pipeline.data = function(dataOptions) {
-            packData($p, dataOptions);
+            allocate($p, dataOptions);
             opt = compile($p);
             // if(!$p.hasOwnProperty('fieldDomains')) {
                 var dd = opt.extent($p.fields.map((f, i) => i), $p.dataDimension);
-                // console.log(dd);
+                console.log(dd);
                 // $p.uniform.uFieldDomains.data = $p.fieldDomains;
             // }
             $p.opt = opt;
@@ -48,32 +46,35 @@ define(function(require) {
             return pipeline;
         }
 
-        $p.getResult = function() {};
-
         pipeline.register = function(tag) {
             registers[tag] = {
                 indexes: $p.indexes,
+                dataSize: $p.dataSize,
                 fields: $p.fields,
                 dataDim: $p.uniform.uDataDim.data.slice(),
-                fieldWidths: $p.fieldWidths,
-                fieldDomains: $p.fieldDomains,
+                fieldWidths: $p.fieldWidths.slice(),
+                fieldDomains: $p.fieldDomains.slice(),
                 deriveCount: $p.deriveCount,
-                deriveWidths: $p.deriveWidths,
-                deriveDomains: $p.deriveDomains,
+                deriveWidths: $p.deriveWidths.slice(),
+                deriveDomains: $p.deriveDomains.slice(),
                 filterFlag: $p.uniform.uFilterFlag.data,
                 filterControls: $p.uniform.uFilterControls.data.slice(),
                 dataInput: $p.uniform.uDataInput.data,
-                attribute: [{
-                        id: $p.attribute.aIndex0.data,
-                        value: $p.attribute.aIndex0Value.data
+                attribute: {
+                    aDataIdx: {
+                        ids: $p.attribute.aDataIdx.data,
+                        value: $p.attribute.aDataValx.data
                     },
-                    {
-                        id: $p.attribute.aIndex1.data,
-                        value: $p.attribute.aIndex1Value.data
+                    aDataIdy: {
+                        ids: $p.attribute.aDataIdy.data,
+                        value: $p.attribute.aDataValy.data
                     },
-                ]
+                    aDataFieldId: $p.attribute.aDataFieldId.data,
+                    aDataItemId: $p.attribute.aDataItemId.data
+                }
             }
-            // console.log("registered ", tag, registers);
+
+            // console.log(">>>>>>>>>registered ", tag, registers[tag]);
             return pipeline;
         }
 
@@ -83,19 +84,22 @@ define(function(require) {
                 throw new Error('"' + tag + '" is not found in regesters.');
 
             var reg = registers[tag];
+            // console.log('************* resume to ', tag, reg);
             //resume CPU registers
             $p.indexes = reg.indexes;
+            $p.dataSize = reg.dataSize;
             $p.deriveCount = reg.deriveCount;
             $p.fieldCount = reg.fields.length - reg.indexes.length - reg.deriveCount;
-            $p.fields = reg.fields;
-            $p.fieldWidths = reg.fieldWidths;
-            $p.fieldDomains = reg.fieldDomains;
-            $p.deriveDomains = reg.deriveDomains;
-            $p.deriveWidths = reg.deriveWidths;
-            $p.dataDimension = reg.dataDim;
+            $p.fields = reg.fields.slice();
+            $p.fieldWidths = reg.fieldWidths.slice();
+            $p.fieldDomains = reg.fieldDomains.slice();
+            $p.deriveDomains = reg.deriveDomains.slice();
+            $p.deriveWidths = reg.deriveWidths.slice();
+            $p.dataDimension = reg.dataDim.slice();
 
             //resume GPU Uniforms
             $p.uniform.uFieldCount.data = $p.fieldCount;
+            $p.uniform.uDataSize.data = $p.dataSize;
             $p.uniform.uDataDim.data = reg.dataDim;
             $p.uniform.uIndexCount.data = reg.indexes.length;
             $p.uniform.uFieldDomains.data = reg.fieldDomains;
@@ -107,19 +111,22 @@ define(function(require) {
             $p.uniform.uDataInput.data = reg.dataInput;
 
             //resume GPU Attribute Buffers
-            $p.attribute['aIndex0'] = reg.attribute[0].id;
-            $p.attribute['aIndex1'] = reg.attribute[1].id;
-            $p.attribute['aIndex0Value'] = reg.attribute[0].value;
-            $p.attribute['aIndex1Value'] = reg.attribute[1].value;
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aIndex0'].location, 0);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aIndex1'].location, 1);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aIndex0Value'].location, 0);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aIndex1Value'].location, 1);
+            $p.attribute['aDataIdx'] = reg.attribute['aDataIdx'].ids;
+            $p.attribute['aDataIdy'] = reg.attribute['aDataIdy'].ids;
+            $p.attribute['aDataValx'] = reg.attribute['aDataIdx'].value;
+            $p.attribute['aDataValy'] = reg.attribute['aDataIdy'].value;
+            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataIdx'].location, 0);
+            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataIdy'].location, 1);
+            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataValx'].location, 0);
+            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataValy'].location, 1);
+
+            $p.attribute['aDataFieldId'] = reg.attribute['aDataFieldId'];
+            $p.attribute['aDataItemId'] = reg.attribute['aDataItemId'];
 
             return pipeline;
         }
 
-        function binnedAggregation(spec) {
+        pipeline.bin = function (spec) {
             var deriveSpec = {},
                 binAttr,
                 binCount;
@@ -159,7 +166,7 @@ define(function(require) {
 
         pipeline.aggregate = function(spec) {
             if(spec.$bin) {
-                spec.$group = binnedAggregation(spec);
+                spec.$group = pipeline.bin(spec);
                 delete spec.$bin;
             }
 
@@ -347,7 +354,7 @@ define(function(require) {
             $p._update = true;
             pipeline.resume('__init__');
             pipeline.filter($p.crossfilters);
-            pipeline.register('__init__');
+            // pipeline.register('__init__');
             return pipeline;
         }
 
@@ -371,13 +378,6 @@ define(function(require) {
             return result.filter(function(d, i){ return i%4===3;} );
         }
 
-        pipeline.head = pipeline.resume.bind(null, '__init__');
-        pipeline.restart = pipeline.head;
-
-        if(options.hasOwnProperty('data')) {
-            pipeline.data(options.data);
-        }
-
         pipeline.runSpec = function(specs) {
             pipeline.head();
             $p.bindFramebuffer("offScreenFBO");
@@ -392,7 +392,7 @@ define(function(require) {
             $p.pipeline = [];
             $p.crossfilters = [];
             $p.uniform.uFilterFlag = 0;
-            $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
+            // $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
             specs.forEach(function(spec){
                 var opt = Object.keys(spec)[0],
                     arg = spec[opt];
@@ -403,6 +403,17 @@ define(function(require) {
                 }
             })
 
+        }
+
+        pipeline.head = function() {
+            pipeline.resume('__init__');
+            return pipeline;
+
+        }
+        // pipeline.restart = pipeline.head;
+
+        if(options.hasOwnProperty('data')) {
+            pipeline.data(options.data);
         }
 
         return pipeline;

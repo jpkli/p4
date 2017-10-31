@@ -3,6 +3,7 @@ define(function(){
     return function(fxgl) {
         var renderer = {};
         renderer.visualMap = function($int_fieldId, $float_rf, $float_cf, $float_v0, $float_exp){
+
             var value;
             if(fieldId >-1) {
                 $vec2(d);
@@ -21,12 +22,11 @@ define(function(){
         renderer.visualMap.fname = 'directVisualMap';
 
         renderer.vs = function() {
-            var i, j;
-            $vec3(rgb);
-            var posX, posY, size, color, alpha;
-            gl_PointSize = this.uMarkSize;
-            i = (this.aIndex0+0.5) / this.uDataDim.x;
-            j = (this.aIndex1+0.5) / this.uDataDim.y;
+            var i, j, posX, posY, color, alpha, width, height, size;
+            var rgb = new Vec3();
+
+            i = (this.aDataIdx+0.5) / this.uDataDim.x;
+            j = (this.aDataIdy+0.5) / this.uDataDim.y;
 
             this.vResult = 1.0;
             if(this.uFilterFlag == 1) {
@@ -34,19 +34,18 @@ define(function(){
                     this.vResult = 0.0;
             }
 
-            posX = this.directVisualMap(this.uVisMapPosX, i, j, 0.0, 0.0);
-            posY = this.directVisualMap(this.uVisMapPosY, i, j, 0.0,  0.0);
-            size = this.directVisualMap(this.uVisMapSize, i, j, 1.0,  0.0);
-            color = this.directVisualMap(this.uVisMapColor, i, j, -1.0,  0.0);
-            alpha = this.directVisualMap(this.uVisMapAlpha, i, j, this.uDefaultAlpha, 0.0);
 
+            posX = this.directVisualMap(this.uVisualEncodings[0], i, j, 0.0, 0.0);
+            posY = this.directVisualMap(this.uVisualEncodings[1], i, j, 0.0,  0.0);
+            color = this.directVisualMap(this.uVisualEncodings[2], i, j, -1.0,  0.0);
+            alpha = this.directVisualMap(this.uVisualEncodings[3], i, j, this.uDefaultAlpha, 0.0);
+            size = this.directVisualMap(this.uVisualEncodings[6], i, j, -1.0,  0.0);
             posX = posX * 2.0 - 1.0;
             posY = posY * 2.0 - 1.0;
 
-            if(color == -1.0)
-                rgb = this.uDefaultColor;
-            else
-                rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
+            rgb = (color == -1.0) ? this.uDefaultColor : texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
+            // gl_PointSize = (size == -1.0) ? this.uMarkSize : size * 20.0;
+            gl_PointSize = 20.0;
             this.vColorRGBA = vec4(rgb, alpha);
             gl_Position = vec4(posX, posY, 0.0, 1.0);
         };

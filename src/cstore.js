@@ -1,10 +1,7 @@
 if (typeof(define) !== 'function') var define = require('amdefine')(module);
 
 define( function(require) {
-
     var ctypes = require('./ctypes');
-
-
     return function ColumnStore(option){
         "use strict";
         var cstore   = (this instanceof ColumnStore) ? this : {},

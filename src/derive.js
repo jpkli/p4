@@ -25,8 +25,8 @@ define(function(){
 
         // function getDataValue($int_field, $float_row, $float_col) {
         //     var pos, value;
-        //     if(uIndexCount > 0 && field == 0) value = aIndex0Value;
-        //     else if(uIndexCount > 0 && field == 1) value = aIndex1Value;
+        //     if(uIndexCount > 0 && field == 0) value = aDataValx;
+        //     else if(uIndexCount > 0 && field == 1) value = aDataValy;
         //     else {
         //         pos = (float(field-uIndexCount) + col) / float(uFieldCount);
         //         value = texture2D(tData, vec2(row, pos)).a;
@@ -47,8 +47,8 @@ define(function(){
 
             var i, j;
 
-            i = (this.aIndex0+0.5) / this.uDataDim.x;
-            j = (this.aIndex1+0.5) / this.uDataDim.y;
+            i = (this.aDataIdx+0.5) / this.uDataDim.x;
+            j = (this.aDataIdy+0.5) / this.uDataDim.y;
 
             this.vResult = this.getDerivedValue(this.uDeriveId, vec2(i, j));
             if(this.uFilterFlag == 1) {
@@ -79,10 +79,10 @@ define(function(){
             fs = context.shader.fragment(fragmentShader),
             gl = context.program("derive", vs, fs);
 
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex0Value.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataIdx.location, 0);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataValx.location, 0);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataIdy.location, 1);
+        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataValy.location, 1);
 
         function _execute() {
 

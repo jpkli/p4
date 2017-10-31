@@ -7,14 +7,19 @@ define(function(){
         var vs = fxgl.shader.vertex(function(){
             gl_PointSize = 1.0;
             var i, j;
-            i = (this.aIndex0+0.5) / this.uDataDim.x;
-            j = (this.aIndex1+0.5) / this.uDataDim.y;
-            this.vResult = this.getData(this.uFieldId, i, j);
-
+            if(this.aDataIdy * this.uDataDim.x + this.aDataIdx >= this.uDataSize) {
+                this.vDiscardData = 1.0;
+            } else {
+                this.vDiscardData = 0.0;
+                i = (this.aDataIdx+0.5) / this.uDataDim.x;
+                j = (this.aDataIdy+0.5) / this.uDataDim.y;
+                this.vResult = this.getData(this.uFieldId, i, j);
+            }
             gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
         });
 
         var fs = fxgl.shader.fragment(function() {
+            if(this.vDiscardData == 1.0) discard;
             if(this.vResult >= 0.0)
                 gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
             else
@@ -24,12 +29,15 @@ define(function(){
         var gl = fxgl.program("stats", vs, fs);
 
         return function(fieldIds, dataDimension) {
-            // fxgl.framebuffer("fStats", "float", [2, fieldIds.length]);
+            if(!fxgl._update)
+                fxgl.framebuffer("fStats", "float", [2, fieldIds.length]);
             var gl = fxgl.program("stats");
-            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0.location, 0);
-            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex0Value.location, 0);
-            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1.location, 1);
-            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aIndex1Value.location, 1);
+            fxgl.framebuffer.enableRead("fGroupResults");
+
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdy.location, 1);
+            gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValy.location, 1);
 
             fxgl.bindFramebuffer("fStats");
             gl.clearColor( smallest, smallest, smallest, smallest );
@@ -44,6 +52,7 @@ define(function(){
 
             var start = new Date();
             var idCount = fxgl.uniform.uIndexCount.data;
+            console.log('resultDimension:::::::::::::::::::::::::::::', dataDimension, idCount, fieldIds );
 
             fieldIds.forEach(function(d, i){
                 fxgl.uniform.uFieldId = i+idCount;
@@ -73,14 +82,12 @@ define(function(){
 
             fieldIds.forEach(function(d, i){
                 var ext = extent.slice(i*8, i*8+8);
-                // console.log(ext);
                 var minValue = (ext[4] < 0) ? ext[5] : ext[7],
                     maxValue = (ext[2] > 0) ? ext[3] : ext[1];
                  extents[i] = [minValue, maxValue];
-
              });
 
-            //  console.log(extent);
+             console.log(extent);
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
             return extents;

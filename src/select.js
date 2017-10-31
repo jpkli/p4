@@ -4,16 +4,17 @@ define(function(){
         gl_PointSize = 1.0;
 
         var i, j, k, value;
-        $vec2(domain);
-        i = (this.aIndex0+0.5) / this.uDataDim.x;
-        j = (this.aIndex1+0.5) / this.uDataDim.y;
-        this.vResult = this.uMatchValue;
+        var domain = new Vec2();
+        i = (this.aDataIdx+0.5) / this.uDataDim.x;
+        j = (this.aDataIdy+0.5) / this.uDataDim.y;
+        this.vResult = 1.0;
 
-        for( $int(f) = 0; f < $(fieldCount)+$(indexCount); f++) {
+        for(var f = 0; f < $(fieldCount)+$(indexCount); f++) {
             if(this.uFilterControls[f] == 1) {
                 value = this.getData(f, i, j);
-                if(value <= this.uFilterRanges[f].x || value > this.uFilterRanges[f].y)
+                if(value <= this.uFilterRanges[f].x || value > this.uFilterRanges[f].y) {
                     this.vResult = 0.0;
+                }
             }
         }
 
@@ -27,14 +28,14 @@ define(function(){
         gl_PointSize = 1.0;
 
         var i, j, k, value;
-        $vec2(domain);
-        i = (this.aIndex0+0.5) / this.uDataDim.x;
-        j = (this.aIndex1+0.5) / this.uDataDim.y;
+        var domain = new Vec2();
+        i = (this.aDataIdx+0.5) / this.uDataDim.x;
+        j = (this.aDataIdy+0.5) / this.uDataDim.y;
         this.vResult = 0.0;
 
         value = this.getData(this.uFieldId, i, j);
 
-        for($int(l) = 0; l < 500; l++){
+        for(var l = 0; l < 500; l++){
             if(l < this.uSelectCount) {
                 if(value == this.uInSelections[l]) {
                     this.vResult = 1.0;
@@ -63,12 +64,12 @@ define(function(){
             filterRanges = context.fieldDomains.concat(
                 context.deriveDomains
             ),
-            inSelections = new Float32Array(SELECT_MAX);
+            inSelections = new Array(SELECT_MAX);
 
         context.uniform("uFilterControls","int", filterControls)
             .uniform("uFilterRanges","vec2", filterRanges)
             .uniform("uMatchValue", "float", 1.0)
-            .uniform("uInSelections", "float", inSelections)
+            .uniform("uInSelections", "float", Float32Array.from(inSelections))
             .uniform("uSelectMax", "int", SELECT_MAX)
             .uniform("uSelectCount", "int", 0);
 
@@ -101,8 +102,8 @@ define(function(){
             });
             context.bindFramebuffer("fFilterResults");
             context.framebuffer.enableRead("fDerivedValues");
-            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1.location, 1);
-            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aIndex1Value.location, 1);
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aDataIdy.location, 1);
+            context.ctx.ext.vertexAttribDivisorANGLE(context.attribute.aDataValy.location, 1);
             if(selectFields.length) {
                 console.log(dataDimension);
                 gl = context.program("select");
@@ -116,17 +117,26 @@ define(function(){
 
                 selectFields.forEach(function(k){
                     var fieldId = fields.indexOf(k);
-                    spec[k].$in.forEach(function(v, i){
-                        inSelections[i] = v;
-                    });
+
+
+                    if(context.categoryIndex.hasOwnProperty(k)) {
+                        inSelections = spec[k].$in
+                        .slice(0, SELECT_MAX)
+                        .map(function(v) { return context.categoryIndex[k][v]; });
+                    } else {
+                        inSelections = spec[k].$in.slice(0, SELECT_MAX);
+                    }
+
+                    console.log(inSelections);
+
                     context.uniform.uSelectCount = spec[k].$in.length;
-                    context.uniform.uInSelections = inSelections;
+                    context.uniform.uInSelections = Float32Array.from(inSelections);
                     context.uniform.uFieldId = fieldId;
-                    console.log(k, spec[k].$in.length, fieldId, inSelections);
+
                     gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-                    filterRanges[fieldId] = [Math.min.apply(null, spec[k].$in), Math.max.apply(null, spec[k].$in)];
                     // filterRanges[fieldId*2] = Math.min.apply(null, spec[k].$in);
                     // filterRanges[fieldId*2+1] = Math.max.apply(null, spec[k].$in);
+                    filterRanges[fieldId] = [Math.min.apply(null, inSelections), Math.max.apply(null, inSelections)];
                 })
             }
 
@@ -153,7 +163,6 @@ define(function(){
                 context.uniform.uFilterRanges= filterRanges;
 
                 gl = context.program("filter");
-
                 gl.disable(gl.BLEND);
                 // gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
                 // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
@@ -173,34 +182,22 @@ define(function(){
             });
 
             Object.keys(filterSpec).forEach(function(k, i) {
-                var fid = context.fields.indexOf(k);
-                if(context.categoryIndex.hasOwnProperty(k)) {
-                    var min, max, values;
-                    values = spec[k].map(function(v) { return context.categoryIndex[k][v]; });
-                    min = Math.min.apply(null, values);
-                    max = Math.max.apply(null, values);
-                    spec[k] = [min, max];
+                if(context.categoryIndex.hasOwnProperty(k) && !spec[k].$in) {
+                    spec[k] = {$in: spec[k]};
                 }
             });
 
             context.uniform.uFilterFlag = 1;
-
+            filterRanges = context.fieldDomains.concat(
+                context.deriveDomains
+            );
             var newDomains = _execute(spec);
-
+            console.log(newDomains);
             if(!context._update){
-                Object.keys(spec).forEach(function(k, i) {
-                    var fid = context.fields.indexOf(k);
-                    if (fid === -1) throw new Error('Invalid data field ' + k);
-                    var range = [];
-                    if(spec[k].hasOwnProperty('$in')) {
-                        range[0] = Math.min.apply(null, spec[k].$in);
-                        range[1] = Math.max.apply(null, spec[k].$in);
-                    } else {
-                        range = spec[k];
-                    }
+                newDomains.forEach(function(range, fid) {
                     if (fid < context.fieldCount + context.indexes.length) {
                         context.fieldDomains[fid] = range;
-                        context.fieldWidths[fid] = context.getDataWidth(context.dkeys.indexOf(k), range);
+                        context.fieldWidths[fid] = context.getDataWidth(fid, range);
                     } else {
                         var di = fid - context.fieldCount - context.indexes.length;
                         context.deriveDomains[di] = range;
