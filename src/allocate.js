@@ -1,6 +1,6 @@
 define(function(require){
     const utils = require('./utils');
-
+    const vecId = ['x', 'y', 'z'];
     return function($p, dataProps) {
         var data = dataProps || [];
 
@@ -86,7 +86,7 @@ define(function(require){
             $p.attribute("aDataValx", "float", utils.seqFloat(0, $p.dataDimension[0] - 1));
             $p.attribute("aDataValy", "float", utils.seqFloat(0, $p.dataDimension[1] - 1));
         } else {
-            const vecId = ['x', 'y', 'z'];
+
             $p.indexes.forEach(function(id, i) {
                 var indexAttrData = arrays.unique(data[id]).sort(function(a, b) {
                     return a - b;
@@ -99,6 +99,8 @@ define(function(require){
         }
 
         $p.attribute("aDataItemId", "float", utils.seqFloat(0, $p.dataSize - 1));
+        $p.attribute("aDataItemVal0", "float", null);
+        $p.attribute("aDataItemVal1", "float", null);
         $p.attribute("aDataFieldId", "vec2", utils.seqFloat(0, $p.fields.length * 2));
         $p.attribute("aVertexId", "float", [0, 1, 2, 3, 4, 5]);
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aVertexId.location, 0);

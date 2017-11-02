@@ -1,6 +1,7 @@
 define(function(require){
     var colors = require('./color'),
         ctypes = require('./ctypes'),
+        render = require('./render'),
         reveal = require('./reveal'),
         chart = require('./chart/chart');
 
@@ -18,82 +19,64 @@ define(function(require){
         return buf;
     }
 
-    var seqInt = seq.bind(null, "int"),
-        seqFloat = seq.bind(null, "float");
+    return function visualize($p) {
 
-    // var contRenderer = require('./renderer/contiguous'),
-    //     intlRenderer = require('./renderer/interleave');
-
-    return function visualize(fxgl) {
-
-        var colorManager = colors(fxgl),
-            padding = fxgl.padding || {left: 0, right: 0, top: 0, bottom: 0},
+        var colorManager = colors($p),
+            padding = $p.padding || {left: 0, right: 0, top: 0, bottom: 0},
             viewport = [
-                fxgl.viewport[0],
-                fxgl.viewport[1],
+                $p.viewport[0],
+                $p.viewport[1],
             ];
 
         var vis = new chart({
-            container: fxgl.container,
+            container: $p.container,
             width: viewport[0] + padding.left + padding.right,
             height: viewport[1] + padding.top + padding.bottom,
-            canvas: fxgl.canvas,
+            canvas: $p.canvas,
             padding: padding
         });
 
-        var fieldDomains = fxgl.uniform.uFieldDomains.data;
+        var fieldDomains = $p.uniform.uFieldDomains.data;
 
-        fxgl.visLayers = vis;
+        $p.visLayers = vis;
 
-        fxgl.uniform("uVisualEncodings","int",   new Array(visualEncodings.length).fill(-1))
+        $p.uniform("uVisualEncodings","int",   new Array(visualEncodings.length).fill(-1))
             .uniform("uVisDomains",     "vec2",  fieldDomains)
             .uniform("uVisLevel",       "float", 1.0)
             .uniform("uFeatureCount",   "int",   0)
             .uniform("uMarkSize",       "float", 5.0)
             .uniform("uDefaultAlpha",   "float", 1.0)
+            .uniform("uDefaultWidth",   "float", 1.0 / $p.viewport[0])
+            .uniform("uDefaultHeight",  "float", 1.0 / $p.viewport[1])
             .uniform("uMaxRGBA",        "vec4",  [0, 0, 0, 0])
             .uniform("uDefaultColor",   "vec3",  [0.8, 0, 0])
             .uniform("uColorMode",      "int",   1)
-            .uniform("uViewDim",        "vec2",  fxgl.viewport)
+            .uniform("uViewDim",        "vec2",  $p.viewport)
             .uniform("uVisShape",       "int",   0)
             .varying("vColorRGBA",      "vec4"   )
 
-        var enhance = reveal(fxgl);
+        var enhance = reveal($p);
 
-        fxgl.framebuffer("offScreenFBO", "float", fxgl.viewport)
+        $p.framebuffer("offScreenFBO", "float", $p.viewport)
             .framebuffer("visStats", "float", [1, 1]);
 
-        fxgl.framebuffer.enableRead("offScreenFBO");
+        $p.framebuffer.enableRead("offScreenFBO");
 
-        var renderer = require('./render')(fxgl);
+        var renderer = require('./render')($p);
 
-        // var renderer = {
-        //     contig: contRenderer(fxgl),
-        //     interleave: intlRenderer(fxgl)
-        // };
-        //
-        // fxgl.subroutine(
-        //     renderer.contig.visualMap.fname,
-        //     renderer.contig.visualMap.returnType,
-        //     renderer.contig.visualMap
-        // );
-        //
-        // fxgl.subroutine(
-        //     renderer.interleave.visualMap.fname,
-        //     renderer.interleave.visualMap.returnType,
-        //     renderer.interleave.visualMap
-        // );
-        //
-        // var vs1 = fxgl.shader.vertex(renderer.contig.vs),
-        //     fs1 = fxgl.shader.fragment(renderer.contig.fs);
-        //
-        // fxgl.program("visualize", vs1, fs1);
-        //
-        // var vs2 = fxgl.shader.vertex(renderer.interleave.vs),
-        //     fs2 = fxgl.shader.fragment(renderer.interleave.fs);
-        // fxgl.program("interleave", vs2, fs2);
-        //
         var svgViews = [];
+
+        function updateInstancedAttribute(fields, vm) {
+            if(Array.isArray(vm)){
+                $p.uniform.uFeatureCount = vm.length;
+                var fv = new Float32Array(vm.length*2);
+                vm.forEach(function(f, i) {
+                    fv[i*2] = fields.indexOf(f);
+                    fv[i*2+1] = i;
+                });
+                $p.attribute.aDataFieldId = fv;
+            }
+        }
 
         var viz = function(options) {
             var vmap = options.vmap || {},
@@ -107,7 +90,6 @@ define(function(require){
                 offset = options.offset || [0, 0],
                 perceptual = vmap.perceptual || false,
                 update = vmap.update || false,
-                interleave = false,
                 interaction = options.interaction,
                 viewLevel = options.viewLevel,
                 categories = options.categories,
@@ -120,72 +102,96 @@ define(function(require){
                 vmapColor = fields.indexOf(vmap.color),
                 vmapAlpha = fields.indexOf(vmap.alpha);
 
-            var vDomain = {};
-            fields.forEach(function(f, i){ vDomain[f] = domains[i];});
-            // console.log(options);
+            var vDomain = {},
+                visMark = vmap.mark || 'point',
+                renderMode = "instancedXY";
 
-            if(Array.isArray(vmap.x) || Array.isArray(vmap.y))
-                interleave = true;
-
-            if(perceptual && !fxgl._update)
-                fxgl.bindFramebuffer("offScreenFBO");
-            else
-                fxgl.bindFramebuffer(null);
+            fields.forEach(function(f, i){ vDomain[f] = domains[i]; });
 
             var gl;
 
-            if(interleave)
-                gl = fxgl.program("interleave");
-            else
-                gl = fxgl.program("instancedXY");
-
-            fxgl.framebuffer.enableRead("fFilterResults");
-            fxgl.framebuffer.enableRead("fDerivedValues");
-            fxgl.framebuffer.enableRead("fGroupResults");
-
-            function updateInstancedAttribute(vm) {
-                if(Array.isArray(vm)){
-                    fxgl.uniform.uFeatureCount = vm.length;
-                    var fv = new Float32Array(vm.length*2);
-                    vm.forEach(function(f, i) {
-                        fv[i*2] = fields.indexOf(f);
-                        fv[i*2+1] = i;
-                    });
-
-                    fxgl.attribute.aDataFieldId = fv;
-                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataFieldId.location, 0);
-                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataItemId.location, 1);
-                } else {
-                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdx.location, 0);
-                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValx.location, 0);
-                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdy.location, 1);
-                    fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValy.location, 1);
-                }
+            if(Array.isArray(vmap.x) || Array.isArray(vmap.y)) {
+                renderMode = 'interleave';
+            } else if(vmap.mark && vmap.mark == 'rect') {
+                renderMode = 'polygon';
             }
-            updateInstancedAttribute(vmap.x);
-            updateInstancedAttribute(vmap.y);
+
+            gl = $p.program(renderMode);
+
+            if(perceptual && !$p._update)
+                $p.bindFramebuffer("offScreenFBO");
+            else
+                $p.bindFramebuffer(null);
+
+
+            $p.framebuffer.enableRead("fFilterResults");
+            $p.framebuffer.enableRead("fDerivedValues");
+            $p.framebuffer.enableRead("fGroupResults");
+
+            if(renderMode == 'instancedXY') {
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
+            } else if(renderMode == 'interleave') {
+                updateInstancedAttribute(fields, vmap.x);
+                updateInstancedAttribute(fields, vmap.y);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataFieldId.location, 0);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemId.location, 1);
+            } else {
+                var val0 = new Float32Array($p.dataSize),
+                    val1 = new Float32Array($p.dataSize);
+                for(var y = 0; y < dataDim[1]; y++) {
+                    for(var x = 0; x < dataDim[0]; x++) {
+                        val0[y*dataDim[0] + x] = $p.attribute.aDataValx.data[x];
+                        val1[y*dataDim[0] + x] = $p.attribute.aDataValy.data[y];
+                    }
+                }
+                $p.attribute.aDataItemVal0 = val0;
+                $p.attribute.aDataItemVal1 = val1;
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aVertexId.location, 0);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemId.location, 1);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemVal0.location, 1);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemVal1.location, 1);
+            }
 
             if(typeof data == "string")
-                fxgl.uniform.uDataInput = fxgl.framebuffer[data].texture;
+                $p.uniform.uDataInput = $p.framebuffer[data].texture;
 
             var vmapIndex = new Int32Array(visualEncodings.length);
             visualEncodings.forEach(function(code, codeIndex){
                 vmapIndex[codeIndex] = fields.indexOf(vmap[code]);
             })
 
-            fxgl.uniform.uVisualEncodings = vmapIndex;
+            $p.uniform.uVisualEncodings = vmapIndex;
 
-            console.log(vmapIndex);
             if(vmapIndex[2] === -1 && typeof(vmap.color) == "string"){
-                console.log(vmap.color);
-                fxgl.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+                $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+            }
+            var opacity = vmap.opacity || vmap.alpha;
+            if(typeof(opacity) == "number") {
+                $p.uniform.uDefaultAlpha = opacity;
+            } else {
+                $p.uniform.uDefaultAlpha = 1.0;
             }
 
-            if(typeof(vmap.alpha) == "number" || typeof(vmap.opacity) == "number") {
-                fxgl.uniform.uDefaultAlpha = vmap.alpha;
-            } else {
-                fxgl.uniform.uDefaultAlpha = 1.0;
+            if(!$p._update) {
+                if(!vmap.width) {
+                    $p.uniform.uDefaultWidth = 1.0 / (dataDim[1]-1);
+                }
+
+                if(!vmap.height) {
+                    $p.uniform.uDefaultHeight = 1.0 / (dataDim[0]-1);
+                }
             }
+
+
+            console.log('dataDim:::::::::', dataDim);
+
+            if(vmapIndex[2] === -1 && typeof(vmap.size) == "number") {
+                $p.uniform.uMarkSize = vmap.size;
+            }
+
             gl.lineWidth(1.0);
 
             if(perceptual)
@@ -233,64 +239,52 @@ define(function(require){
             }
 
             if(mark == 'bar') {
-                var result = fxgl.readResult('row');
+                var result = $p.readResult('row');
                 viewSetting.data = result;
                 viewSetting.fields = fields;
                 if(intervals.hasOwnProperty(vmap.x))
                     viewSetting.isHistogram = true;
             }
 
-            if(!fxgl._update) {
-                domains = fxgl.uniform.uFieldDomains.data.slice();
-                fxgl.uniform.uVisDomains = domains;
+            if(!$p._update) {
+                domains = $p.uniform.uFieldDomains.data.slice();
+                $p.uniform.uVisDomains = domains;
                 if(svgViews[viewOrder])
                     svgViews[viewOrder].svg.remove();
                 svgViews[viewOrder] = vis.addLayer(viewSetting);
 
             } else {
                 if(mark == 'bar'){
-                    var result = fxgl.readResult('row');
+                    var result = $p.readResult('row');
                     svgViews[viewOrder].update({
-                        data: sortData(result)
+                        data: result
                     })
                 }
             }
 
-            var primitive;
-            if(mark in ['point', 'square', 'circle'])
-                primitive = gl.POINTS;
-            else if(mark == 'line')
-                primitive = gl.LINE_STRIP;
+            var primitive = gl.POINTS;
+            if(['rect'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
+            else if(mark == 'line') primitive = gl.LINE_STRIP;
 
             function draw() {
-                if(interleave) {
-                    var count = fxgl.attribute.aDataFieldId.data.length / fxgl.attribute.aDataFieldId.size,
-                        primcount = fxgl.dataSize;
+                if(renderMode == 'interleave') {
+                    var count = $p.attribute.aDataFieldId.data.length / $p.attribute.aDataFieldId.size,
+                        primcount = $p.dataSize;
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, count, primcount);
+                } else if(renderMode == 'polygon'){
+                    gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
                 } else {
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, dataDim[0], dataDim[1]);
                 }
             }
 
-            if(mark!='bar') {
-                // fxgl.uniform.uDefaultColor = vmap.color || [0.8,0.8,0.8];
-                // fxgl.uniform.uVisLevel = 0;
-                draw();
-                // fxgl.uniform.uDefaultColor =  [0.0,0.5,0.5];
-                // fxgl.uniform.uVisLevel = 1;
-                // draw();
-            }
+            if(mark!='bar') draw();
 
-            if(perceptual && !fxgl._update)
+            if(perceptual && !$p._update)
                 enhance(viewport);
 
-            if(interleave) { // change instance setting back for data processing
-                gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdx.location, 0);
-                gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValx.location, 0);
-                gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdy.location, 1);
-                gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValy.location, 1);
-            }
-            fxgl.bindFramebuffer(null);
+
+            $p.bindFramebuffer(null);
 
         }
         viz.chart = vis;

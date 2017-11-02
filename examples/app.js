@@ -30,13 +30,13 @@ require(['ace/ace', '../../src/pipeline', 'benchmark/src/gen-binary'], function(
 
 
     var data = genData({
-        size: 200000,
+        size: 100000,
         props: dataProps
     });
     var dsl = {
         container: "main-vis",
-        viewport: [720, 560],
-        padding: {left: 80, right: 10, top: 30, bottom: 100},
+        viewport: [800, 560],
+        padding: {left: 80, right: 80, top: 30, bottom: 100},
         data: data
     };
 

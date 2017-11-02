@@ -1,8 +1,9 @@
 define(function(require){
     const utils = require('./utils');
+    const vecId = ['x', 'y', 'z'];
+    const aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
     return function aggregate($p) {
-        var aggregate = {},
-            aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
+        var aggregate = {};
 
         $p.uniform('uGroupGetStat', 'float', 0.0)
             .uniform('uAggrOpt', 'int', 2);
@@ -27,7 +28,6 @@ define(function(require){
             }
 
             var pos = new Vec2();
-
             for (var ii = 0; ii < 2; ii++) {
                 var gid = new Int();
                 gid = this.uGroupFields[ii];
@@ -256,12 +256,12 @@ define(function(require){
             });
             $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
 
-            // $p.attribute.aDataItemId = utils.seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
+            $p.attribute.aDataItemId = utils.seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
             $p.dataSize = $p.resultDimension[0] * $p.resultDimension[1];
             $p.uniform.uDataSize.data = $p.dataSize;
 
 
-            const vecId = ['x', 'y', 'z'];
+
             $p.indexes.forEach(function(d, i) {
                 // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
                 $p.attribute['aDataId' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {return i;});
@@ -270,14 +270,12 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal'+ vecId[i]].location, i);
             });
 
-
             if ($p.indexes.length == 1) {
                 $p.attribute.aDataIdy = new Float32Array(1);
                 $p.attribute.aDataValy = new Float32Array(1);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
             }
-
 
             console.log('results info ::::::::::',resultFields, resultFieldIds, $p.dataDimension);
             var resultDomains = $p.opt.extent(resultFieldIds, $p.dataDimension);
@@ -288,8 +286,6 @@ define(function(require){
                 $p.fieldDomains[ii] = resultDomains[ii - $p.indexes.length];
                 $p.fieldWidths[ii] = resultDomains[ii - $p.indexes.length][1] - resultDomains[ii - $p.indexes.length][0];
             }
-            // console.log( resultFieldIds, fieldWidths, fieldDomains, fields, $p.indexes, $p.resultDimension);
-
 
             $p.uniform.uFieldDomains.data = $p.fieldDomains;
             $p.uniform.uFieldWidths.data = $p.fieldWidths;
@@ -309,27 +305,23 @@ define(function(require){
                     $p.fieldDomains[i][1],
                     interval
                 );
-
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal' + vecId[i]].location, i);
             });
-
-
         }
 
         aggregate.result = function(arg) {
             var options = arg || {},
                 offset = options.offset || [0, 0],
                 resultSize = options.size || $p.resultDimension[0]* $p.resultDimension[1],
-                rowSize = Math.min(resultSize, $p.resultDimension[0]),
-                colSize = Math.ceil(resultSize/$p.resultDimension[0]);
-
+                rowTotal = Math.min(resultSize, $p.resultDimension[0]),
+                colTotal = Math.ceil(resultSize/$p.resultDimension[0]);
 
             $p.bindFramebuffer("fGroupResults");
             var gl = $p.program("group"),
-                result = new Float32Array(rowSize * colSize * 4 * resultFieldCount);
+                result = new Float32Array(rowTotal * colTotal * 4 * resultFieldCount);
 
-            gl.readPixels(offset[0], offset[1], rowSize, colSize * resultFieldCount, gl.RGBA, gl.FLOAT, result);
+            gl.readPixels(offset[0], offset[1], rowTotal, colTotal * resultFieldCount, gl.RGBA, gl.FLOAT, result);
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
             return result.filter(function(d, i){ return i%4===3;} );

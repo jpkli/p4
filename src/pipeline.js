@@ -142,7 +142,7 @@ define(function(require) {
 
             var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
             var binInterval = (binDomain[1] - binDomain[0]) / binCount;
-
+            console.log('Bin Info:::', binCount, binInterval);
             var histFunction = (function() {max(ceil((binAttr - binMin) / float(binInterval)), 1.0)})
                 .toString()
                 .slice(13, -1) // remove "function () {" from function.toString
@@ -225,6 +225,8 @@ define(function(require) {
                     vmap.id = viewIndex;
                 }
             }
+
+            if(!vmap.id) vmap.id = 0
 
             var viewOptions = {
                 vmap: vmap,
