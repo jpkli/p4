@@ -15,7 +15,7 @@
                 "file": "parallel-coordinates.json"
             },
             {
-                "name": "HeatMap",
+                "name": "Heatmap",
                 "file": "heatmap.json"
             }
         ]

@@ -90,7 +90,8 @@ define(function(require){
 
         var resultFieldCount,
             secondPass = false,
-            thirdPass = false;
+            thirdPass = false,
+            resultDomains;
 
         function _execute(opts, groupFieldIds, resultFieldIds) {
             resultFieldCount = resultFieldIds.length;
@@ -226,7 +227,8 @@ define(function(require){
 
             $p.getResult = aggregate.result;
             // console.log($p.getResult());
-            console.log(groupFields);
+
+
             $p.indexes = groupFields;
 
             $p.dataDimension = $p.resultDimension;
@@ -261,11 +263,10 @@ define(function(require){
             $p.uniform.uDataSize.data = $p.dataSize;
 
 
-
             $p.indexes.forEach(function(d, i) {
                 // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
                 $p.attribute['aDataId' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {return i;});
-                $p.attribute['aDataVal' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
+                $p.attribute['aDataVal' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {return i;});
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId'+ vecId[i]].location, i);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal'+ vecId[i]].location, i);
             });
@@ -276,12 +277,9 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
             }
-
-            console.log('results info ::::::::::',resultFields, resultFieldIds, $p.dataDimension);
-            var resultDomains = $p.opt.extent(resultFieldIds, $p.dataDimension);
-
-            console.log(resultDomains);
-
+            if(!$p._update) {
+                resultDomains = $p.opt.extent(resultFieldIds, $p.dataDimension);
+            }
             for (var ii = $p.indexes.length; ii < $p.indexes.length + resultFieldIds.length; ii++) {
                 $p.fieldDomains[ii] = resultDomains[ii - $p.indexes.length];
                 $p.fieldWidths[ii] = resultDomains[ii - $p.indexes.length][1] - resultDomains[ii - $p.indexes.length][0];

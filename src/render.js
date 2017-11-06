@@ -23,7 +23,7 @@ define(function(){
             value = defaultValue;
         }
         if(exp != 0.0)
-            value = pow(value, exp);
+            value = pow(value, exp) * 0.85 + 0.15;
         return value;
     };
 
@@ -57,19 +57,25 @@ define(function(){
     };
 
     instancedXY.fs = function() {
-        if(this.vResult == this.uVisLevel) {
-            if(this.uVisShape == 1) {
-                var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
-                if (dist > 0.5) discard;
-                var delta = 0.2;
-                var alpha = this.vColorRGBA.a - smoothstep(0.45-delta, 0.45, dist);
+
+        if(this.uVisShape == 1) {
+            var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
+            if (dist > 0.5) discard;
+            var delta = 0.;
+            var alpha = this.vColorRGBA.a - smoothstep(0.5-delta, 0.5, dist);
+            if(this.vResult == this.uVisLevel) {
                 gl_FragColor = vec4(this.vColorRGBA.rgb, alpha);
             } else {
-                gl_FragColor = vec4(this.vColorRGBA.rgb * this.vColorRGBA.a,  this.vColorRGBA.a);
+                gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);
             }
         } else {
-            discard;
+            if(this.vResult == this.uVisLevel) {
+                gl_FragColor = vec4(this.vColorRGBA.rgb * this.vColorRGBA.a,  this.vColorRGBA.a);
+            } else {
+                gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);
+            }
         }
+
     }
 
     var interleave = {};
@@ -105,7 +111,8 @@ define(function(){
         else {
             var t = (float(this.uVisualEncodings[2] - this.uIndexCount) + j) / float(this.uFieldCount);
             var value = texture2D(this.uDataInput, vec2(i, t)).a;
-            rgb = this.uColorTable[int(value)+1];
+            rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
+            // rgb = this.uColorTable[int(value)+1];
         }
             // rgb = texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
 
@@ -140,7 +147,7 @@ define(function(){
         posX = this.visMap(this.uVisualEncodings[0], i, j, val0, val1, 0.0, 0.0);
         posY = this.visMap(this.uVisualEncodings[1], i, j, val0, val1, 0.0,  0.0);
         color = this.visMap(this.uVisualEncodings[2], i, j, val0, val1, -1.0,  0.0);
-        alpha = this.visMap(this.uVisualEncodings[3], i, j,  val0, val1, this.uDefaultAlpha, 0.0);
+        alpha = this.visMap(this.uVisualEncodings[3], i, j,  val0, val1, this.uDefaultAlpha, 0.33);
         width = this.visMap(this.uVisualEncodings[4], i, j,  val0, val1, this.uDefaultWidth, 0.0);
         height = this.visMap(this.uVisualEncodings[5], i, j,  val0, val1, this.uDefaultHeight, 0.0);
         size = this.visMap(this.uVisualEncodings[6], i, j, val0, val1, this.uMarkSize,  0.0);
@@ -162,10 +169,7 @@ define(function(){
             posY = posY * 2.0 - 1.0;
         }
 
-
         rgb = (color == -1.0) ? this.uDefaultColor : texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
-
-
         this.vColorRGBA = vec4(rgb*alpha, alpha);
         gl_Position = vec4(posX, posY, 0.0, 1.0);
     }
@@ -176,7 +180,6 @@ define(function(){
         else
             discard;
     }
-
 
     return function(fxgl) {
         fxgl.subroutine('visMap', 'float', visMap);

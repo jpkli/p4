@@ -2,12 +2,20 @@
     "data" : {
         "url": "data/synthetic",
         "format": "typedArray",
-        "attributes": {
-            "height": "float",
-            "weight": "float",
-            "iq"    : "int",
-            "age"   : "int",
-            "race"  : "string"
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float",
+            "FatherAge"    : "int",
+            "FatherRace"   : "string",
+            "FatherEdu"    : "string"
         }
     },
     "pipeline": [
@@ -15,7 +23,7 @@
             "$visualize": {
                 "id": "chart",
                 "mark": "line",
-                "y": ["weight", "height", "iq", "age"],
+                "y": ["BabyWeight", "MotherHeight", "MotherWeight", "MotherWgtGain"],
                 "color": "red",
                 "perceptual": 1
             }

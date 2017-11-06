@@ -25,6 +25,7 @@ define(function(require){
             tickPosition = option.tickPosition || [0, 0],
             tickInterval= option.tickInterval || "auto",
             tickAlign = option.tickAlign || "center",
+            skipLast = option.skipLast || false,
             tickFormat  = option.tickFormat || null,
             grid        = option.grid,
             format      = option.format || function(_){return _;},
@@ -101,9 +102,9 @@ define(function(require){
                         di.push(i);
                 }
 
-                if(di[di.length-1]!=domain[1] && !isNaN(domain[1])){
+                if(di[di.length-1]!=domain[1] && !isNaN(domain[1]) && !skipLast){
 
-                    if((domain[1] - di[di.length-1]) < 0.6 * intv)
+                    if((domain[1] - di[di.length-1]) < 0.4 * intv)
                         di[di.length-1] = domain[1];
                     else
                         di.push(domain[1]);

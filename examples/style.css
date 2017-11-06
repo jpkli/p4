@@ -1,6 +1,6 @@
 .sidebar {
     background-color: #F5F5F5;
-    min-width: 180px;
+    min-width: 190px;
 }
 
 .sidebar>h4 {
@@ -14,6 +14,10 @@
 
 .example-list {
     margin-left: 1em;
+}
+
+.example-list .active {
+    font-weight: bold;
 }
 
 .column {

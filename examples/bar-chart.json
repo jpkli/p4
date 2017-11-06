@@ -1,22 +1,30 @@
 {
     "data" : {
         "url": "data/synthetic",
-        "format": "typedArray",
-        "attributes": {
-            "height": "float",
-            "weight": "float",
-            "iq"    : "int",
-            "age"   : "int",
-            "race"  : "string"
+        "dtype": "typedArray",
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float",
+            "FatherAge"    : "int",
+            "FatherRace"   : "string",
+            "FatherEdu"    : "string"
         }
     },
     "pipeline": [
         {
             "$aggregate" : {
-                "$group": "race",
+                "$group": "MotherEdu",
                 "$reduce" : {
-                    "avgHeight": { "$avg": "height"},
-                    "population": { "$count": "*"}
+                    "Babies": { "$count": "*"},
+                    "AvgWeight": { "$avg": "BabyWeight"}
                 }
             }
         },
@@ -25,8 +33,8 @@
                 "id": "chart",
                 "mark": "bar",
                 "color": "steelblue",
-                "x": "race",
-                "y": "population"
+                "x": "MotherEdu",
+                "y": "Babies"
             }
         }
     ]

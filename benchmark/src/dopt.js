@@ -1,3 +1,9 @@
+requirejs.config({
+    paths: {
+        flexgl: '../flexgl/src'
+    }
+})
+
 const dataSizeTable = {
     "14": '16K',
     "15": '32K',
@@ -166,6 +172,7 @@ require(['src/dataopts', 'src/result-plot'], function(benchmark, plotResults) {
                 controls: controls,
                 trials: parseInt($('#trials').val()),
                 dataSize: Math.pow(2, dataSize),
+                dataProps: dataProps,
                 oncomplete: function(l, res) {
                     $('#' + l + '-' + dataSize + ' > td').each(function(tdi){
                         $(this).text(res[dopts[tdi]].avg.toFixed(2));

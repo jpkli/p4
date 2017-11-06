@@ -44,7 +44,7 @@ define(function(require){
             .uniform("uVisDomains",     "vec2",  fieldDomains)
             .uniform("uVisLevel",       "float", 1.0)
             .uniform("uFeatureCount",   "int",   0)
-            .uniform("uMarkSize",       "float", 5.0)
+            .uniform("uMarkSize",       "float", 10.0)
             .uniform("uDefaultAlpha",   "float", 1.0)
             .uniform("uDefaultWidth",   "float", 1.0 / $p.viewport[0])
             .uniform("uDefaultHeight",  "float", 1.0 / $p.viewport[1])
@@ -52,7 +52,7 @@ define(function(require){
             .uniform("uDefaultColor",   "vec3",  [0.8, 0, 0])
             .uniform("uColorMode",      "int",   1)
             .uniform("uViewDim",        "vec2",  $p.viewport)
-            .uniform("uVisShape",       "int",   0)
+            .uniform("uVisShape",       "int",   1)
             .varying("vColorRGBA",      "vec4"   )
 
         var enhance = reveal($p);
@@ -118,7 +118,7 @@ define(function(require){
 
             gl = $p.program(renderMode);
 
-            if(perceptual && !$p._update)
+            if(perceptual)
                 $p.bindFramebuffer("offScreenFBO");
             else
                 $p.bindFramebuffer(null);
@@ -176,29 +176,24 @@ define(function(require){
             }
 
             if(!$p._update) {
-                if(!vmap.width) {
-                    $p.uniform.uDefaultWidth = 1.0 / (dataDim[1]-1);
+                if(!vmap.width && vmap.x) {
+                    $p.uniform.uDefaultWidth = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] - 1);
+                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == "number") {
+                    $p.uniform.uDefaultWidth = vmap.width / width;
                 }
 
-                if(!vmap.height) {
-                    $p.uniform.uDefaultHeight = 1.0 / (dataDim[0]-1);
+                if(!vmap.height && vmap.y) {
+                    $p.uniform.uDefaultHeight = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] - 1);
+                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == "number") {
+                    $p.uniform.uDefaultHeight = vmap.height / height;
                 }
             }
-
-
-            console.log('dataDim:::::::::', dataDim);
 
             if(vmapIndex[2] === -1 && typeof(vmap.size) == "number") {
                 $p.uniform.uMarkSize = vmap.size;
             }
 
             gl.lineWidth(1.0);
-
-            if(perceptual)
-                gl.blendFunc( gl.ONE, gl.ONE );
-            else
-                gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
-                // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
 
             gl.viewport(
                 offset[0],
@@ -207,10 +202,20 @@ define(function(require){
                 height-padding.top-padding.bottom
             );
 
+
+            if(perceptual) {
+                gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+                gl.blendFunc( gl.ONE, gl.ONE );
+            } else {
+                gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
+            }
+                // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
+
             // clear screen
             // if(viewOrder == 0) {
-            //     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-            //     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+                // gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+                // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             // }
 
             gl.disable(gl.CULL_FACE);
@@ -280,7 +285,7 @@ define(function(require){
 
             if(mark!='bar') draw();
 
-            if(perceptual && !$p._update)
+            if(perceptual)
                 enhance(viewport);
 
 

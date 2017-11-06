@@ -175,7 +175,7 @@ define(function(require) {
                 $p.uniform.uFilterFlag = 1;
 
             opt.aggregate.execute(spec);
-
+            // console.log(pipeline.result('row'));
             return pipeline;
         }
 
@@ -185,6 +185,8 @@ define(function(require) {
             opt.select.execute(spec);
             $p.getResult = opt.select.result;
             // console.log($p.getResult());
+
+
             return pipeline;
         }
 
@@ -197,9 +199,9 @@ define(function(require) {
             //.replace(/function\s*[\w|\d]+\s*\((.+)\)/g, "$1")
 
             //TODO: recompile the kernel for derive by checking if deriving equations/functions changed.
-            if (!opt.hasOwnProperty('derive')) {
+            // if (!opt.hasOwnProperty('derive')) {
                 opt.derive = optDerive($p, spec);
-            }
+            // }
             opt.derive.execute(spec);
             $p.getResult = opt.derive.result;
             return pipeline;
@@ -255,7 +257,7 @@ define(function(require) {
                 else if($p.interaction == 'auto') {
                     viewOptions.interaction = function(d) {
 
-                        $p._update = true;
+                        // $p._update = true;
                         rerun = true;
                         Object.keys(d).forEach(function(k) {
                             if(d[k].length < 2) {

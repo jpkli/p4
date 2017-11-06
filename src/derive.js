@@ -40,8 +40,6 @@ define(function(){
             .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
 
 
-
-
         function vertexShader(getData) {
             gl_PointSize = 1.0;
 

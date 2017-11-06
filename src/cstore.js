@@ -10,7 +10,7 @@ define( function(require) {
             count    = option.count || 0,   // number of entries stored
             types    = option.types || [],  // types of the columns
             attributes = option.attributes || option.keys || option.names || [],  // column attributes
-            struct   = option.struct|| {},
+            struct   = option.struct|| option.schema || {},
             CAMs     = option.CAMs  || {},  // content access memory
             TLBs     = option.TLBs  || {},  // table lookaside buffer
             colStats = {},
@@ -71,7 +71,7 @@ define( function(require) {
                 TLBs[f] = [];
                 CAMs[f] = {};
                 colRead[f] = function(value) {
-                    if(!CAMs[f][value]){
+                    if(!CAMs[f].hasOwnProperty(value)){
                         CAMs[f][value] = TLBs[f].length;
                         TLBs[f].push(value);
                     }
@@ -104,7 +104,7 @@ define( function(require) {
                 for(var j = 0; j<skip; j++)
                     rowArray.shift();
             }
-            rowArray.forEach(function(row){
+            rowArray.forEach(function(row, i){
                 row.forEach(function(v,j){
                     columns[j][count] = colRead[attributes[j]](v);
                 });

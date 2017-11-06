@@ -1,27 +1,36 @@
 {
     "data" : {
         "url": "data/synthetic",
-        "format": "typedArray",
-        "attributes": {
-            "height": "float",
-            "weight": "float",
-            "iq"    : "int",
-            "age"   : "int",
-            "race"  : "string"
+        "dtype": "typedArray",
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float",
+            "FatherAge"    : "int",
+            "FatherRace"   : "string",
+            "FatherEdu"    : "string"
         }
     },
     "pipeline": [
         {
-            "$select" : {
-                "iq": [100, 150],
-                "age": [20, 40]
+            "$select": {
+                "MotherAge": [10, 45],
+                "FatherAge": [10, 45]
             }
         },
         {
             "$aggregate" : {
-                "$group": ["age", "iq"],
+                "$group": ["FatherAge", "MotherAge"],
                 "$reduce" : {
-                    "count": { "$count": "*"}
+                    "Babies": { "$count": "*"},
+                    "Avg. Weight": { "$avg": "Weight"}
                 }
             }
         },
@@ -29,9 +38,9 @@
             "$visualize": {
                 "id": "chart",
                 "mark": "rect",
-                "color": "count",
-                "x": "iq",
-                "y": "age"
+                "x": "MotherAge",
+                "y": "FatherAge",
+                "color": "Babies"
             }
         }
     ]

@@ -53,7 +53,7 @@ define(function(require){
                 scale:  "linear",
                 align: "bottom",
                 labelPos: {x: 0, y: -20},
-                ticks: 5,
+                // ticks: 5,
                 // grid: 1,
                 format: format(".3s"),
             };
@@ -65,7 +65,6 @@ define(function(require){
                 width: width,
                 height: height,
                 align: "left",
-                ticks: 5,
                 labelPos: {x: -5, y: -5},
                 // grid: 1,
                 format: format(".3s"),
@@ -168,7 +167,7 @@ define(function(require){
                 var maxStrLength = Math.max.apply(null, xAxisOption.domain.map(
                     function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
                 );
-                if(maxStrLength > 10 || barWidth < 40) {
+                if(maxStrLength > 10) {
                     xAxisOption.labelAngel = -40;
                     xAxisOption.labelPos = {x: 15, y: -10};
                 }

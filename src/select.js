@@ -199,8 +199,8 @@ define(function(){
                 $p.deriveDomains
             );
             var newDomains = _execute(spec);
-            console.log(newDomains);
             if(!$p._update){
+                console.log('checking filter domains', newDomains);
                 newDomains.forEach(function(range, fid) {
                     if (fid < $p.fieldCount + $p.indexes.length) {
                         $p.fieldDomains[fid] = range;

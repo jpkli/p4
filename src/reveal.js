@@ -44,31 +44,38 @@ define(function(require){
 
             if(value.a == 0.0) discard;
             a = pow(((value.a - this.uDefaultAlpha) / (this.uMaxRGBA.a -this.uDefaultAlpha)), 0.33) * 0.85 + 0.15;
+            // a = pow((value.a / this.uMaxRGBA.a), 0.33) * 0.85;
             // a = value.a / this.uMaxRGBA.a;
 
             gl_FragColor = vec4(value.rgb, a);
-            // gl_FragColor = vec4(texture2D(this.tColorGraident, vec2(a, 1.0)).rgb, a+0.2);
+            // gl_FragColor = vec4(texture2D(this.tColorGraident, vec2(1.0-a, 1.0)).rgb, 1.0);
         });
 
         fxgl.program("vis-render", vs2, fs2);
 
         return function(viewDim) {
-            var gl = fxgl.program("post-processing");
-            fxgl.framebuffer.enableRead("offScreenFBO");
-            fxgl.bindFramebuffer("visStats");
-            gl.viewport(0, 0, 1, 1);
-            fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aViewX.location, 0);
-            fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aViewY.location, 1);
-            gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-            gl.blendEquation(gl.MAX_EXT);
-            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0,  viewDim[0], viewDim[1]);
+            var gl;
+            if(!fxgl._update) {
+                console.log('reveal post-processing');
+                gl = fxgl.program("post-processing");
+                fxgl.framebuffer.enableRead("offScreenFBO");
+                fxgl.bindFramebuffer("visStats");
+                gl.viewport(0, 0, 1, 1);
+                fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aViewX.location, 0);
+                fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aViewY.location, 1);
+                gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+                gl.blendEquation(gl.MAX_EXT);
+                gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0,  viewDim[0], viewDim[1]);
 
-            var max = new Float32Array(4);
-            gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
-            fxgl.uniform.uMaxRGBA = max;
+                var max = new Float32Array(4);
+                gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
+                fxgl.uniform.uMaxRGBA = max;
+            }
 
             gl = fxgl.program("vis-render");
+            fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aViewX.location, 0);
+            fxgl.ctx.ext.vertexAttribDivisorANGLE(fxgl.attribute.aViewY.location, 1);
             fxgl.framebuffer.enableRead("offScreenFBO");
             fxgl.bindFramebuffer(null);
 
