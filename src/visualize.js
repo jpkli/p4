@@ -36,31 +36,29 @@ define(function(require){
             padding: padding
         });
 
-        var fieldDomains = $p.uniform.uFieldDomains.data;
-
         $p.visLayers = vis;
 
-        $p.uniform("uVisualEncodings","int",   new Array(visualEncodings.length).fill(-1))
-            .uniform("uVisDomains",     "vec2",  fieldDomains)
-            .uniform("uVisLevel",       "float", 1.0)
-            .uniform("uFeatureCount",   "int",   0)
-            .uniform("uMarkSize",       "float", 10.0)
-            .uniform("uDefaultAlpha",   "float", 1.0)
-            .uniform("uDefaultWidth",   "float", 1.0 / $p.viewport[0])
-            .uniform("uDefaultHeight",  "float", 1.0 / $p.viewport[1])
-            .uniform("uMaxRGBA",        "vec4",  [0, 0, 0, 0])
-            .uniform("uDefaultColor",   "vec3",  [0.8, 0, 0])
-            .uniform("uColorMode",      "int",   1)
-            .uniform("uViewDim",        "vec2",  $p.viewport)
-            .uniform("uVisShape",       "int",   1)
-            .varying("vColorRGBA",      "vec4"   )
+        $p.uniform('uVisualEncodings','int',   new Array(visualEncodings.length).fill(-1))
+            .uniform('uVisDomains',     'vec2',  $p.fieldDomains)
+            .uniform('uVisLevel',       'float', 1.0)
+            .uniform('uFeatureCount',   'int',   0)
+            .uniform('uMarkSize',       'float', 10.0)
+            .uniform('uDefaultAlpha',   'float', 1.0)
+            .uniform('uDefaultWidth',   'float', 1.0 / $p.viewport[0])
+            .uniform('uDefaultHeight',  'float', 1.0 / $p.viewport[1])
+            .uniform('uMaxRGBA',        'vec4',  [0, 0, 0, 0])
+            .uniform('uDefaultColor',   'vec3',  [0.8, 0, 0])
+            .uniform('uColorMode',      'int',   1)
+            .uniform('uViewDim',        'vec2',  $p.viewport)
+            .uniform('uVisShape',       'int',   1)
+            .varying('vColorRGBA',      'vec4'   )
 
         var enhance = reveal($p);
 
-        $p.framebuffer("offScreenFBO", "float", $p.viewport)
-            .framebuffer("visStats", "float", [1, 1]);
+        $p.framebuffer('offScreenFBO', 'float', $p.viewport)
+            .framebuffer('visStats', 'float', [1, 1]);
 
-        $p.framebuffer.enableRead("offScreenFBO");
+        $p.framebuffer.enableRead('offScreenFBO');
 
         var renderer = require('./render')($p);
 
@@ -102,11 +100,14 @@ define(function(require){
                 vmapColor = fields.indexOf(vmap.color),
                 vmapAlpha = fields.indexOf(vmap.alpha);
 
-            var vDomain = {},
+            var visDomain = {},
                 visMark = vmap.mark || 'point',
-                renderMode = "instancedXY";
+                renderMode = 'instancedXY';
 
-            fields.forEach(function(f, i){ vDomain[f] = domains[i]; });
+
+            fields.forEach(function(f, i){
+                visDomain[f] = $p.fieldDomains[i].slice();
+            });
 
             var gl;
 
@@ -117,16 +118,9 @@ define(function(require){
             }
 
             gl = $p.program(renderMode);
-
-            if(perceptual)
-                $p.bindFramebuffer("offScreenFBO");
-            else
-                $p.bindFramebuffer(null);
-
-
-            $p.framebuffer.enableRead("fFilterResults");
-            $p.framebuffer.enableRead("fDerivedValues");
-            $p.framebuffer.enableRead("fGroupResults");
+            $p.framebuffer.enableRead('fFilterResults');
+            $p.framebuffer.enableRead('fDerivedValues');
+            $p.framebuffer.enableRead('fGroupResults');
 
             if(renderMode == 'instancedXY') {
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
@@ -155,7 +149,7 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemVal1.location, 1);
             }
 
-            if(typeof data == "string")
+            if(typeof data == 'string')
                 $p.uniform.uDataInput = $p.framebuffer[data].texture;
 
             var vmapIndex = new Int32Array(visualEncodings.length);
@@ -165,33 +159,47 @@ define(function(require){
 
             $p.uniform.uVisualEncodings = vmapIndex;
 
-            if(vmapIndex[2] === -1 && typeof(vmap.color) == "string"){
-                $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+            if(vmapIndex[2] === -1 && typeof(vmap.color) === 'string'){
+                if(vmap.color === 'auto') {
+                    perceptual = true;
+                    $p.uniform.uRevealMode.data = 1;
+                } else {
+                    $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+                }
             }
             var opacity = vmap.opacity || vmap.alpha;
-            if(typeof(opacity) == "number") {
+            if(typeof(opacity) === 'number') {
                 $p.uniform.uDefaultAlpha = opacity;
+            } else if(vmapIndex[3] === -1 && typeof(opacity) == 'string' && opacity == 'auto' ) {
+                perceptual = true;
+                $p.uniform.uRevealMode.data = 0;
             } else {
                 $p.uniform.uDefaultAlpha = 1.0;
             }
 
             if(!$p._update) {
                 if(!vmap.width && vmap.x) {
-                    $p.uniform.uDefaultWidth = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] - 1);
-                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == "number") {
+                    $p.uniform.uDefaultWidth = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] );
+                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == 'number') {
                     $p.uniform.uDefaultWidth = vmap.width / width;
                 }
 
                 if(!vmap.height && vmap.y) {
-                    $p.uniform.uDefaultHeight = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] - 1);
-                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == "number") {
+                    $p.uniform.uDefaultHeight = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] );
+                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == 'number') {
                     $p.uniform.uDefaultHeight = vmap.height / height;
                 }
             }
 
-            if(vmapIndex[2] === -1 && typeof(vmap.size) == "number") {
+            if(vmapIndex[2] === -1 && typeof(vmap.size) == 'number') {
                 $p.uniform.uMarkSize = vmap.size;
             }
+
+
+            if(perceptual)
+                $p.bindFramebuffer('offScreenFBO');
+            else
+                $p.bindFramebuffer(null);
 
             gl.lineWidth(1.0);
 
@@ -209,8 +217,9 @@ define(function(require){
                 gl.blendFunc( gl.ONE, gl.ONE );
             } else {
                 gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
-            }
                 // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
+            }
+
 
             // clear screen
             // if(viewOrder == 0) {
@@ -224,7 +233,7 @@ define(function(require){
             gl.blendEquation(gl.FUNC_ADD);
 
             var viewSetting = {
-                domain: vDomain,
+                domain: visDomain,
                 width: width,
                 height: height,
                 vmap: vmap,
@@ -233,6 +242,33 @@ define(function(require){
                 left: offset[0],
                 top: viewport[1] - height - offset[1]
             };
+
+            if (mark == 'rect') {
+                if(vmapIndex[0] > -1) {
+                    var len = $p.fieldWidths[vmapIndex[0]],
+                        ext = $p.fieldDomains[vmapIndex[0]];
+                    viewSetting.scaleX = 'ordinal';
+                    if($p.categoryLookup.hasOwnProperty(vmap.x)){
+                         viewSetting.domainX = new Array(len).fill(0).map(
+                             (d,i)=>$p.categoryLookup[vmap.x][i]
+                         );
+                     } else {
+                         viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
+                     }
+                }
+                if(vmapIndex[1] > -1) {
+                    var len = $p.fieldWidths[vmapIndex[1]],
+                        ext = $p.fieldDomains[vmapIndex[1]];
+                    viewSetting.scaleY = 'ordinal';
+                    if($p.categoryLookup.hasOwnProperty(vmap.y)){
+                         viewSetting.domainY = new Array(len).fill(0).map(
+                             (d,i)=>$p.categoryLookup[vmap.y][i]
+                         ).reverse();
+                    } else {
+                        viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
+                    }
+                }
+            }
 
             function sortData(data) {
                 return data.sort(function(a,b){
@@ -250,7 +286,7 @@ define(function(require){
                 if(intervals.hasOwnProperty(vmap.x))
                     viewSetting.isHistogram = true;
             }
-
+            console.log('vis domain ::::', $p.uniform.uVisDomains.data);
             if(!$p._update) {
                 domains = $p.uniform.uFieldDomains.data.slice();
                 $p.uniform.uVisDomains = domains;

@@ -23,7 +23,7 @@ define(function(){
             value = defaultValue;
         }
         if(exp != 0.0)
-            value = pow(value, exp) * 0.85 + 0.15;
+            value = pow(value, exp);
         return value;
     };
 
@@ -61,12 +61,12 @@ define(function(){
         if(this.uVisShape == 1) {
             var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
             if (dist > 0.5) discard;
-            var delta = 0.;
+            var delta = 0.3;
             var alpha = this.vColorRGBA.a - smoothstep(0.5-delta, 0.5, dist);
             if(this.vResult == this.uVisLevel) {
                 gl_FragColor = vec4(this.vColorRGBA.rgb, alpha);
             } else {
-                gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);
+                gl_FragColor = vec4(0.9, 0.9, 0.9, alpha);
             }
         } else {
             if(this.vResult == this.uVisLevel) {
@@ -147,11 +147,15 @@ define(function(){
         posX = this.visMap(this.uVisualEncodings[0], i, j, val0, val1, 0.0, 0.0);
         posY = this.visMap(this.uVisualEncodings[1], i, j, val0, val1, 0.0,  0.0);
         color = this.visMap(this.uVisualEncodings[2], i, j, val0, val1, -1.0,  0.0);
-        alpha = this.visMap(this.uVisualEncodings[3], i, j,  val0, val1, this.uDefaultAlpha, 0.33);
+        alpha = this.visMap(this.uVisualEncodings[3], i, j,  val0, val1, this.uDefaultAlpha, 0.0);
         width = this.visMap(this.uVisualEncodings[4], i, j,  val0, val1, this.uDefaultWidth, 0.0);
         height = this.visMap(this.uVisualEncodings[5], i, j,  val0, val1, this.uDefaultHeight, 0.0);
         size = this.visMap(this.uVisualEncodings[6], i, j, val0, val1, this.uMarkSize,  0.0);
 
+        posX = posX * (this.uFieldWidths[this.uVisualEncodings[0]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[0]];
+        posY = posY * (this.uFieldWidths[this.uVisualEncodings[1]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[1]];
+
+        posY -= height;
         if(this.aVertexId == 0.0 || this.aVertexId == 3.0) {
             posX = posX * 2.0 - 1.0;
             posY = posY * 2.0 - 1.0;
@@ -168,6 +172,8 @@ define(function(){
             posX = posX * 2.0 - 1.0;
             posY = posY * 2.0 - 1.0;
         }
+
+
 
         rgb = (color == -1.0) ? this.uDefaultColor : texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
         this.vColorRGBA = vec4(rgb*alpha, alpha);

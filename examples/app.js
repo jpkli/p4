@@ -69,12 +69,12 @@ define(function(require){
             var dsl = {
                 container: "main-vis",
                 viewport: [800, 560],
-                padding: {left: 80, right: 80, top: 30, bottom: 100},
+                padding: {left: 80, right: 80, top: 40, bottom: 100},
                 data: data
             };
 
-
             program = P4GL(dsl);
+            $('.example-list .active').trigger('click');
         })
 
         // var data = genData({
@@ -119,6 +119,7 @@ define(function(require){
 
                     if(ei === 0 && ii === 0) {
                         itemLink.addClass('active');
+
                     }
                 })
 

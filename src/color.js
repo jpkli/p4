@@ -52,7 +52,7 @@ define(function(require){
         var a = alpha || 1.0,
             c = rgb(hexStr);
 
-        return [c[0]*a, c[1]*a, c[2]*a, a];
+        return [c[0], c[1], c[2], a];
     }
 
     function rgba2hex(c) {

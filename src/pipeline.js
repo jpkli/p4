@@ -34,11 +34,11 @@ define(function(require) {
         pipeline.data = function(dataOptions) {
             allocate($p, dataOptions);
             opt = compile($p);
-            // if(!$p.hasOwnProperty('fieldDomains')) {
+            if(!$p.hasOwnProperty('fieldDomains')) {
                 var dd = opt.extent($p.fields.map((f, i) => i), $p.dataDimension);
                 console.log(dd);
                 // $p.uniform.uFieldDomains.data = $p.fieldDomains;
-            // }
+            }
             $p.opt = opt;
             pipeline.ctx = $p.ctx;
             pipeline.register('__init__');
@@ -55,8 +55,6 @@ define(function(require) {
                 fieldWidths: $p.fieldWidths.slice(),
                 fieldDomains: $p.fieldDomains.slice(),
                 deriveCount: $p.deriveCount,
-                deriveWidths: $p.deriveWidths.slice(),
-                deriveDomains: $p.deriveDomains.slice(),
                 filterFlag: $p.uniform.uFilterFlag.data,
                 filterControls: $p.uniform.uFilterControls.data.slice(),
                 dataInput: $p.uniform.uDataInput.data,
@@ -93,8 +91,6 @@ define(function(require) {
             $p.fields = reg.fields.slice();
             $p.fieldWidths = reg.fieldWidths.slice();
             $p.fieldDomains = reg.fieldDomains.slice();
-            $p.deriveDomains = reg.deriveDomains.slice();
-            $p.deriveWidths = reg.deriveWidths.slice();
             $p.dataDimension = reg.dataDim.slice();
 
             //resume GPU Uniforms
@@ -104,8 +100,6 @@ define(function(require) {
             $p.uniform.uIndexCount.data = reg.indexes.length;
             $p.uniform.uFieldDomains.data = reg.fieldDomains;
             $p.uniform.uFieldWidths.data = reg.fieldWidths;
-            $p.uniform.uDeriveDomains.data = reg.deriveDomains;
-            $p.uniform.uDeriveWidths.data = reg.deriveWidths;
             $p.uniform.uFilterFlag.data = reg.filterFlag;
             // $p.uniform.uFilterControls.data = reg.filterControls;
             $p.uniform.uDataInput.data = reg.dataInput;
@@ -233,7 +227,6 @@ define(function(require) {
             var viewOptions = {
                 vmap: vmap,
                 fields: $p.fields,
-                domains: $p.fieldDomains,
                 dataDim: $p.dataDimension,
                 categories: $p.categoryLookup,
                 intervals: $p.intervals,
@@ -255,31 +248,33 @@ define(function(require) {
                     }
                 }
                 else if($p.interaction == 'auto') {
-                    viewOptions.interaction = function(d) {
-
+                    viewOptions.interaction = function(selection) {
+                        console.log('selections:::::::::', selection);
                         // $p._update = true;
                         rerun = true;
-                        Object.keys(d).forEach(function(k) {
-                            if(d[k].length < 2) {
+                        Object.keys(selection).forEach(function(k) {
+                            if(selection[k].length < 2) {
                                 if($p.intervals.hasOwnProperty(k)) {
-                                    var value = (Array.isArray(d[k])) ? d[k][0] : d[k];
+                                    var value = (Array.isArray(selection[k]))
+                                        ? selection[k][0]
+                                        : selection[k];
                                     d[k] = [value-$p.intervals[k].interval, value];
                                 }
                             }
-                            $p.crossfilters[k] = d[k];
+                            $p.crossfilters[k] = selection[k];
                         });
                         pipeline.update();
                         // console.log('$p.crossfilters::::::', $p.crossfilters, $p.fieldDomains);
 
                         var operations = $p.pipeline.slice(0, optID);
-                        var filtering = false;
+
                         for (var i = 0, l = $p.pipeline.length; i < l; i++) {
                             var p = $p.pipeline[i];
                             if(Object.keys(p)[0] == 'filter') {
-                                Object.keys(d).forEach(function(k) {
-                                    p.filter[k] = d[k];
+                                Object.keys(selection).forEach(function(k) {
+                                    p.filter[k] = selection[k];
                                 });
-                                filtering = true;
+
                                 break;
                             }
                         }
@@ -406,7 +401,6 @@ define(function(require) {
                     pipeline[opt](arg);
                 }
             })
-
         }
 
         pipeline.head = function() {

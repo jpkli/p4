@@ -29,19 +29,16 @@ define(function(require){
             tickFormat  = option.tickFormat || null,
             grid        = option.grid,
             format      = option.format || function(_){return _;},
-            autoHide    = option.autoHide || false,
+            visable    = option.visable || true,
             domainIntervals,
             X = [],
             Y = [];
 
-        if (range === null){
-            range = (dim == "x") ? [0, width] : [0,height];
-        }
+
 
         if(typeof(ticks) != "number") {
             ticks = (dim == "x") ? Math.ceil(width/60) : Math.ceil(height/60);
         }
-
 
         function getTickInterval(){
             var vDomain = Math.abs(domain[1] - domain[0]),
@@ -224,7 +221,7 @@ define(function(require){
             axis.remove();
         }
 
-        if(!autoHide) {
+        if(visable) {
             metric.svg = metric.show();
         }
 

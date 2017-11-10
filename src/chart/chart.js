@@ -34,7 +34,13 @@ define(function(require){
                 labels = plot.append('g'),
                 onclick = options.onclick || null,
                 onhover = options.onhover || null,
+                tickOffset = options.axisOffset || [0, 0],
                 marks = [];
+
+            var scaleX = options.scaleX || 'linear',
+                domainX = options.domainX || domain[vmap.x],
+                scaleY = options.scaleY || 'linear',
+                domainY = options.domainY || domain[vmap.y];
 
             width -= padding.left + padding.right;
             height -= padding.top + padding.bottom;
@@ -49,8 +55,8 @@ define(function(require){
                 dim: "x",
                 width: width,
                 height: height,
-                domain: domain[vmap.x],
-                scale:  "linear",
+                domain: domainX,
+                scale:  scaleX,
                 align: "bottom",
                 labelPos: {x: 0, y: -20},
                 // ticks: 5,
@@ -61,7 +67,8 @@ define(function(require){
             var yAxisOption = {
                 container: plot,
                 dim: "y",
-                domain: domain[vmap.y],
+                domain: domainY,
+                scale: scaleY,
                 width: width,
                 height: height,
                 align: "left",
@@ -69,6 +76,27 @@ define(function(require){
                 // grid: 1,
                 format: format(".3s"),
             };
+
+            if(scaleX == 'ordinal') {
+                xAxisOption.ticks = domainX.length;
+                while(width / xAxisOption.ticks < 20) {
+                    xAxisOption.ticks *= 0.5;
+                }
+                var maxStrLength = Math.max.apply(null, domainX.map(
+                    function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
+                );
+                if(maxStrLength > 10) {
+                    xAxisOption.labelAngel = -40;
+                    xAxisOption.labelPos = {x: 15, y: -10};
+                }
+            }
+
+            if(scaleY == 'ordinal') {
+                yAxisOption.ticks = domainY.length;
+                while(width / yAxisOption.ticks < 20) {
+                    yAxisOption.ticks *= 0.5;
+                }
+            }
 
             var brushOptions = {
                 width: width,
@@ -128,7 +156,7 @@ define(function(require){
 
                     labels
                     .append("text")
-                      .attr("y", -padding.top)
+                      .attr("y", -padding.top + 10)
                       .attr("x", i * axisDist)
                       .attr("dy", "1em")
                       .css("text-anchor", "middle")

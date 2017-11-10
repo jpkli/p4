@@ -1,22 +1,22 @@
 define(function(){
-    return function optDerive(context, spec) {
+    return function optDerive($p, spec) {
 
         var derive = {},
-            dataDimension = context.uniform.uDataDim.data,
-            deriveMax = context.uniform.uDeriveCount.data,
-            deriveFields = Object.keys(spec);
+            dataDimension = $p.uniform.uDataDim.data,
+            deriveMax = $p.uniform.uDeriveCount.data,
+            derivedFields = Object.keys(spec);
 
-        fields = context.fields;
+        fields = $p.fields;
 
         var marco = "\t";
 
-        deriveFields.forEach(function(d, i){
+        derivedFields.forEach(function(d, i){
             var re = new RegExp("("+fields.join("|")+")","g");
             // var formula = spec[d].replace(/@([\w|\d|_]+)/g, function(matched){
             var formula = spec[d].replace(re, function(matched){
                 // console.log(matched);
                 var index = fields.indexOf(matched);
-                return 'getData('  + index + ', pos.x, pos.y)';
+                return 'this.getData('  + index + ', pos.x, pos.y)';
             });
             marco += 'if (index == ' + i + ') return ' + formula + "; \n \telse ";
         });
@@ -34,13 +34,13 @@ define(function(){
         //     return value;
         // }
 
-        context.uniform("uOptMode", "float", 0)
+        $p.uniform("uOptMode", "float", 0)
             .uniform("uDeriveId", "int", 0)
             // .subroutine("getDataValue", "float", getDataValue)
             .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
 
 
-        function vertexShader(getData) {
+        function vertexShader() {
             gl_PointSize = 1.0;
 
             var i, j;
@@ -73,29 +73,33 @@ define(function(){
                 gl_FragColor = vec4(-1.0, this.vResult, 0.0, 0.0);
         }
 
-        var vs = context.shader.vertex(vertexShader),
-            fs = context.shader.fragment(fragmentShader),
-            gl = context.program("derive", vs, fs);
+        var vs = $p.shader.vertex(vertexShader),
+            fs = $p.shader.fragment(fragmentShader),
+            gl = $p.createProgram("derive", vs, fs);
 
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataIdx.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataValx.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataIdy.location, 1);
-        gl.ext.vertexAttribDivisorANGLE(context.attribute.aDataValy.location, 1);
+        // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+        // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+        // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+        // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
 
         function _execute() {
 
-            var gl = context.program("derive");
-            context.framebuffer.enableRead("fFilterResults");
-            context.bindFramebuffer("fDerivedValues");
+            var gl = $p.program("derive");
+            $p.framebuffer.enableRead("fFilterResults");
+            $p.bindFramebuffer("fDerivedValues");
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
             gl.enable( gl.BLEND );
             gl.blendFunc( gl.ONE, gl.ONE );
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
 
-            // context.uniform.uDeriveCount = deriveFieldCount;
+            // $p.uniform.uDeriveCount = deriveFieldCount;
             var deriveDomains = [];
-            deriveFields.forEach(function(d, i){
-                context.uniform.uDeriveId = i;
+            derivedFields.forEach(function(d, i){
+                $p.uniform.uDeriveId = i;
                 gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
                 gl.viewport(0, 0, 1,  1);
@@ -124,10 +128,10 @@ define(function(){
             gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
             gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-            context.uniform.uOptMode = 1.0;
+            $p.uniform.uOptMode = 1.0;
 
-            deriveFields.forEach(function(d, i){
-                context.uniform.uDeriveId = i;
+            derivedFields.forEach(function(d, i){
+                $p.uniform.uDeriveId = i;
                 gl.viewport(0, dataDimension[1]*i, dataDimension[0], dataDimension[1]);
                 gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
             });
@@ -138,31 +142,36 @@ define(function(){
         }
 
         derive.execute = function(spec) {
-            var deriveFields = Object.keys(spec);
-            context.fields = context.fields.concat(deriveFields);
-            var newDomains = _execute();
-            if(!context._update) {
-                newDomains.forEach(function(d, i) {
-                    context.deriveDomains[context.deriveCount+i] = d;
-                    context.deriveWidths[context.deriveCount+i] = d[1] - d[0] + 1;
-                });
-                context.deriveCount += deriveFields.length;
-                // console.log(derive.result());
-                getResult = derive.result;
-                // console.log(context.deriveDomains, fields);
+            var derivedFields = Object.keys(spec);
+            var newDerivedDomains = _execute();
+            if(!$p._update) {
+                newDerivedDomains.forEach(function(d, i) {
+                    var fieldId = $p.fields.indexOf(derivedFields[i]);
+                    if(fieldId === -1) {
+                        $p.fields.push(derivedFields[i]);
+                        fieldId = $p.fields.indexOf(derivedFields[i]);
+                        $p.deriveCount += 1;
+                    }
 
-                context.uniform.uDeriveDomains.data = context.deriveDomains;
-                context.uniform.uDeriveWidths.data = context.deriveWidths;
+                    $p.fieldDomains[fieldId] = d;
+                    $p.fieldWidths[fieldId] = d[1] - d[0] + 1;
+                });
+
+                getResult = derive.result;
+                // console.log($p.deriveDomains, fields);
+
+                $p.uniform.uFieldDomains.data = $p.fieldDomains;
+                $p.uniform.uFieldWidths.data = $p.fieldWidths;
             }
         }
 
         derive.result = function(arg) {
             var options = arg || {},
                 offset = options.offset || [0, 0],
-                resultSize = options.size || context.dataDimension[0]* context.dataDimension[1],
+                resultSize = options.size || $p.dataDimension[0]* $p.dataDimension[1],
                 fid = options.fieldId || options.deriveFieldId || 0,
-                rowSize = Math.min(resultSize, context.dataDimension[0]),
-                colSize = Math.ceil(resultSize/context.dataDimension[0]);
+                rowSize = Math.min(resultSize, $p.dataDimension[0]),
+                colSize = Math.ceil(resultSize/$p.dataDimension[0]);
 
             var result = new Float32Array(rowSize * colSize * 4);
             gl.readPixels(0, dataDimension[1]*fid, rowSize, colSize, gl.RGBA, gl.FLOAT, result);

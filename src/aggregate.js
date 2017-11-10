@@ -179,18 +179,24 @@ define(function(require){
 
         aggregate.execute = function(spec) {
             var groupFields = spec.$by || spec.$group,
-                groupFieldIds = [-1, -1];
+                groupFieldIds = [-1, -1].
+                resultDim = [1, 1];
 
             if(!Array.isArray(groupFields)) groupFields = [groupFields];
             if (groupFields.length == 2) {
                 groupFieldIds[0] = $p.fields.indexOf(groupFields[0]);
                 groupFieldIds[1] = $p.fields.indexOf(groupFields[1]);
+                $p.resultDimension = [
+                    $p.fieldWidths[groupFieldIds[0]],
+                    $p.fieldWidths[groupFieldIds[1]]
+                ];
             } else {
                 groupFieldIds[0] = $p.fields.indexOf(groupFields[0]);
+                $p.resultDimension = [$p.fieldWidths[groupFieldIds[0]], 1];
             }
 
-            $p.resultDimension = $p.getGroupKeyDimension(groupFieldIds);
-            console.log( groupFieldIds, $p.resultDimension, $p.fieldWidths, $p.fieldDomains);
+
+            // console.log( groupFieldIds, $p.resultDimension, $p.fieldWidths, $p.fieldDomains);
             // var resultFields = Object.keys(spec).filter(function(d){return d!='$by' && d!='$group';}),
             //     resultFieldIds = resultFields.map(function(f) { return fields.indexOf(f); }),
             //     operators = resultFields.map(function(r){return spec[r]; });
@@ -226,7 +232,7 @@ define(function(require){
             _execute(operators, groupFieldIds, resultFieldIds);
 
             $p.getResult = aggregate.result;
-            // console.log($p.getResult());
+            console.log($p.getResult());
 
 
             $p.indexes = groupFields;
@@ -247,8 +253,8 @@ define(function(require){
             $p.uniform.uIndexCount.data = $p.indexes.length;
             $p.uniform.uFieldCount.data = $p.fields.length - $p.indexes.length;
 
-            $p.fieldWidths = $p.fieldWidths.concat($p.deriveWidths);
-            $p.fieldDomains = $p.fieldDomains.concat($p.deriveDomains);
+            // $p.fieldWidths = $p.fieldWidths.concat($p.deriveWidths);
+            // $p.fieldDomains = $p.fieldDomains.concat($p.deriveDomains);
 
             $p.fieldDomains = newFieldIds.map(function(f) {
                 return $p.fieldDomains[f];
@@ -306,6 +312,8 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal' + vecId[i]].location, i);
             });
+
+            console.log($p.fields, $p.fieldDomains, $p.fieldWidths);
         }
 
         aggregate.result = function(arg) {

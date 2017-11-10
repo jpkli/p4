@@ -12,20 +12,21 @@
             "MotherEdu"    : "string",
             "MotherHeight" : "float",
             "MotherWeight" : "float",
-            "MotherWgtGain": "float",
-            "FatherAge"    : "int",
-            "FatherRace"   : "string",
-            "FatherEdu"    : "string"
+            "MotherWgtGain": "float"
         }
     },
     "pipeline": [
         {
             "$visualize": {
-                "id": "chart",
                 "mark": "line",
-                "y": ["BabyWeight", "MotherHeight", "MotherWeight", "MotherWgtGain"],
                 "color": "red",
-                "perceptual": 1
+                "opacity": "auto",
+                "y": [
+                    "BabyWeight",
+                    "MotherHeight",
+                    "MotherWeight",
+                    "MotherWgtGain"
+                ]
             }
         }
     ]

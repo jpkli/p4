@@ -36,13 +36,12 @@ define(function(require){
         $p.fields = $p.indexes.concat(dkeys.filter(function(k) {
             return $p.indexes.indexOf(k) === -1;
         }));
-        $p.fieldWidths = new Array($p.fields.length);
+        $p.fieldWidths = new Array($p.fields.length).concat(new Array($p.deriveMax).fill(1));
         $p.fieldCount = $p.fields.length - $p.indexes.length;
 
 
         function getDataWidth(fid, range) {
             var range = Math.abs(range[1] - range[0]);
-
             if (dtypes[fid] == "index" || dtypes[fid] == "int" || dtypes[fid] == "string") {
                 return range + 1;
             } else if (dtypes[fid] == "time") {
@@ -59,10 +58,9 @@ define(function(require){
             } else if (dtypes[fid] in ["float", "double", "numeric"]) {
                 return 10;
             } else {
-                return range;
+                return range+1;
             }
         }
-
         $p.fields.forEach(function(field) {
             var min = stats[field].min,
                 max = stats[field].max,
@@ -70,15 +68,11 @@ define(function(require){
             console.log(fi, [min, max]);
             $p.fieldWidths[fi] = getDataWidth(fi, [min, max]);
         });
-
         $p.getDataWidth = getDataWidth;
-
         console.log($p.dataDimension, $p.dataSize);
-
         $p.deriveDomains = new Array($p.deriveMax).fill([0, 1]);
         $p.deriveWidths = new Array($p.deriveMax).fill(1);
         $p.deriveFieldCount = 0;
-
 
         if ($p.indexes.length === 0) {
             $p.attribute("aDataIdx", "float", utils.seqFloat(0, $p.dataDimension[0] - 1));
@@ -98,10 +92,10 @@ define(function(require){
             });
         }
 
-        $p.attribute("aDataItemId", "float", utils.seqFloat(0, $p.dataSize - 1));
         $p.attribute("aDataItemVal0", "float", null);
         $p.attribute("aDataItemVal1", "float", null);
-        $p.attribute("aDataFieldId", "vec2", utils.seqFloat(0, $p.fields.length * 2));
+        $p.attribute("aDataItemId", "float", new Float32Array($p.dataSize).map((d,i)=>i));
+        $p.attribute("aDataFieldId", "vec2", new Float32Array($p.fields.length * 2).map((d,i)=>i));
         $p.attribute("aVertexId", "float", [0, 1, 2, 3, 4, 5]);
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aVertexId.location, 0);
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataFieldId.location, 0);
@@ -125,8 +119,8 @@ define(function(require){
         $p.uniform("uGroupFields", "int", [0, -1]);
         $p.uniform("uDataInput", "sampler2D");
         $p.uniform("uDeriveCount", "int", $p.deriveMax);
-        $p.uniform("uDeriveDomains", "vec2", $p.deriveDomains);
-        $p.uniform("uDeriveWidths", "float", $p.deriveWidths);
+        // $p.uniform("uDeriveDomains", "vec2", $p.deriveDomains);
+        // $p.uniform("uDeriveWidths", "float", $p.deriveWidths);
 
         $p.varying("vResult", "float");
         $p.varying("vDiscardData", "float");
@@ -155,23 +149,32 @@ define(function(require){
             );
         });
 
+        //TODO: get data statistics using the GPU
+        if(stats !== null) {
+            $p.fieldDomains = $p.fields.map(function(k, i) {
+                return [stats[k].min, stats[k].max];
+            })
+            .concat(new Array($p.deriveMax).fill([0, 1]));
+
+            $p.uniform("uFieldDomains", "vec2",  $p.fieldDomains);
+
+        } else {
+            $p.uniform("uFieldDomains", "vec2",  $p.fields.map(f => [0, 1]));
+        }
+
+
         // $p.texture.tData.sampler = $p.uniform.uDataInput;
         $p.uniform.uDataInput = $p.texture.tData;
 
         function getFieldWidth($int_fid) {
-            if (fid >= this.uFieldCount + this.uIndexCount) {
-                return this.uDeriveWidths[fid - this.uFieldCount - this.uIndexCount];
-            } else {
-                return this.uFieldWidths[fid];
-            }
+
+            return this.uFieldWidths[fid];
         }
 
         function getFieldDomain($int_fid) {
-            if (fid >= this.uFieldCount + this.uIndexCount) {
-                return this.uDeriveDomains[fid - this.uFieldCount - this.uIndexCount];
-            } else {
-                return this.uFieldDomains[fid];
-            }
+
+            return this.uFieldDomains[fid];
+
         }
 
         function getData($int_fid, $float_r, $float_s) {
@@ -215,33 +218,5 @@ define(function(require){
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
 
-        //TODO: get data statistics using the GPU
-        if(stats !== null) {
-            $p.fieldDomains = $p.fields.map(function(k, i) {
-                return [stats[k].min, stats[k].max];
-            });
-            $p.uniform("uFieldDomains", "vec2",  $p.fieldDomains);
-        } else {
-            $p.uniform("uFieldDomains", "vec2",  $p.fields.map(f => [0, 1]));
-        }
-
-        $p.getGroupKeyDimension = function(ids) {
-            var dim = [1, 1];
-            // console.log($p.deriveWidths, fieldCount, $p.indexes.length);
-            if (ids[0] !== -1) {
-                dim[0] = (ids[0] < $p.fieldCount + $p.indexes.length) ?
-                    $p.fieldWidths[ids[0]] :
-                    $p.deriveWidths[ids[0] - $p.fieldCount - $p.indexes.length];
-            }
-
-            if (ids[1] !== -1) {
-                dim[1] = (ids[1] < $p.fieldCount + $p.indexes.length) ?
-                $p.fieldWidths[ids[1]] :
-                $p.deriveWidths[ids[1] - $p.fieldCount - $p.indexes.length];
-            // console.log(ids[0], $p.fieldWidths[ids[0]] );
-            }
-
-            return dim;
-        }
     }
 })

@@ -12,27 +12,24 @@
             "MotherEdu"    : "string",
             "MotherHeight" : "float",
             "MotherWeight" : "float",
-            "MotherWgtGain": "float",
-            "FatherAge"    : "int",
-            "FatherRace"   : "string",
-            "FatherEdu"    : "string"
+            "MotherWgtGain": "float"
         }
     },
     "pipeline": [
         {
             "$select": {
-                "BabyWeight": [0, 18],
-                "MotherWeight": [70, 380]
+                "BabyWeight": [0, 15],
+                "MotherWeight": [70, 370]
             }
         },
         {
             "$visualize": {
-                "id": "chart",
-                "mark": "dot",
+                "mark": "circle",
+                "size": 10,
                 "color": "red",
+                "opacity": "auto",
                 "x": "MotherWeight",
-                "y": "BabyWeight",
-                "perceptual": 1
+                "y": "BabyWeight"
             }
         }
     ]

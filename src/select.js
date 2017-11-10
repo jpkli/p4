@@ -56,14 +56,10 @@ define(function(){
     return function program($p) {
         const SELECT_MAX = 500;
         var select = {},
-            fields = $p.fields,
             dataDimension = $p.uniform.uDataDim.data,
-            fieldCount = fields.length,
-            fieldTotal = $p.uniform.uDeriveCount.data + fields.length,
-            filterControls = new Array(fieldTotal).fill(0),
-            filterRanges = $p.fieldDomains.concat(
-                $p.deriveDomains
-            ),
+            fieldCount = $p.fields.length,
+            filterControls = new Array(fieldCount).fill(0),
+            filterRanges = $p.fieldDomains,
             inSelections = new Array(SELECT_MAX);
 
         $p.uniform("uFilterControls","int", filterControls)
@@ -72,10 +68,6 @@ define(function(){
             .uniform("uInSelections", "float", Float32Array.from(inSelections))
             .uniform("uSelectMax", "int", SELECT_MAX)
             .uniform("uSelectCount", "int", 0);
-
-        // $p.env({
-        //     selectMax: SELECT_MAX
-        // })
 
         var filter = {
             vs: $p.shader.vertex(vertexShaderFilter),
@@ -121,7 +113,6 @@ define(function(){
                 selectFields.forEach(function(k){
                     var fieldId = fields.indexOf(k);
 
-
                     if($p.categoryIndex.hasOwnProperty(k)) {
                         inSelections = spec[k].$in
                         .slice(0, SELECT_MAX)
@@ -129,8 +120,6 @@ define(function(){
                     } else {
                         inSelections = spec[k].$in.slice(0, SELECT_MAX);
                     }
-
-                    console.log(inSelections);
 
                     $p.uniform.uSelectCount = spec[k].$in.length;
                     $p.uniform.uInSelections = Float32Array.from(inSelections);
@@ -148,7 +137,7 @@ define(function(){
             });
 
             if(filterSelections.length){
-                filterControls = new Array(fieldTotal).fill(0);
+                filterControls = new Array(fieldCount).fill(0);
 
                 filterSelections.forEach(function(k){
                     var fieldId = fields.indexOf(k);
@@ -195,27 +184,19 @@ define(function(){
             });
 
             $p.uniform.uFilterFlag = 1;
-            filterRanges = $p.fieldDomains.concat(
-                $p.deriveDomains
-            );
+            filterRanges = $p.fieldDomains.slice();
             var newDomains = _execute(spec);
             if(!$p._update){
-                console.log('checking filter domains', newDomains);
-                newDomains.forEach(function(range, fid) {
-                    if (fid < $p.fieldCount + $p.indexes.length) {
-                        $p.fieldDomains[fid] = range;
-                        $p.fieldWidths[fid] = $p.getDataWidth(fid, range);
-                    } else {
-                        var di = fid - $p.fieldCount - $p.indexes.length;
-                        $p.deriveDomains[di] = range;
-                        $p.deriveWidths[di] = range[1] - range[0] + 1;
-                    }
+                // console.log('checking filter domains', newDomains);
+                newDomains.forEach(function(domain, fid) {
+                    var d = domain;
+                    if($p.dtypes[fid] == 'int') d[1] -= 1;
+                    $p.fieldDomains[fid] = d;
+                    $p.fieldWidths[fid] = $p.getDataWidth(fid, d);
                 });
 
                 $p.uniform.uFieldDomains.data = $p.fieldDomains;
                 $p.uniform.uFieldWidths.data = $p.fieldWidths;
-                $p.uniform.uDeriveDomains.data = $p.deriveDomains;
-                $p.uniform.uDeriveWidths.data = $p.deriveWidths;
             }
         }
 
