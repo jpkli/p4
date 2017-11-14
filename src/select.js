@@ -97,7 +97,6 @@ define(function(){
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
             if(selectFields.length) {
-                console.log(dataDimension);
                 gl = $p.program("select");
                 gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
@@ -182,7 +181,7 @@ define(function(){
                     spec[k] = {$in: spec[k]};
                 }
             });
-
+            console.log('filter spec::::::::::', spec);
             $p.uniform.uFilterFlag = 1;
             filterRanges = $p.fieldDomains.slice();
             var newDomains = _execute(spec);

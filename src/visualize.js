@@ -2,24 +2,17 @@ define(function(require){
     var colors = require('./color'),
         ctypes = require('./ctypes'),
         render = require('./render'),
-        reveal = require('./reveal'),
-        chart = require('./chart/chart');
+        reveal = require('./reveal');
 
-    const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size']
+    const Chart = require('./chart/chart');
+    const Brush = require('./chart/brush');
 
-    function seq(dtype, start, end, interval) {
-        var step = interval || 1,
-            size = (end - start) / step + 1,
-            buf;
+    const interact = require('./interact');
 
-        buf = new ctypes[dtype](size);
-        for(var i = 0; i < size; i++) {
-            buf[i] = start + i * step;
-        }
-        return buf;
-    }
+    const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
+    const userActions = ['click', 'hover', 'brush', 'zoom', 'pan']
 
-    return function visualize($p) {
+    return function ($p) {
 
         var colorManager = colors($p),
             padding = $p.padding || {left: 0, right: 0, top: 0, bottom: 0},
@@ -28,7 +21,7 @@ define(function(require){
                 $p.viewport[1],
             ];
 
-        var vis = new chart({
+        var vis = new Chart({
             container: $p.container,
             width: viewport[0] + padding.left + padding.right,
             height: viewport[1] + padding.top + padding.bottom,
@@ -36,11 +29,15 @@ define(function(require){
             padding: padding
         });
 
-        $p.visLayers = vis;
-
+        // $p.visLayers = vis;
         $p.uniform('uVisualEncodings','int',   new Array(visualEncodings.length).fill(-1))
+            .uniform('uViewDim',        'vec2',  $p.viewport)
+            .uniform('uVisShape',       'int',   1)
+            .uniform('uInterleaveX',    'int',   0)
             .uniform('uVisDomains',     'vec2',  $p.fieldDomains)
             .uniform('uVisLevel',       'float', 1.0)
+            .uniform('uVisScale',       'vec2', [1.0, 1.0])
+            .uniform('uPosOffset',      'vec2', [0.0, 0.0])
             .uniform('uFeatureCount',   'int',   0)
             .uniform('uMarkSize',       'float', 10.0)
             .uniform('uDefaultAlpha',   'float', 1.0)
@@ -49,8 +46,6 @@ define(function(require){
             .uniform('uMaxRGBA',        'vec4',  [0, 0, 0, 0])
             .uniform('uDefaultColor',   'vec3',  [0.8, 0, 0])
             .uniform('uColorMode',      'int',   1)
-            .uniform('uViewDim',        'vec2',  $p.viewport)
-            .uniform('uVisShape',       'int',   1)
             .varying('vColorRGBA',      'vec4'   )
 
         var enhance = reveal($p);
@@ -62,14 +57,12 @@ define(function(require){
 
         var renderer = require('./render')($p);
 
-        var svgViews = [];
-
-        function updateInstancedAttribute(fields, vm) {
+        function updateInstancedAttribute(vm) {
             if(Array.isArray(vm)){
                 $p.uniform.uFeatureCount = vm.length;
                 var fv = new Float32Array(vm.length*2);
                 vm.forEach(function(f, i) {
-                    fv[i*2] = fields.indexOf(f);
+                    fv[i*2] = $p.fields.indexOf(f);
                     fv[i*2+1] = i;
                 });
                 $p.attribute.aDataFieldId = fv;
@@ -80,39 +73,35 @@ define(function(require){
             var vmap = options.vmap || {},
                 mark = options.mark || vmap.mark || 'line',
                 data = options.data || null,
-                fields = options.fields,
-                domains = options.domains,
-                dataDim = options.dataDim,
-                width = options.width || viewport[0],
-                height = options.height || viewport[1],
-                offset = options.offset || [0, 0],
                 perceptual = vmap.perceptual || false,
-                update = vmap.update || false,
                 interaction = options.interaction,
-                viewLevel = options.viewLevel,
-                categories = options.categories,
-                intervals = options.intervals,
                 viewOrder = options.viewOrder;
 
+            var visDimension = vmap.viewport || [$p.views[viewOrder].width, $p.views[viewOrder].height] || viewport,
+                width = visDimension[0],
+                height =  visDimension[1],
+                offset = $p.views[viewOrder].offset || [0, 0];
 
-            var vmapX = fields.indexOf(vmap.x),
-                vmapY = fields.indexOf(vmap.y),
-                vmapColor = fields.indexOf(vmap.color),
-                vmapAlpha = fields.indexOf(vmap.alpha);
 
             var visDomain = {},
                 visMark = vmap.mark || 'point',
                 renderMode = 'instancedXY';
 
-
-            fields.forEach(function(f, i){
+            $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
+                visDomain[f][0] *= $p.uniform.uVisScale.data[0];
+                visDomain[f][1] *= $p.uniform.uVisScale.data[1];
             });
 
             var gl;
 
             if(Array.isArray(vmap.x) || Array.isArray(vmap.y)) {
                 renderMode = 'interleave';
+                if(Array.isArray(vmap.x)){
+                    // vmap.x = vmap.x.reverse();
+                    $p.uniform.uInterleaveX = 0;
+                }
+                if(Array.isArray(vmap.y)) $p.uniform.uInterleaveX = 1;
             } else if(vmap.mark && vmap.mark == 'rect') {
                 renderMode = 'polygon';
             }
@@ -128,17 +117,17 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
             } else if(renderMode == 'interleave') {
-                updateInstancedAttribute(fields, vmap.x);
-                updateInstancedAttribute(fields, vmap.y);
+                updateInstancedAttribute(vmap.x);
+                updateInstancedAttribute(vmap.y);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataFieldId.location, 0);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemId.location, 1);
             } else {
                 var val0 = new Float32Array($p.dataSize),
                     val1 = new Float32Array($p.dataSize);
-                for(var y = 0; y < dataDim[1]; y++) {
-                    for(var x = 0; x < dataDim[0]; x++) {
-                        val0[y*dataDim[0] + x] = $p.attribute.aDataValx.data[x];
-                        val1[y*dataDim[0] + x] = $p.attribute.aDataValy.data[y];
+                for(var y = 0; y < $p.dataDimension[1]; y++) {
+                    for(var x = 0; x < $p.dataDimension[0]; x++) {
+                        val0[y*$p.dataDimension[0] + x] = $p.attribute.aDataValx.data[x];
+                        val1[y*$p.dataDimension[0] + x] = $p.attribute.aDataValy.data[y];
                     }
                 }
                 $p.attribute.aDataItemVal0 = val0;
@@ -154,7 +143,7 @@ define(function(require){
 
             var vmapIndex = new Int32Array(visualEncodings.length);
             visualEncodings.forEach(function(code, codeIndex){
-                vmapIndex[codeIndex] = fields.indexOf(vmap[code]);
+                vmapIndex[codeIndex] = $p.fields.indexOf(vmap[code]);
             })
 
             $p.uniform.uVisualEncodings = vmapIndex;
@@ -186,7 +175,7 @@ define(function(require){
 
                 if(!vmap.height && vmap.y) {
                     $p.uniform.uDefaultHeight = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] );
-                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == 'number') {
+                } else if(vmapIndex[5] === -1 && typeof(vmap.width) == 'number') {
                     $p.uniform.uDefaultHeight = vmap.height / height;
                 }
             }
@@ -216,6 +205,7 @@ define(function(require){
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
                 gl.blendFunc( gl.ONE, gl.ONE );
             } else {
+                // gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
                 gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
                 // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
             }
@@ -238,7 +228,7 @@ define(function(require){
                 height: height,
                 vmap: vmap,
                 onclick: interaction,
-                categories: categories,
+                categories: $p.categoryLookup,
                 left: offset[0],
                 top: viewport[1] - height - offset[1]
             };
@@ -282,22 +272,28 @@ define(function(require){
             if(mark == 'bar') {
                 var result = $p.readResult('row');
                 viewSetting.data = result;
-                viewSetting.fields = fields;
-                if(intervals.hasOwnProperty(vmap.x))
+                viewSetting.fields = $p.fields;
+                if($p.intervals.hasOwnProperty(vmap.x))
                     viewSetting.isHistogram = true;
             }
-            console.log('vis domain ::::', $p.uniform.uVisDomains.data);
+            // console.log('vis domain ::::', $p.uniform.uVisDomains.data);
+            //                 $p.uniform.uVisDomains = $p.uniform.uFieldDomains.data.slice();
+
+            //TODO: Maybe just save the needed data domains instead of copying all
             if(!$p._update) {
-                domains = $p.uniform.uFieldDomains.data.slice();
-                $p.uniform.uVisDomains = domains;
-                if(svgViews[viewOrder])
-                    svgViews[viewOrder].svg.remove();
-                svgViews[viewOrder] = vis.addLayer(viewSetting);
+                var pv = $p.views[viewOrder];
+                pv.domains = $p.uniform.uFieldDomains.data.slice();
+                $p.uniform.uVisDomains = pv.domains;
+
+                if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function')
+                    pv.chart.svg.remove();
+                pv.chart = vis.addLayer(viewSetting);
 
             } else {
+                $p.uniform.uVisDomains = $p.views[viewOrder].domains;
                 if(mark == 'bar'){
                     var result = $p.readResult('row');
-                    svgViews[viewOrder].update({
+                    $p.views[viewOrder].chart.update({
                         data: result
                     })
                 }
@@ -315,21 +311,28 @@ define(function(require){
                 } else if(renderMode == 'polygon'){
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
                 } else {
-                    gl.ext.drawArraysInstancedANGLE(primitive, 0, dataDim[0], dataDim[1]);
+                    gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
                 }
             }
 
             if(mark!='bar') draw();
-
-            if(perceptual)
-                enhance(viewport);
-
-
+            if(perceptual) enhance([width, height]);
             $p.bindFramebuffer(null);
 
+            if(!$p._update) {
+                var actions = Object.keys(vmap)
+                    .filter(function(act){ return userActions.indexOf(act) !== -1});
+
+                interact($p, {
+                    actions: actions,
+                    vis: $p.views[viewOrder],
+                    callback: interaction
+                });
+
+            }
         }
+
         viz.chart = vis;
         return viz;
-
     }
 });

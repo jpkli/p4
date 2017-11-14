@@ -18,6 +18,13 @@
                 "name": "Heatmap",
                 "file": "heatmap.json"
             }
+        ],
+        "views": [
+            {
+                "width": 600,
+                "height": 560,
+                "offset": [0, 80]
+            }
         ]
     },
     {
@@ -46,7 +53,7 @@
             },
             {
                 "name": "Bushing and Linking",
-                "file": "scatter-plot.json"
+                "file": "crossfiltering.json"
             },
             {
                 "name": "Focus + Context",

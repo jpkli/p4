@@ -6,8 +6,6 @@ define(function(require){
         var option      = arg || {},
             svg         = option.container || option.parent,
             dim         = option.dim || "x",
-            labelPos    = option.labelPos || option.labelPosition || {x: 0, y: 0},
-            labelAngel  = option.labelAngle || option.labelAngel || 0,
             color       = option.color || "#000",
             position    = option.position || 0,
             align       = option.align || "",
@@ -19,10 +17,10 @@ define(function(require){
             height      = option.height || svg.innerHeight(),
             padding     = option.padding || svg.padding() || {left: 0, right: 0, top: 0, bottom: 0},
             range       = option.range || (dim == "x") ? [0, width] : [height, 0],
-            styles      = {stroke: color, 'stroke-width': 0.7},
+            styles      = {stroke: color, 'stroke-width': 1},
             ticks       = option.ticks,
             tickLength  = option.tickLength || 6,
-            tickPosition = option.tickPosition || [0, 0],
+            tickPosition = option.tickPosition || false,
             tickInterval= option.tickInterval || "auto",
             tickAlign = option.tickAlign || "center",
             skipLast = option.skipLast || false,
@@ -31,14 +29,39 @@ define(function(require){
             format      = option.format || function(_){return _;},
             visable    = option.visable || true,
             domainIntervals,
+            labelPos    = null,
+            labelAngle  = option.labelAngle || 0,
             X = [],
             Y = [];
 
-
-
         if(typeof(ticks) != "number") {
-            ticks = (dim == "x") ? Math.ceil(width/60) : Math.ceil(height/60);
+            ticks = (dim == "x") ? Math.ceil(width/50) : Math.ceil(height/50);
         }
+        var tickLabelAlign = option.tickLabelAlign || "end";
+        switch (align) {
+            case "left" || "center":
+                labelPos = option.labelPos || {x: -tickLength/2, y: -5};
+                tickLabelAlign =  option.tickLabelAlign ||"end";
+                break;
+            case "right":
+                labelPos = {x: tickLength, y: -5};
+                tickLabelAlign = option.tickLabelAlign || "start";
+                if(!tickPosition) tickPosition = [ tickLength/2, 0];
+                break;
+            case "top":
+                labelPos = {x: 0, y: 0};
+                tickLabelAlign = "middle";
+                if(!tickPosition) tickPosition = [0, -tickLength];
+                break;
+            case "bottom" || "middle":
+                labelPos = option.labelPos || {x: 0, y: -tickLength*3};
+                tickLabelAlign =  option.tickLabelAlign || "middle";
+                break;
+            default:
+                labelPos = option.labelPos || option.labelPosition || {x: 0, y: 0};
+                break;
+        }
+        if(!tickPosition) tickPosition = [0,0];
 
         function getTickInterval(){
             var vDomain = Math.abs(domain[1] - domain[0]),
@@ -179,10 +202,9 @@ define(function(require){
                     y2: y2,
                 }, styles);
 
-                var tickLabelAlign = "end";
-                if(align=="right") tickLabelAlign = "begin";
-                if (dim == 'x') tickLabelAlign = "middle";
-                if (dim == 'x' && labelAngel) tickLabelAlign = "end";
+
+                // if (dim == 'x') tickLabelAlign = "middle";
+                // if (dim == 'x' && labelAngle) tickLabelAlign = "end";
 
                 var tickLabel = svgTicks.append("text")
                     .Attr({
@@ -190,10 +212,10 @@ define(function(require){
                         y: y2 - labelPos.y,
                         // class: "labels",
                         class: "i2v-axis-label",
-                        "font-size": "1.0em",
+                        "font-size": "0.9em",
                         textAnchor: tickLabelAlign
                     });
-                if(labelAngel) tickLabel.attr("transform", "rotate(" + [labelAngel, (x2 + labelPos.x), (y2 - labelPos.y)].join(",")+")");
+                if(labelAngle) tickLabel.attr("transform", "rotate(" + [labelAngle, (x2 + labelPos.x), (y2 - labelPos.y)].join(",")+")");
 
                 var labelText = (typeof(tickFormat) == "function") ? format(tickFormat(di[i])) : format(di[i]) ;
                 // tickLabel.appendChild( document.createTextNode(labelText) );
@@ -210,7 +232,19 @@ define(function(require){
                         gx1 = 0;
                         gx2 = width;
                     }
-                    axis.append("line", {x1: gx1, x2: gx2, y1: gy1, y2: gy2, class: "grid-lines"}, styles);
+                    axis.append("line",
+                        {
+                            x1: gx1,
+                            x2: gx2,
+                            y1: gy1,
+                            y2: gy2,
+                            class: "grid-lines"
+                        },
+                        {
+                            "stroke": color,
+                            // "stroke-width": 0.5,
+                            "stroke-opacity": 0.33
+                        });
                 }
             }
             axis.translate(padding.left, padding.top);

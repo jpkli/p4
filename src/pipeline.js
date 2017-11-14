@@ -18,6 +18,7 @@ define(function(require) {
             rerun = false;
 
         var $p = config(options);
+
         $p.getResult = function() {};
 
         function addToPipeline(opt, arg) {
@@ -44,6 +45,16 @@ define(function(require) {
             pipeline.register('__init__');
 
             return pipeline;
+        }
+
+        pipeline.view = function(views) {
+            $p.views.forEach(function(v){
+                if(v.hasOwnProperty('chart')) {
+                    v.chart.svg.remove();
+                    delete v.chart;
+                }
+            })
+            $p.views = views;
         }
 
         pipeline.register = function(tag) {
@@ -136,7 +147,7 @@ define(function(require) {
 
             var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
             var binInterval = (binDomain[1] - binDomain[0]) / binCount;
-            console.log('Bin Info:::', binCount, binInterval);
+
             var histFunction = (function() {max(ceil((binAttr - binMin) / float(binInterval)), 1.0)})
                 .toString()
                 .slice(13, -1) // remove "function () {" from function.toString
@@ -191,8 +202,6 @@ define(function(require) {
 
             //TODO: support JS function as expression for deriving new variable
             //.replace(/function\s*[\w|\d]+\s*\((.+)\)/g, "$1")
-
-            //TODO: recompile the kernel for derive by checking if deriving equations/functions changed.
             // if (!opt.hasOwnProperty('derive')) {
                 opt.derive = optDerive($p, spec);
             // }
@@ -209,31 +218,28 @@ define(function(require) {
 
         pipeline.visualize = function(vmap) {
             var optID = addToPipeline('visualize', vmap);
-            var viewDim = viewDim || $p.viewport;
+            var viewIndex = 0,
+                filters = {};
 
-            var filters = {};
             if(typeof vmap.id == 'string') {
-                var viewIndex = $p.viewNames.indexOf(vmap.id);
-                if( viewIndex == -1) {
-                    $p.viewNames.push(vmap.id);
-                    vmap.id = $p.viewNames.length - 1;
-                } else {
-                    vmap.id = viewIndex;
+                viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
+                if(viewIndex == -1) {
+                    //find next available view slot in all views
+                    for(var vi = 0; vi < $p.views.length; vi++){
+                        if(!$p.views[vi].id) {
+                            viewIndex = vi;
+                            $p.views[viewIndex].id = vmap.id;
+                            break;
+                        }
+                    }
                 }
-            }
 
-            if(!vmap.id) vmap.id = 0
+            }
+            $p.views[viewIndex].vmap = vmap;
 
             var viewOptions = {
                 vmap: vmap,
-                fields: $p.fields,
-                dataDim: $p.dataDimension,
-                categories: $p.categoryLookup,
-                intervals: $p.intervals,
-                viewOrder: vmap.id,
-                width: $p.views[vmap.id].width,
-                height: $p.views[vmap.id].height,
-                offset: $p.views[vmap.id].offset
+                viewOrder: viewIndex
             };
 
             if(!rerun) {
@@ -249,34 +255,41 @@ define(function(require) {
                 }
                 else if($p.interaction == 'auto') {
                     viewOptions.interaction = function(selection) {
-                        console.log('selections:::::::::', selection);
+                        // console.log('selections:::::::::', selection);
                         // $p._update = true;
                         rerun = true;
-                        Object.keys(selection).forEach(function(k) {
-                            if(selection[k].length < 2) {
-                                if($p.intervals.hasOwnProperty(k)) {
-                                    var value = (Array.isArray(selection[k]))
-                                        ? selection[k][0]
-                                        : selection[k];
-                                    d[k] = [value-$p.intervals[k].interval, value];
+                        if(typeof selection == 'object') {
+                            Object.keys(selection).forEach(function(k) {
+                                if(selection[k].length < 2) {
+                                    if($p.intervals.hasOwnProperty(k)) {
+                                        var value = (Array.isArray(selection[k]))
+                                            ? selection[k][0]
+                                            : selection[k];
+                                        selection[k] = [value-$p.intervals[k].interval, value];
+                                    } else if(!$p.categoryLookup.hasOwnProperty(k)) {
+                                        selection[k] = [selection[k][0] + selection[k][0] + 1];
+                                    }
+                                }
+                                $p.crossfilters[k] = selection[k];
+                            });
+
+                            pipeline.update();
+                            // console.log('$p.crossfilters::::::', $p.crossfilters, $p.fieldDomains);
+
+                            var operations = $p.pipeline.slice(0, optID);
+
+                            for (var i = 0, l = $p.pipeline.length; i < l; i++) {
+                                var p = $p.pipeline[i];
+                                if(Object.keys(p)[0] == 'filter') {
+                                    Object.keys(selection).forEach(function(k) {
+                                        p.filter[k] = selection[k];
+                                    });
+
+                                    break;
                                 }
                             }
-                            $p.crossfilters[k] = selection[k];
-                        });
-                        pipeline.update();
-                        // console.log('$p.crossfilters::::::', $p.crossfilters, $p.fieldDomains);
-
-                        var operations = $p.pipeline.slice(0, optID);
-
-                        for (var i = 0, l = $p.pipeline.length; i < l; i++) {
-                            var p = $p.pipeline[i];
-                            if(Object.keys(p)[0] == 'filter') {
-                                Object.keys(selection).forEach(function(k) {
-                                    p.filter[k] = selection[k];
-                                });
-
-                                break;
-                            }
+                        } else {
+                            pipeline.update();
                         }
 
                         pipeline.run();
@@ -295,7 +308,6 @@ define(function(require) {
             }
 
             opt.visualize(viewOptions);
-
             return pipeline;
         }
 

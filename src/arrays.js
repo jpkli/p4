@@ -1,5 +1,3 @@
-if (typeof(define) !== 'function') var define = require('amdefine')(module);
-
 define(function Arrays(require) {
     "use strict;"
     var array = {};

@@ -68,13 +68,60 @@ define(function(require){
             console.log(metadata);
             var dsl = {
                 container: "main-vis",
-                viewport: [800, 560],
-                padding: {left: 80, right: 80, top: 40, bottom: 100},
+                viewport: [900, 800],
+                padding: {left: 50, right: 40, top: 40, bottom: 50},
                 data: data
             };
 
             program = P4GL(dsl);
-            $('.example-list .active').trigger('click');
+            $.getJSON('examples/examples.json', function(examples){
+                examples.forEach(function(ex, ei){
+                    var div = $('<div/>').addClass('sidebar-module'),
+                        h4 = $('<h4/>').text(ex.category),
+                        ul = $('<ul/>').addClass('list-unstyled example-list');
+
+                        if(ex.hasOwnProperty('views')) {
+                            program.view(ex.views);
+                        }
+                    ex.examples.forEach(function(item, ii){
+
+
+                        var itemLink = $('<a/>').attr('href', '#').text(item.name);
+                        ul.append($('<li/>').append(itemLink));
+                        itemLink.click(function(){
+                            editor.setValue("");
+                            $('.example-list .active').removeClass('active');
+                            $(this).addClass('active');
+                            $.ajax({
+                                url: 'examples/' + item.file,
+                                dataType: 'text',
+                            })
+                            .done(function(json){
+                                var spec = JSON.parse(json);
+                                if(spec.hasOwnProperty('views')) {
+                                    program.view(spec.views);
+                                } else if(ex.hasOwnProperty('views')) {
+                                    program.view(ex.views);
+                                }
+                                editor.session.insert({row:0, column: 0}, json);
+                                program.runSpec(spec.pipeline);
+                            })
+                        })
+
+                        if(ei === 0 && ii === 0) {
+                            itemLink.addClass('active');
+
+                        }
+                    })
+
+                    div.append(h4);
+                    div.append(ul);
+                    $('#list-examples').append(div);
+                })
+                $('.example-list .active').trigger('click');
+            })
+
+
         })
 
         // var data = genData({
@@ -91,46 +138,12 @@ define(function(require){
         // };
 
 
-        var currentExample;
 
-        $.getJSON('examples/examples.json', function(examples){
-            currentExample = examples[0];
-            examples.forEach(function(ex, ei){
-                var div = $('<div/>').addClass('sidebar-module'),
-                    h4 = $('<h4/>').text(ex.category),
-                    ul = $('<ul/>').addClass('list-unstyled example-list');
-
-                ex.examples.forEach(function(item, ii){
-                    var itemLink = $('<a/>').attr('href', '#').text(item.name);
-                    ul.append($('<li/>').append(itemLink));
-                    itemLink.click(function(){
-                        editor.setValue("");
-                        $('.example-list .active').removeClass('active');
-                        $(this).addClass('active');
-                        $.ajax({
-                            url: 'examples/' + item.file,
-                            dataType: 'text',
-                        })
-                        .done(function(spec){
-                            editor.session.insert({row:0, column: 0}, spec);
-                            program.runSpec(JSON.parse(spec).pipeline);
-                        })
-                    })
-
-                    if(ei === 0 && ii === 0) {
-                        itemLink.addClass('active');
-
-                    }
-                })
-
-                div.append(h4);
-                div.append(ul);
-                $('#list-examples').append(div);
-            })
-        })
 
         $('#run-spec').click(function(){
-            program.runSpec(JSON.parse(editor.getValue()).pipeline);
+            var spec = JSON.parse(editor.getValue());
+            if(spec.hasOwnProperty('views')) program.view(spec.views);
+            program.runSpec(spec.pipeline);
 
         })
     };

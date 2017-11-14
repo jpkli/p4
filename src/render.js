@@ -11,9 +11,9 @@ define(function(){
     ){
         var value;
         var d = new Vec2();
+        var s = new Vec2();
         d = this.uVisDomains[fieldId];
         if(fieldId >= this.uIndexCount) {
-
             value = this.getNonIndexedData(fieldId, addrX, addrY);
             value = (value - d.x) / (d.y - d.x);
         } else if(fieldId > -1 && fieldId < this.uIndexCount) {
@@ -46,8 +46,16 @@ define(function(){
         color = this.visMap(this.uVisualEncodings[2], i, j, this.aDataValx, this.aDataValy, -1.0,  0.0);
         alpha = this.visMap(this.uVisualEncodings[3], i, j, this.aDataValx, this.aDataValy, this.uDefaultAlpha, 0.0);
         size = this.visMap(this.uVisualEncodings[6], i, j, this.aDataValx, this.aDataValy, 1.0,  0.0);
+
+
+        posX *= this.uVisScale.x;
+        posY *= this.uVisScale.y;
+        posX += this.uPosOffset.x;
+        posY -= this.uPosOffset.y;
         posX = posX * 2.0 - 1.0;
         posY = posY * 2.0 - 1.0;
+
+
 
         rgb = (color == -1.0) ? this.uDefaultColor : texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
         gl_PointSize = size * this.uMarkSize;
@@ -66,13 +74,15 @@ define(function(){
             if(this.vResult == this.uVisLevel) {
                 gl_FragColor = vec4(this.vColorRGBA.rgb, alpha);
             } else {
-                gl_FragColor = vec4(0.9, 0.9, 0.9, alpha);
+                discard;
+                // gl_FragColor = vec4(vec3(0.9, 0.9, 0.9), alpha);
             }
         } else {
             if(this.vResult == this.uVisLevel) {
                 gl_FragColor = vec4(this.vColorRGBA.rgb * this.vColorRGBA.a,  this.vColorRGBA.a);
             } else {
-                gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);
+                discard;
+                // gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);
             }
         }
 
@@ -93,11 +103,11 @@ define(function(){
                 this.vResult = 0.0;
         }
 
-        if(this.uVisualEncodings[0] == -1) {
+        if(this.uInterleaveX == 1) {
             posX = this.aDataFieldId.y / float(this.uFeatureCount-1);
             posY = this.visMap(int(this.aDataFieldId.x), i, j, i, j, 1.0,  0.0);
         } else {
-            posY = this.aDataFieldId.y / float(this.uFeatureCount-1);
+            posY = 1.0 - this.aDataFieldId.y / float(this.uFeatureCount-1);
             posX = this.visMap(int(this.aDataFieldId.x), i, j, i, j, 1.0,  0.0);
         }
         color = this.visMap(this.uVisualEncodings[2], i, j, i, j, -1.0,  0.0);
@@ -151,11 +161,14 @@ define(function(){
         width = this.visMap(this.uVisualEncodings[4], i, j,  val0, val1, this.uDefaultWidth, 0.0);
         height = this.visMap(this.uVisualEncodings[5], i, j,  val0, val1, this.uDefaultHeight, 0.0);
         size = this.visMap(this.uVisualEncodings[6], i, j, val0, val1, this.uMarkSize,  0.0);
-
         posX = posX * (this.uFieldWidths[this.uVisualEncodings[0]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[0]];
         posY = posY * (this.uFieldWidths[this.uVisualEncodings[1]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[1]];
 
-        posY -= height;
+        // width *= 0.98;
+        // height *= 0.98;
+        // posX += 0.01*width;
+        // posY -= 0.01*height;
+
         if(this.aVertexId == 0.0 || this.aVertexId == 3.0) {
             posX = posX * 2.0 - 1.0;
             posY = posY * 2.0 - 1.0;
@@ -172,8 +185,6 @@ define(function(){
             posX = posX * 2.0 - 1.0;
             posY = posY * 2.0 - 1.0;
         }
-
-
 
         rgb = (color == -1.0) ? this.uDefaultColor : texture2D(this.tColorGraident, vec2(color, 1.0)).rgb;
         this.vColorRGBA = vec4(rgb*alpha, alpha);

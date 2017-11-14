@@ -1,14 +1,11 @@
-if (typeof(define) !== 'function') var define = require('amdefine')(module);
-
 define(function(require){
     "use strict";
-    var Viz = require('./base'),
+    var WebVis = require('./base'),
         Axis = require('./axis'),
-        Selector = require('./selector'),
         format = require('./format'),
         scale = require('./scale');
 
-    return Viz.extend(function Chart(option){
+    return WebVis.extend(function Chart(option){
         var chart = this,
             canvas = option.canvas,
             svg = this.$svg(),
@@ -38,17 +35,12 @@ define(function(require){
                 marks = [];
 
             var scaleX = options.scaleX || 'linear',
-                domainX = options.domainX || domain[vmap.x],
+                domainX = options.domainX || domain[vmap.x] || domain[vmap.width],
                 scaleY = options.scaleY || 'linear',
-                domainY = options.domainY || domain[vmap.y];
+                domainY = options.domainY || domain[vmap.y] || domain[vmap.height];
 
             width -= padding.left + padding.right;
             height -= padding.top + padding.bottom;
-            var brush = {
-                brushstart: function(){},
-                brush: function(){},
-                brushend: function() {}
-            };
 
             var xAxisOption = {
                 container: plot,
@@ -58,7 +50,6 @@ define(function(require){
                 domain: domainX,
                 scale:  scaleX,
                 align: "bottom",
-                labelPos: {x: 0, y: -20},
                 // ticks: 5,
                 // grid: 1,
                 format: format(".3s"),
@@ -72,7 +63,7 @@ define(function(require){
                 width: width,
                 height: height,
                 align: "left",
-                labelPos: {x: -5, y: -5},
+                // labelPos: {x: -5, y: -5},
                 // grid: 1,
                 format: format(".3s"),
             };
@@ -86,8 +77,8 @@ define(function(require){
                     function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
                 );
                 if(maxStrLength > 10) {
-                    xAxisOption.labelAngel = -40;
-                    xAxisOption.labelPos = {x: 15, y: -10};
+                    xAxisOption.labelAngle = -15;
+                    xAxisOption.labelPos = {x: 0, y: -22};
                 }
             }
 
@@ -98,46 +89,48 @@ define(function(require){
                 }
             }
 
-            var brushOptions = {
-                width: width,
-                height: height,
-                padding: padding,
-                brushstart: null,
-                brush: null,
-                brushend: null,
-            };
-
-            var x, y, ypAxes = [];
+            var x, y, xAxes = [], yAxes = [];
 
             // For parallel coordinates
 
             if(Array.isArray(vmap.x)) {
-                var axisDist = width / (vmap.x.length-1),
-                    selectors = plot.append('g');
+                var axisDist = height / (vmap.x.length-1);
 
                 vmap.x.forEach(function(d, i) {
-                    brushOptions.container = selectors;
-                    new Selector(brushOptions);
-                    xAxisOption.position = i * axisDist;
+                    xAxisOption.position = i * axisDist + 1;
                     xAxisOption.domain = domain[d];
+                    if(categories.hasOwnProperty(d)){
+                        xAxisOption.scale = 'ordinal';
+                        xAxisOption.tickAlign = 'outer';
+                        xAxisOption.domain = categories[d].reverse();
+                    }
+                    var labelOffset = 20;
+                    if(i === 0) {
+                        xAxisOption.tickPosition = [0, -5];
+                        xAxisOption.labelPos = {x: 0, y: 2};
+                        labelOffset = 35;
+                    } else {
+                        xAxisOption.tickPosition = null;
+                        xAxisOption.labelPos = null;
+                    }
                     x = Axis(xAxisOption);
+                    xAxes[i] = x;
+
+                    labels
+                    .append("text")
+                      .attr("x", 5 )
+                      .attr("y", i * axisDist - labelOffset)
+                      .attr("dy", "1em")
+                      .css("text-anchor", "middle")
+                      .css("font-size", "1em")
+                      .text(d);
                 });
             }
 
             if(Array.isArray(vmap.y)) {
-                var axisDist = width / (vmap.y.length-1),
-                    selectors = plot.append('g');
+                var axisDist = width / (vmap.y.length-1);
 
                 vmap.y.forEach(function(d, i) {
-                    var axisSelect = selectors.append("g")
-                        .translate(axisDist * (i - 0.1), 0);
-
-                    brushOptions.brush = function(range) {
-                        var spec = {};
-                        spec[d] = range.y.reverse();
-                        onclick(spec);
-                    }
-
                     yAxisOption.position = i * axisDist;
                     yAxisOption.domain = domain[d];
                     if(categories.hasOwnProperty(d)){
@@ -146,13 +139,14 @@ define(function(require){
                         yAxisOption.domain = categories[d].reverse();
                     }
 
-                    y = Axis(yAxisOption);
-                    ypAxes[i] = y;
+                    if(i == vmap.y.length-1) {
+                        yAxisOption.tickPosition = [5, 0];
+                        yAxisOption.tickLabelAlign = "start";
+                        yAxisOption.labelPos = {x: 8, y: -5};
 
-                    brushOptions.container = axisSelect;
-                    brushOptions.y = y.invert;
-                    brushOptions.width = axisDist * 0.2,
-                    new Selector(brushOptions);
+                    }
+                    y = Axis(yAxisOption);
+                    yAxes[i] = y;
 
                     labels
                     .append("text")
@@ -161,7 +155,7 @@ define(function(require){
                       .attr("dy", "1em")
                       .css("text-anchor", "middle")
                       .css("font-size", "1em")
-                      .text(d.replace(/_/g, ' '));
+                      .text(d);
                 });
             }
 
@@ -196,8 +190,9 @@ define(function(require){
                     function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
                 );
                 if(maxStrLength > 10) {
-                    xAxisOption.labelAngel = -40;
-                    xAxisOption.labelPos = {x: 15, y: -10};
+                    xAxisOption.labelAngle = -15;
+                    xAxisOption.tickLabelAlign = 'middle';
+                    xAxisOption.labelPos = {x: 0, y: -22};
                 }
                 xAxisOption.scale = "ordinal";
                 xAxisOption.ticks = (xAxisOption.domain.length < 16)
@@ -278,29 +273,32 @@ define(function(require){
                     }
                 });
             } else {
-                if(vmap.hasOwnProperty('x')) x = Axis(xAxisOption);
-                if(vmap.hasOwnProperty('y')) y = Axis(yAxisOption);
+
+                if((vmap.x || vmap.width) && !Array.isArray(vmap.x)) x = Axis(xAxisOption);
+                if((vmap.y || vmap.height) && !Array.isArray(vmap.y)) y = Axis(yAxisOption);
             }
-            if(vmap.hasOwnProperty('x') && !Array.isArray(vmap.y)) {
+            if(vmap.hasOwnProperty('x') && !Array.isArray(vmap.x)) {
                 // xAxisOption.grid = 1;
-
-                brushOptions.x = x.invert;
-
                 labels.append("g")
                   .append("text")
                     .attr("x", width/2)
                     .attr("y", height + padding.bottom/2 )
                     .attr("dy", "1em")
                     .css("text-anchor", "middle")
-                    .css("font-size", "1.2em")
+                    .css("font-size", "1.0em")
+                    .css("font-weight", "bold")
                     .css(" text-transform", "capitalize")
                     .text(vmap.x.replace(/_/g, ' '));
+
+                plot.append("line")
+                    .attr('x1', 0)
+                    .attr('x2', width)
+                    .attr('y1', 0)
+                    .attr('y2', 0)
+                    .css('stroke', '#000')
             }
-            if(vmap.hasOwnProperty('y') && !Array.isArray(vmap.x)) {
+            if(vmap.hasOwnProperty('y') && !Array.isArray(vmap.y)) {
                 // yAxisOption.grid = 1;
-
-                brushOptions.y = y.invert;
-
                 if(!Array.isArray(vmap.y)) {
                     labels.append("g")
                       .append("text")
@@ -309,44 +307,29 @@ define(function(require){
                         .attr("x", -height/2 )
                         .attr("dy", "1em")
                         .css("text-anchor", "middle")
-                        .css("font-size", "1.2em")
+                        .css("font-size", "1.0em")
+                        .css("font-weight", "bold")
                         .css(" text-transform", "capitalize")
                         .text(vmap.y.replace(/_/g, ' '));
+
+                    plot.append("line")
+                        .attr('x1', width)
+                        .attr('x2', width)
+                        .attr('y1', 0)
+                        .attr('y2', height)
+                        .css('stroke', '#000')
+                        // .css('stroke-opacity', 0.5)
                 }
             }
-            if(!data.length && brushOptions.hasOwnProperty('x') && brushOptions.hasOwnProperty('y')) {
-                brushOptions.container = plot;
-                brushOptions.brush = function(d) {
-                    var spec = {};
-                    spec[vmap.x] = d.x;
-                    spec[vmap.y] = d.y.reverse();
-                    // console.log(spec);
-                    onclick(spec);
-                }
-                selector = new Selector(brushOptions);
-            }
+
 
             plot.translate(padding.left+left, padding.top+top);
 
             var chartLayer = {};
 
             chartLayer.update =  function(spec) {
-                var domain = spec.domain || {},
-                    data = spec.data || [];
+                var data = spec.data || [];
 
-                if(domain.hasOwnProperty('x')) {
-                    x.svg.remove();
-                    xAxisOption.domain = domain.x;
-                    x = Axis(xAxisOption);
-                    selector.x(x.invert);
-                }
-                if(domain.hasOwnProperty('y')) {
-                    y.svg.remove();
-                    yAxisOption.domain = domain.y;
-                    y = Axis(yAxisOption);
-                    selector.y(y.invert);
-                }
-                // console.log(vmap.x);
                 if(data.length) {
                     data.forEach(function(d, i){
                         var barHeight = isFinite(y(d[vmap.y])) ? y(d[vmap.y]) : height;
@@ -368,14 +351,16 @@ define(function(require){
             chartLayer.removeAxis = function() {
                 x.remove();
                 y.remove();
-                if(ypAxes.length) {
-                    ypAxes.forEach(function(yp) {
+                if(yAxes.length) {
+                    yAxes.forEach(function(yp) {
                         yp.remove();
                     })
                 }
             }
 
             chartLayer.svg = plot;
+            chartLayer.x = Array.isArray(vmap.x) ? xAxes : x;
+            chartLayer.y = Array.isArray(vmap.y) ? yAxes : y;
 
             return chartLayer;
         };

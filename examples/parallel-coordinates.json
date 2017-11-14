@@ -23,9 +23,9 @@
                 "opacity": "auto",
                 "y": [
                     "BabyWeight",
-                    "MotherHeight",
                     "MotherWeight",
-                    "MotherWgtGain"
+                    "MotherWgtGain",
+                    "MotherHeight"
                 ]
             }
         }
