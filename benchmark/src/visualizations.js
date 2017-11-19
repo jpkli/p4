@@ -24,6 +24,7 @@ define(function(require){
         if(dataSize + 1 < Math.pow(2, 23) && !(libs.length == 1 && libs[0] == 'p4gl'))
             benchmarkData = genJsonData({size: dataSize, props: dataProps});
 
+        
         libs.forEach(function(lib) {
             console.log('benchmarking ' + lib);
             results[lib] = {};

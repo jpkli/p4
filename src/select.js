@@ -4,19 +4,22 @@ define(function(){
         gl_PointSize = 1.0;
 
         var i, j, k, value;
-        var domain = new Vec2();
+        var filter = new Int(0);
+
         i = (this.aDataIdx+0.5) / this.uDataDim.x;
         j = (this.aDataIdy+0.5) / this.uDataDim.y;
-        this.vResult = 1.0;
 
+        this.vResult = this.uFilterLevel;
         for(var f = 0; f < $(fieldCount)+$(indexCount); f++) {
             if(this.uFilterControls[f] == 1) {
                 value = this.getData(f, i, j);
                 if(value < this.uFilterRanges[f].x || value >= this.uFilterRanges[f].y) {
-                    this.vResult = 0.0;
+                    filter -= 1;
                 }
             }
         }
+
+        this.vResult = (filter < 0) ? this.uFilterLevel - 0.25 : this.uFilterLevel;
 
         var x = i * 2.0 - 1.0;
         var y = j * 2.0 - 1.0;
@@ -28,7 +31,7 @@ define(function(){
         gl_PointSize = 1.0;
 
         var i, j, k, value;
-        var domain = new Vec2();
+
         i = (this.aDataIdx+0.5) / this.uDataDim.x;
         j = (this.aDataIdy+0.5) / this.uDataDim.y;
         this.vResult = 0.0;
@@ -64,7 +67,6 @@ define(function(){
 
         $p.uniform("uFilterControls","int", filterControls)
             .uniform("uFilterRanges","vec2", filterRanges)
-            .uniform("uMatchValue", "float", 1.0)
             .uniform("uInSelections", "float", Float32Array.from(inSelections))
             .uniform("uSelectMax", "int", SELECT_MAX)
             .uniform("uSelectCount", "int", 0);
@@ -170,6 +172,7 @@ define(function(){
         }
 
         select.execute = function(spec) {
+
             var filterSpec = spec;
 
             Object.keys($p.crossfilters).forEach(function(c){
@@ -181,10 +184,11 @@ define(function(){
                     spec[k] = {$in: spec[k]};
                 }
             });
-            console.log('filter spec::::::::::', spec);
+            // console.log('filter spec::::::::::', spec);
             $p.uniform.uFilterFlag = 1;
             filterRanges = $p.fieldDomains.slice();
             var newDomains = _execute(spec);
+
             if(!$p._update){
                 // console.log('checking filter domains', newDomains);
                 newDomains.forEach(function(domain, fid) {
@@ -197,6 +201,7 @@ define(function(){
                 $p.uniform.uFieldDomains.data = $p.fieldDomains;
                 $p.uniform.uFieldWidths.data = $p.fieldWidths;
             }
+            // select.result();
         }
 
         select.result = function(arg) {
@@ -214,8 +219,8 @@ define(function(){
             // console.log(result.filter(function(d, i){ return i%4===0;} ));
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             // var result = [];
-            // bitmap.forEach(function(d, i){ if(i%4===0 && d!==0) result.push(i/4);});
-            // console.log(dataDimension, result.length, bitmap.length /4);
+            // bitmap.forEach(function(d, i){ if(i%3===0 && d!==0) result.push(d);});
+            // console.log(result);
             // return result;
             return  bitmap;
         }

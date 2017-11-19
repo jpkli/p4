@@ -122,6 +122,10 @@ define(function(require){
         // $p.uniform("uDeriveDomains", "vec2", $p.deriveDomains);
         // $p.uniform("uDeriveWidths", "float", $p.deriveWidths);
 
+        $p.uniform("uFilterLevel","float", 0.25)
+        .uniform('uVisLevel',       'float', 0.25)
+        $p.uniform("uMatchLevel", "int", 1.0)
+
         $p.varying("vResult", "float");
         $p.varying("vDiscardData", "float");
         $p.texture(
@@ -167,14 +171,11 @@ define(function(require){
         $p.uniform.uDataInput = $p.texture.tData;
 
         function getFieldWidth($int_fid) {
-
             return this.uFieldWidths[fid];
         }
 
         function getFieldDomain($int_fid) {
-
             return this.uFieldDomains[fid];
-
         }
 
         function getData($int_fid, $float_r, $float_s) {

@@ -1,0 +1,66 @@
+{
+    "data" : {
+        "url": "data/synthetic",
+        "format": "typedArray",
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float"
+        }
+    },
+    "views": [
+        {
+            "id": "c1",
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 80, "right": 20, "top": 20, "bottom": 100},
+            "offset": [0, 0]
+        },
+        {
+            "id": "c2",
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 80, "right": 20, "top": 20, "bottom": 100},
+            "offset": [330, 0]
+        }
+    ],
+    "pipeline": [
+        {
+            "$visualize": {
+                "id": "c1",
+                "mark": "circle",
+                "size": 15,
+                "color": "red",
+                "opacity": 0.25,
+                "x": "MotherWeight",
+                "y": "BabyWeight",
+                "brush": 1
+            }
+        },
+        {
+            "$aggregate" : {
+                "$group": "MotherEdu",
+                "$reduce" : {
+                    "Babies": { "$count": "*"},
+                    "AvgWeight": { "$avg": "BabyWeight"}
+                }
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c2",
+                "mark": "bar",
+                "color": "steelblue",
+                "x": "MotherEdu",
+                "y": "Babies"
+            }
+        }
+    ]
+}

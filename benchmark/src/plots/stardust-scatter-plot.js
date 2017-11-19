@@ -35,14 +35,14 @@ define(function(require){
                 .domain(d3.extent(data, d => d[vmap.y]))
                 .range([ 0, height ]);
 
-            circles.attr("center", Stardust.scale.Vector2(scaleX(d => d[vmap.x]), scaleY(d => d[vmap.y])));
-            circles.attr("radius", 1);
-            circles.attr("color", [ 0.3, 0.5, 0.7, 0.2 ]);
+
 
         }
 
         plot.render = function() {
-
+            circles.attr("center", Stardust.scale.Vector2(scaleX(d => d[vmap.x]), scaleY(d => d[vmap.y])));
+            circles.attr("radius", 1);
+            circles.attr("color", [ 0.3, 0.5, 0.7, 0.2 ]);
             circles.render();
             var gl = platform._GL,
                 pixel = new Uint8Array(4);

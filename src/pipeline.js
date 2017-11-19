@@ -292,6 +292,7 @@ define(function(require) {
                             pipeline.update();
                         }
 
+
                         pipeline.run();
                         // Object.keys(d).forEach(function(k) {
                         //     delete $p.crossfilters[k];
@@ -363,7 +364,9 @@ define(function(require) {
 
         pipeline.update = function() {
             $p._update = true;
+            $p.uniform.uFilterLevel.data = 0.5;
             pipeline.resume('__init__');
+
             pipeline.filter($p.crossfilters);
             // pipeline.register('__init__');
             return pipeline;

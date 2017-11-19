@@ -35,10 +35,9 @@ define(function(){
         i = (this.aDataIdx+0.5) / this.uDataDim.x;
         j = (this.aDataIdy+0.5) / this.uDataDim.y;
 
-        this.vResult = 1.0;
+        this.vResult = this.uVisLevel;
         if(this.uFilterFlag == 1) {
-            if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
-                this.vResult = 0.0;
+            this.vResult = texture2D(this.fFilterResults, vec2(i, j)).a;
         }
 
         posX = this.visMap(this.uVisualEncodings[0], i, j, this.aDataValx, this.aDataValy, 0.0, 0.0);
@@ -71,14 +70,14 @@ define(function(){
             if (dist > 0.5) discard;
             var delta = 0.3;
             var alpha = this.vColorRGBA.a - smoothstep(0.5-delta, 0.5, dist);
-            if(this.vResult == this.uVisLevel) {
-                gl_FragColor = vec4(this.vColorRGBA.rgb, alpha);
+            if(this.vResult >= this.uVisLevel) {
+                gl_FragColor = vec4(this.vColorRGBA.rgb*alpha, alpha);
             } else {
                 discard;
-                // gl_FragColor = vec4(vec3(0.9, 0.9, 0.9), alpha);
+                // gl_FragColor = vec4(vec3(0.4), 0.5);
             }
         } else {
-            if(this.vResult == this.uVisLevel) {
+            if(this.vResult >= this.uVisLevel) {
                 gl_FragColor = vec4(this.vColorRGBA.rgb * this.vColorRGBA.a,  this.vColorRGBA.a);
             } else {
                 discard;
@@ -97,11 +96,11 @@ define(function(){
         i = (mod(this.aDataItemId, this.uDataDim.x) + 0.5) / this.uDataDim.x;
         j = (floor(this.aDataItemId / this.uDataDim.x) + 0.5) / this.uDataDim.y;
 
-        this.vResult = 1.0;
+        this.vResult = this.uVisLevel;
         if(this.uFilterFlag == 1) {
-            if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
-                this.vResult = 0.0;
+            this.vResult = texture2D(this.fFilterResults, vec2(i, j)).a;
         }
+
 
         if(this.uInterleaveX == 1) {
             posX = this.aDataFieldId.y / float(this.uFeatureCount-1);
@@ -132,10 +131,11 @@ define(function(){
     }
 
     interleave.fs = function() {
-        if(this.vResult == this.uVisLevel)
-            gl_FragColor = this.vColorRGBA;
-        else
+        if(this.vResult < this.uVisLevel)
             discard;
+        else
+            gl_FragColor = this.vColorRGBA;
+
     }
 
     var polygon = {};
@@ -156,7 +156,7 @@ define(function(){
         val1 = this.aDataItemVal1;
         posX = this.visMap(this.uVisualEncodings[0], i, j, val0, val1, 0.0, 0.0);
         posY = this.visMap(this.uVisualEncodings[1], i, j, val0, val1, 0.0,  0.0);
-        color = this.visMap(this.uVisualEncodings[2], i, j, val0, val1, -1.0,  0.0);
+        color = this.visMap(this.uVisualEncodings[2], i, j, val0, val1, -1.0,  0.33);
         alpha = this.visMap(this.uVisualEncodings[3], i, j,  val0, val1, this.uDefaultAlpha, 0.0);
         width = this.visMap(this.uVisualEncodings[4], i, j,  val0, val1, this.uDefaultWidth, 0.0);
         height = this.visMap(this.uVisualEncodings[5], i, j,  val0, val1, this.uDefaultHeight, 0.0);
@@ -192,7 +192,7 @@ define(function(){
     }
 
     polygon.fs = function() {
-        if(this.vResult == this.uVisLevel)
+        if(this.vResult >= this.uVisLevel)
             gl_FragColor = this.vColorRGBA;
         else
             discard;

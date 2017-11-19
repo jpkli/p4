@@ -89,13 +89,13 @@ define(function(require){
         });
 
         scp.init();
-        scp.render();
-
-        profile.total = performance.now() - ts;
+        // scp.render();
+        profile.init =  performance.now() - ts;
+        // profile.total = performance.now() - ts;
         ts = performance.now();
         scp.render();
         profile.render = performance.now() - ts;
-        profile.init = profile.total - profile.render;
+
 
         return profile;
     }

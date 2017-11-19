@@ -67,7 +67,7 @@ define(function(require){
 
     function setColorScheme(colors) {
         var cc = colors.length - 1,
-            step = colorResolution / (cc+1),
+            step = colorResolution / cc,
             colorGradient = new Float32Array(colorResolution * 4);
         colors.push(colors[cc]);
         for(var i = 0; i < cc+1; i++) {
@@ -103,7 +103,7 @@ define(function(require){
     }
 
     var gradient = setColorScheme(colorSchemes["viridis"]),
-    // var gradient = setColorScheme(["blue", "green", "red"]),
+    // var gradient = setColorScheme(["#EE0000", "steelblue"]),
         table = setColorTable(defaultColors);
 
     return function(fxgl) {

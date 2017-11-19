@@ -19,8 +19,8 @@ define(function(require){
         $('.column').css('height', pageHeight);
         $('#editor').css('height', pageHeight);
 
-        ace.config.set("packaged", true)
-        ace.config.set("basePath", require.toUrl("ace"))
+        ace.config.set("packaged", true);
+        ace.config.set("basePath", require.toUrl("ace"));
         var editor = ace.edit("editor");
         editor.setTheme("ace/theme/chrome");
         editor.getSession().setMode("ace/mode/json");

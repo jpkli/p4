@@ -10,6 +10,8 @@ define(function(require){
     const interact = require('./interact');
 
     const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
+
+    const encode =require('./encode');
     const userActions = ['click', 'hover', 'brush', 'zoom', 'pan']
 
     return function ($p) {
@@ -29,13 +31,11 @@ define(function(require){
             padding: padding
         });
 
-        // $p.visLayers = vis;
-        $p.uniform('uVisualEncodings','int',   new Array(visualEncodings.length).fill(-1))
+        $p.uniform('uVisualEncodings',  'int',   new Array(visualEncodings.length).fill(-1))
             .uniform('uViewDim',        'vec2',  $p.viewport)
             .uniform('uVisShape',       'int',   1)
             .uniform('uInterleaveX',    'int',   0)
             .uniform('uVisDomains',     'vec2',  $p.fieldDomains)
-            .uniform('uVisLevel',       'float', 1.0)
             .uniform('uVisScale',       'vec2', [1.0, 1.0])
             .uniform('uPosOffset',      'vec2', [0.0, 0.0])
             .uniform('uFeatureCount',   'int',   0)
@@ -54,6 +54,9 @@ define(function(require){
             .framebuffer('visStats', 'float', [1, 1]);
 
         $p.framebuffer.enableRead('offScreenFBO');
+        $p.renderMode = 'instancedXY';
+
+
 
         var renderer = require('./render')($p);
 
@@ -70,22 +73,20 @@ define(function(require){
         }
 
         var viz = function(options) {
+            $p.renderMode = 'instancedXY';
+            $p.revealDensity = false;
             var vmap = options.vmap || {},
                 mark = options.mark || vmap.mark || 'line',
                 data = options.data || null,
-                perceptual = vmap.perceptual || false,
                 interaction = options.interaction,
                 viewOrder = options.viewOrder;
 
-            var visDimension = vmap.viewport || [$p.views[viewOrder].width, $p.views[viewOrder].height] || viewport,
-                width = visDimension[0],
+            var visDomain = {},
+                visDimension = vmap.viewport || [$p.views[viewOrder].width, $p.views[viewOrder].height] || viewport;
+
+            var width = visDimension[0],
                 height =  visDimension[1],
                 offset = $p.views[viewOrder].offset || [0, 0];
-
-
-            var visDomain = {},
-                visMark = vmap.mark || 'point',
-                renderMode = 'instancedXY';
 
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
@@ -93,30 +94,19 @@ define(function(require){
                 visDomain[f][1] *= $p.uniform.uVisScale.data[1];
             });
 
-            var gl;
+            var vmapIndex = encode($p, vmap, colorManager);
 
-            if(Array.isArray(vmap.x) || Array.isArray(vmap.y)) {
-                renderMode = 'interleave';
-                if(Array.isArray(vmap.x)){
-                    // vmap.x = vmap.x.reverse();
-                    $p.uniform.uInterleaveX = 0;
-                }
-                if(Array.isArray(vmap.y)) $p.uniform.uInterleaveX = 1;
-            } else if(vmap.mark && vmap.mark == 'rect') {
-                renderMode = 'polygon';
-            }
-
-            gl = $p.program(renderMode);
+            var gl = $p.program($p.renderMode);
             $p.framebuffer.enableRead('fFilterResults');
             $p.framebuffer.enableRead('fDerivedValues');
             $p.framebuffer.enableRead('fGroupResults');
 
-            if(renderMode == 'instancedXY') {
+            if($p.renderMode == 'instancedXY') {
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
-            } else if(renderMode == 'interleave') {
+            } else if($p.renderMode == 'interleave') {
                 updateInstancedAttribute(vmap.x);
                 updateInstancedAttribute(vmap.y);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataFieldId.location, 0);
@@ -140,87 +130,6 @@ define(function(require){
 
             if(typeof data == 'string')
                 $p.uniform.uDataInput = $p.framebuffer[data].texture;
-
-            var vmapIndex = new Int32Array(visualEncodings.length);
-            visualEncodings.forEach(function(code, codeIndex){
-                vmapIndex[codeIndex] = $p.fields.indexOf(vmap[code]);
-            })
-
-            $p.uniform.uVisualEncodings = vmapIndex;
-
-            if(vmapIndex[2] === -1 && typeof(vmap.color) === 'string'){
-                if(vmap.color === 'auto') {
-                    perceptual = true;
-                    $p.uniform.uRevealMode.data = 1;
-                } else {
-                    $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
-                }
-            }
-            var opacity = vmap.opacity || vmap.alpha;
-            if(typeof(opacity) === 'number') {
-                $p.uniform.uDefaultAlpha = opacity;
-            } else if(vmapIndex[3] === -1 && typeof(opacity) == 'string' && opacity == 'auto' ) {
-                perceptual = true;
-                $p.uniform.uRevealMode.data = 0;
-            } else {
-                $p.uniform.uDefaultAlpha = 1.0;
-            }
-
-            if(!$p._update) {
-                if(!vmap.width && vmap.x) {
-                    $p.uniform.uDefaultWidth = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] );
-                } else if(vmapIndex[4] === -1 && typeof(vmap.width) == 'number') {
-                    $p.uniform.uDefaultWidth = vmap.width / width;
-                }
-
-                if(!vmap.height && vmap.y) {
-                    $p.uniform.uDefaultHeight = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] );
-                } else if(vmapIndex[5] === -1 && typeof(vmap.width) == 'number') {
-                    $p.uniform.uDefaultHeight = vmap.height / height;
-                }
-            }
-
-            if(vmapIndex[2] === -1 && typeof(vmap.size) == 'number') {
-                $p.uniform.uMarkSize = vmap.size;
-            }
-
-
-            if(perceptual)
-                $p.bindFramebuffer('offScreenFBO');
-            else
-                $p.bindFramebuffer(null);
-
-            gl.lineWidth(1.0);
-
-            gl.viewport(
-                offset[0],
-                offset[1],
-                width-padding.left-padding.right,
-                height-padding.top-padding.bottom
-            );
-
-
-            if(perceptual) {
-                gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-                gl.blendFunc( gl.ONE, gl.ONE );
-            } else {
-                // gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
-                gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
-                // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
-            }
-
-
-            // clear screen
-            // if(viewOrder == 0) {
-                // gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-                // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-            // }
-
-            gl.disable(gl.CULL_FACE);
-            gl.disable(gl.DEPTH_TEST);
-            gl.enable( gl.BLEND );
-            gl.blendEquation(gl.FUNC_ADD);
 
             var viewSetting = {
                 domain: visDomain,
@@ -260,6 +169,31 @@ define(function(require){
                 }
             }
 
+            if($p.revealDensity) {
+                $p.bindFramebuffer('offScreenFBO');
+                gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
+                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+                gl.blendFunc(gl.ONE, gl.ONE );
+            } else {
+                $p.bindFramebuffer(null);
+                // gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
+                gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
+                // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
+            }
+
+            gl.viewport(
+                offset[0],
+                offset[1],
+                width-padding.left-padding.right,
+                height-padding.top-padding.bottom
+            );
+            gl.lineWidth(1.0);
+
+            gl.disable(gl.CULL_FACE);
+            gl.disable(gl.DEPTH_TEST);
+            gl.enable( gl.BLEND );
+            gl.blendEquation(gl.FUNC_ADD);
+
             function sortData(data) {
                 return data.sort(function(a,b){
                     if(typeof(a[vmap.x]) == 'string')
@@ -288,7 +222,6 @@ define(function(require){
                 if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function')
                     pv.chart.svg.remove();
                 pv.chart = vis.addLayer(viewSetting);
-
             } else {
                 $p.uniform.uVisDomains = $p.views[viewOrder].domains;
                 if(mark == 'bar'){
@@ -304,19 +237,28 @@ define(function(require){
             else if(mark == 'line') primitive = gl.LINE_STRIP;
 
             function draw() {
-                if(renderMode == 'interleave') {
+                if($p.renderMode == 'interleave') {
                     var count = $p.attribute.aDataFieldId.data.length / $p.attribute.aDataFieldId.size,
                         primcount = $p.dataSize;
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, count, primcount);
-                } else if(renderMode == 'polygon'){
+                } else if($p.renderMode == 'polygon'){
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
                 } else {
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
                 }
             }
-
+            if($p._update && typeof(vmap.brush) == 'object') {
+                $p.uniform.uVisLevel = 0.25;
+                $p.uniform.uDefaultColor = colorManager.rgb(vmap.brush.unselected.color);
+                if($p.revealDensity) enhance([width, height]);
+                if(mark!='bar') draw();
+                $p.uniform.uVisLevel = 0.5;
+                $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+            }
+            $p.uniform.uVisLevel = 1.0;
             if(mark!='bar') draw();
-            if(perceptual) enhance([width, height]);
+
+            if($p.revealDensity) enhance([width, height]);
             $p.bindFramebuffer(null);
 
             if(!$p._update) {
@@ -328,7 +270,6 @@ define(function(require){
                     vis: $p.views[viewOrder],
                     callback: interaction
                 });
-
             }
         }
 

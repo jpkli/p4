@@ -23,7 +23,7 @@ define(function(require){
             }
 
             if(this.uFilterFlag == 1) {
-                if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
+                if(texture2D(this.fFilterResults, vec2(i, j)).a < this.uFilterLevel)
                     this.vResult = 0.0;
             }
 

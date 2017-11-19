@@ -21,9 +21,9 @@
         ],
         "views": [
             {
-                "width": 600,
-                "height": 560,
-                "offset": [0, 80]
+                "width": 550,
+                "height": 400,
+                "offset": [0, 0]
             }
         ]
     },
@@ -49,7 +49,7 @@
         "examples": [
             {
                 "name": "Correlating Bar Charts",
-                "file": "bar-chart.json"
+                "file": "clickbar.json"
             },
             {
                 "name": "Bushing and Linking",

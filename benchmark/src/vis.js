@@ -1,3 +1,9 @@
+requirejs.config({
+    paths: {
+        flexgl: '../flexgl/src'
+    }
+})
+
 const dataSizeTable = {
     "14": '16K',
     "15": '32K',
@@ -220,6 +226,7 @@ require(['src/visualizations', 'src/result-plot'], function(benchmark, plotResul
                     dopts: dopts,
                     controls: controls,
                     trials: trials,
+                    dataProps: dataProps,
                     dataSize: Math.pow(2, dataSize)
                 };
 
@@ -237,7 +244,7 @@ require(['src/visualizations', 'src/result-plot'], function(benchmark, plotResul
                         if(ti < trials - 1) {
                             var div = document.getElementById(lib + '-' + dopt);
                             document.getElementById(lib).removeChild(div);
-                            div.remove();
+                            // div.remove();
                         }
                     })
                 })
@@ -291,7 +298,7 @@ require(['src/visualizations', 'src/result-plot'], function(benchmark, plotResul
             } else {
                 di++;
                 dataSize = dataSizes[di];
-                setTimeout(runTest, 2000);
+                setTimeout(runTest, 7000* di);
             }
         }
         setTimeout(runTest, 2000);

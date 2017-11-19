@@ -206,7 +206,7 @@ define(function(require){
                 y = Axis(yAxisOption);
 
                 plot.highlight = function(selected, hcolor) {
-                    var hcolor = hcolor || "orange";
+                    var hcolor = hcolor || "darkorange";
                     marks.forEach(function(c, i){
                         c.attr("fill", color());
                     });
@@ -232,11 +232,11 @@ define(function(require){
 
                     var hBar = plot.append("rect")
                         .Attr({
-                            x: x(d[vmap.x]) - barWidth * 0.4,
+                            x: x(d[vmap.x]) - barWidth * 0.45,
                             y: 0,
-                            width: barWidth * 0.8,
+                            width: barWidth * 0.90,
                             height: 0,
-                            fill: "orange"
+                            fill: "darkorange"
                         });
                     hMarks.push(hBar);
 

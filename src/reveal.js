@@ -45,13 +45,13 @@ define(function(require){
 
             if(value.a == 0.0) discard;
             // a = pow(((value.a - this.uDefaultAlpha) / (this.uMaxRGBA.a -this.uDefaultAlpha)), 0.33) * 0.85 + 0.15;
-            a = pow((value.a / this.uMaxRGBA.a), 0.33) * 0.95 + 0.05;
+            a = pow((value.a / this.uMaxRGBA.a), 0.33) * 0.9 + 0.1;
             // a = value.a / this.uMaxRGBA.a;
 
             if(this.uRevealMode == 0)
-                gl_FragColor = vec4(value.rgb, a);
+                gl_FragColor = vec4(this.uDefaultColor*a, a);
             else
-                gl_FragColor = vec4(texture2D(this.tColorGraident, vec2(1.-a, 1.0)).rgb, 1.0);
+                gl_FragColor = vec4(texture2D(this.tColorGraident, vec2(1.-a, 1.0)).rgb*this.uDefaultAlpha, this.uDefaultAlpha);
         });
 
         fxgl.program("vis-render", vs2, fs2);
@@ -60,7 +60,7 @@ define(function(require){
             var gl;
             if(!fxgl._update) {
                 fxgl.framebuffer("visStats", "float", [1, 1]);
-                console.log('reveal post-processing');
+
                 gl = fxgl.program("post-processing");
                 fxgl.framebuffer.enableRead("offScreenFBO");
                 fxgl.bindFramebuffer("visStats");
@@ -79,10 +79,11 @@ define(function(require){
 
                 var max = new Float32Array(4);
                 gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
-                // if(max[3] == 0) {
-                //     max[3] = Math.sqrt(fxgl.dataSize) * Math.log2(fxgl.dataSize);
-                // }
+                if(max[3] == 0) {
+                    max[3] = Math.sqrt(fxgl.dataSize) * Math.log2(fxgl.dataSize);
+                }
                 fxgl.uniform.uMaxRGBA = max;
+                console.log('reveal post-processing, max = ', max);
             }
             fxgl.bindFramebuffer(null);
             gl = fxgl.program("vis-render");

@@ -20,6 +20,7 @@ define(function(require){
             props.forEach(function(p) {
                 var value = p.min + (p.max - p.min) * random[p.name]();
                 data[i][p.name] = parser[p.name](value);
+
             });
         }
 

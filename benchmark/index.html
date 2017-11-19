@@ -100,13 +100,14 @@
         </div>
 
         <div id="comparative-results-vis">
+            <div id="result-init-scatterPlot" style="display: inline-block"></div>
             <div id="result-scatterPlot" style="display: inline-block"></div>
-            <div id="result-parallelCoordinates" style="display: inline-block"></div>
+
         </div>
 
         <div id="comparative-results-init">
-            <div id="result-init-scatterPlot" style="display: inline-block"></div>
             <div id="result-init-parallelCoordinates" style="display: inline-block"></div>
+            <div id="result-parallelCoordinates" style="display: inline-block"></div>
         </div>
       </div>
     </div>
@@ -164,27 +165,21 @@
                 var plotOptions = {
                     data: data.filter(d => d.dopt == dopt),
                     container: '#result-' + dopt,
-                    chartTitle: dopt,
+                    chartTitle: 'Visualizing ' + dopt,
                     width: 280,
                     height: 280,
                     yMax: d3.max(data, function(d) { return d.latency; })
                 };
 
                 if(pi == dopts.length - 1) {
-                    plotOptions.margin = {top: 30, right: 100, bottom: 60, left: 40};;
+                    plotOptions.margin = {top: 30, right: 160, bottom: 60, left: 60};;
                     plotOptions.legend = true;
+                } else {
+                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 60};
                 }
 
-                if(pi == Math.floor(dopts.length/2)) {
-                    plotOptions.xLabel = true;
-                }
-
-                if(pi == 0) {
-                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 60};;
-
-                    plotOptions.yLabel = true;
-                }
-
+                // plotOptions.yLabel = true;
+                plotOptions.xLabel = false;
                 plotResults(plotOptions);
             })
         })
@@ -201,7 +196,7 @@
                     // dopt: dopt,
                     width: 280,
                     height: 280,
-                    chartTitle: dopt,
+                    chartTitle: 'Initalizing ' + dopt,
                     yMax: d3.max(data, function(d) { return d.init; }),
                     vmap: {
                         color: 'lib',
@@ -210,20 +205,17 @@
                     }
                 };
 
-                if(pi == dopts.length - 1) {
-                    plotOptions.margin = {top: 30, right: 100, bottom: 60, left: 40};;
-                    plotOptions.legend = true;
-                }
-
-                if(pi == Math.floor(dopts.length/2)) {
-                    plotOptions.xLabel = true;
-                }
-
                 if(pi == 0) {
-                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 60};;
-
+                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 60};
                     plotOptions.yLabel = true;
+                } else {
+                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 40};
                 }
+
+                plotOptions.legend = false;
+                plotOptions.xLabel = false;
+
+
 
                 plotResults(plotOptions);
             })

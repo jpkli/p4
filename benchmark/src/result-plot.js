@@ -45,10 +45,10 @@ define(function(require){
         };
 
         var name = {
-            p4gl: 'P4',
-            d3: 'D3 v3',
-            vega: 'Vega v3',
-            stardust: 'Stardust',
+            p4gl: 'P4 (WebGL)',
+            d3: 'D3 (SVG)',
+            vega: 'Vega (Canvas)',
+            stardust: 'Stardust (WebGL)',
             lodash: 'Lodash'
         }
 
@@ -81,10 +81,10 @@ define(function(require){
             xAxis.append("text")
                 .attr("class", "label")
                 .attr("x", width/2)
-                .attr("y", margin.bottom)
+                .attr("y", margin.bottom - 10)
                 .style("text-anchor", "middle")
                 .style("font-size", "1.1em")
-                .text('Data Records')
+                .text('Number of Data Records')
         }
 
         var yAxis = svg.append("g")
@@ -96,11 +96,11 @@ define(function(require){
               .attr("class", "label")
               .attr("transform", "rotate(-90)")
               .attr("y", -margin.left)
-              .attr("x", -width / 2 + margin.bottom)
+              .attr("x", -height / 2 )
               .attr("dy", "1.2em")
-              .style("text-anchor", "end")
+              .style("text-anchor", "middle")
               .style("font-size", "1.1em")
-              .text('Latency (ms)');
+              .text(options.titleY || 'Latency (ms)');
         }
 
 
@@ -130,6 +130,7 @@ define(function(require){
                 .attr("y", -margin.top/2)
                 .style("text-anchor", "middle")
                 .style("font-size", "16px")
+                .style("text-transform", "capitalize")
                  .text(chartTitle);
         }
 

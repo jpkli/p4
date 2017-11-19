@@ -70,6 +70,7 @@ define(function(require) {
         })
 
         var data = db.data();
+        console.log(data);
 
         data.stats = db.stats();
         var metadata = db.metadata();
