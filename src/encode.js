@@ -46,6 +46,10 @@ define(function(require){
             $p.renderMode = 'polygon';
         }
 
+        if(vmapIndex[6] === -1 && typeof(vmap.size) == 'number') {
+            $p.uniform.uMarkSize = vmap.size;
+        }
+
         if(!$p._update) {
             if(!vmap.width && vmap.x) {
                 $p.uniform.uDefaultWidth = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] );

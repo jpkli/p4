@@ -19,7 +19,7 @@ define(function(){
             }
         }
 
-        this.vResult = (filter < 0) ? this.uFilterLevel - 0.25 : this.uFilterLevel;
+        this.vResult = (filter < 0) ? this.uFilterLevel - 0.1 : this.uFilterLevel;
 
         var x = i * 2.0 - 1.0;
         var y = j * 2.0 - 1.0;
@@ -53,7 +53,7 @@ define(function(){
     }
 
     function fragmentShader() {
-        gl_FragColor = vec4(this.vResult);
+        gl_FragColor = vec4(0., 0., 0., this.vResult);
     }
 
     return function program($p) {
@@ -184,7 +184,7 @@ define(function(){
                     spec[k] = {$in: spec[k]};
                 }
             });
-            // console.log('filter spec::::::::::', spec);
+            console.log('filter spec::::::::::', spec);
             $p.uniform.uFilterFlag = 1;
             filterRanges = $p.fieldDomains.slice();
             var newDomains = _execute(spec);
@@ -201,7 +201,7 @@ define(function(){
                 $p.uniform.uFieldDomains.data = $p.fieldDomains;
                 $p.uniform.uFieldWidths.data = $p.fieldWidths;
             }
-            // select.result();
+            select.result();
         }
 
         select.result = function(arg) {

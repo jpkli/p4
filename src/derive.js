@@ -23,20 +23,8 @@ define(function(){
 
         marco += " return 0.0;"
 
-        // function getDataValue($int_field, $float_row, $float_col) {
-        //     var pos, value;
-        //     if(uIndexCount > 0 && field == 0) value = aDataValx;
-        //     else if(uIndexCount > 0 && field == 1) value = aDataValy;
-        //     else {
-        //         pos = (float(field-uIndexCount) + col) / float(uFieldCount);
-        //         value = texture2D(tData, vec2(row, pos)).a;
-        //     }
-        //     return value;
-        // }
-
         $p.uniform("uOptMode", "float", 0)
             .uniform("uDeriveId", "int", 0)
-            // .subroutine("getDataValue", "float", getDataValue)
             .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
 
 

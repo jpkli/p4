@@ -290,12 +290,7 @@ define(function(require){
                     .css(" text-transform", "capitalize")
                     .text(vmap.x.replace(/_/g, ' '));
 
-                plot.append("line")
-                    .attr('x1', 0)
-                    .attr('x2', width)
-                    .attr('y1', 0)
-                    .attr('y2', 0)
-                    .css('stroke', '#000')
+
             }
             if(vmap.hasOwnProperty('y') && !Array.isArray(vmap.y)) {
                 // yAxisOption.grid = 1;
@@ -311,17 +306,22 @@ define(function(require){
                         .css("font-weight", "bold")
                         .css(" text-transform", "capitalize")
                         .text(vmap.y.replace(/_/g, ' '));
+                    }
 
-                    plot.append("line")
-                        .attr('x1', width)
-                        .attr('x2', width)
-                        .attr('y1', 0)
-                        .attr('y2', height)
-                        .css('stroke', '#000')
-                        // .css('stroke-opacity', 0.5)
-                }
             }
-
+            // plot.append("line")
+            //     .attr('x1', 0)
+            //     .attr('x2', width)
+            //     .attr('y1', 0)
+            //     .attr('y2', 0)
+            //     .css('stroke', '#000')
+            // plot.append("line")
+            //     .attr('x1', width)
+            //     .attr('x2', width)
+            //     .attr('y1', 0)
+            //     .attr('y2', height)
+            //     .css('stroke', '#000')
+                // .css('stroke-opacity', 0.5)
 
             plot.translate(padding.left+left, padding.top+top);
 

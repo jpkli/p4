@@ -108,23 +108,22 @@ define(function(require){
         ]));
 
         //setup all attribute, uniform, texture, varying needed by all the shaders
-        $p.uniform("uDataSize", "float", $p.dataSize);
-        $p.uniform("uDataDim", "vec2", $p.dataDimension);
-        $p.uniform("uResultDim", "vec2", $p.dataDimension);
-        $p.uniform("uIndexCount", "int", $p.indexes.length);
+        $p.uniform("uDataSize",    "float", $p.dataSize);
+        $p.uniform("uDataDim",     "vec2",  $p.dataDimension);
+        $p.uniform("uResultDim",   "vec2",  $p.dataDimension);
+        $p.uniform("uIndexCount",  "int",   $p.indexes.length);
         $p.uniform("uFieldWidths", "float", $p.fieldWidths);
-        $p.uniform("uFieldCount", "int", $p.fieldCount);
-        $p.uniform("uFieldId", "int", 0);
-        $p.uniform("uFilterFlag", "int", 0);
-        $p.uniform("uGroupFields", "int", [0, -1]);
-        $p.uniform("uDataInput", "sampler2D");
+        $p.uniform("uFieldCount",  "int",   $p.fieldCount);
+        $p.uniform("uFieldId",     "int",   0);
+        $p.uniform("uFilterFlag",  "int",   0);
+        $p.uniform("uGroupFields", "int",   [0, -1]);
+        $p.uniform("uDataInput",   "sampler2D");
         $p.uniform("uDeriveCount", "int", $p.deriveMax);
         // $p.uniform("uDeriveDomains", "vec2", $p.deriveDomains);
         // $p.uniform("uDeriveWidths", "float", $p.deriveWidths);
 
-        $p.uniform("uFilterLevel","float", 0.25)
-        .uniform('uVisLevel',       'float', 0.25)
-        $p.uniform("uMatchLevel", "int", 1.0)
+        $p.uniform("uFilterLevel", "float", 0.1)
+        $p.uniform('uVisLevel',    "float", 0.1)
 
         $p.varying("vResult", "float");
         $p.varying("vDiscardData", "float");

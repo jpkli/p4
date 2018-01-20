@@ -292,7 +292,6 @@ define(function(require) {
                             pipeline.update();
                         }
 
-
                         pipeline.run();
                         // Object.keys(d).forEach(function(k) {
                         //     delete $p.crossfilters[k];
@@ -357,6 +356,7 @@ define(function(require) {
                 pipeline[opt](p[opt]);
             })
             $p._update = false;
+            $p.uniform.uFilterLevel.data = 0.1;
             return pipeline;
         }
 
@@ -364,7 +364,7 @@ define(function(require) {
 
         pipeline.update = function() {
             $p._update = true;
-            $p.uniform.uFilterLevel.data = 0.5;
+            $p.uniform.uFilterLevel.data = 0.2;
             pipeline.resume('__init__');
 
             pipeline.filter($p.crossfilters);
@@ -405,7 +405,7 @@ define(function(require) {
             $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
             $p.pipeline = [];
             $p.crossfilters = [];
-            $p.uniform.uFilterFlag = 0;
+            $p.uniform.uFilterFlag.data = 0;
             // $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
             specs.forEach(function(spec){
                 var opt = Object.keys(spec)[0],

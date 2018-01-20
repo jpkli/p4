@@ -50,13 +50,11 @@ define(function(require){
 
         var enhance = reveal($p);
 
-        $p.framebuffer('offScreenFBO', 'float', $p.viewport)
-            .framebuffer('visStats', 'float', [1, 1]);
+        $p.framebuffer('offScreenFBO', 'float', $p.viewport);
+        $p.framebuffer('visStats', 'float', [1, 1]);
 
-        $p.framebuffer.enableRead('offScreenFBO');
+        // $p.framebuffer.enableRead('offScreenFBO');
         $p.renderMode = 'instancedXY';
-
-
 
         var renderer = require('./render')($p);
 
@@ -90,6 +88,7 @@ define(function(require){
 
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
+                if(vmap.zero && visDomain[f][0]>0) visDomain[f][0] = 0;
                 visDomain[f][0] *= $p.uniform.uVisScale.data[0];
                 visDomain[f][1] *= $p.uniform.uVisScale.data[1];
             });
@@ -205,18 +204,16 @@ define(function(require){
 
             if(mark == 'bar') {
                 var result = $p.readResult('row');
-                viewSetting.data = result;
+                viewSetting.data = result.filter(d=>d[vmap.y]>0);
                 viewSetting.fields = $p.fields;
                 if($p.intervals.hasOwnProperty(vmap.x))
                     viewSetting.isHistogram = true;
             }
-            // console.log('vis domain ::::', $p.uniform.uVisDomains.data);
-            //                 $p.uniform.uVisDomains = $p.uniform.uFieldDomains.data.slice();
 
             //TODO: Maybe just save the needed data domains instead of copying all
             if(!$p._update) {
                 var pv = $p.views[viewOrder];
-                pv.domains = $p.uniform.uFieldDomains.data.slice();
+                pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
                 $p.uniform.uVisDomains = pv.domains;
 
                 if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function')
@@ -247,15 +244,22 @@ define(function(require){
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
                 }
             }
-            if($p._update && typeof(vmap.brush) == 'object') {
-                $p.uniform.uVisLevel = 0.25;
-                $p.uniform.uDefaultColor = colorManager.rgb(vmap.brush.unselected.color);
-                if($p.revealDensity) enhance([width, height]);
-                if(mark!='bar') draw();
-                $p.uniform.uVisLevel = 0.5;
-                $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+            if($p._update && vmap.hasOwnProperty('brush')) {
+                $p.uniform.uVisLevel = 0.1;
+                if(typeof(vmap.brush) == 'object') {
+                    $p.uniform.uDefaultColor = colorManager.rgb(vmap.brush.unselected.color);
+                } else  {
+                    $p.uniform.uDefaultColor = colorManager.rgb('lightgrey');
+                }
+                // if($p.revealDensity) enhance([width, height]);
+                if(mark !='bar' ) draw();
+                $p.uniform.uVisLevel = 0.2;
+                if(typeof vmap.color == 'string')
+                    $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+            } else {
+                $p.uniform.uVisLevel = 0.1;
             }
-            $p.uniform.uVisLevel = 1.0;
+
             if(mark!='bar') draw();
 
             if($p.revealDensity) enhance([width, height]);
