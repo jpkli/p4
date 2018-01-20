@@ -21,7 +21,7 @@
         ],
         "views": [
             {
-                "width": 550,
+                "width": 500,
                 "height": 400,
                 "offset": [0, 0]
             }
@@ -47,6 +47,10 @@
     {
         "category": "Mulitple Views",
         "examples": [
+            {
+                "name": "Coordinated Views",
+                "file": "multiviews.json"
+            },
             {
                 "name": "Correlating Bar Charts",
                 "file": "clickbar.json"

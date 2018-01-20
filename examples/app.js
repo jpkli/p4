@@ -68,8 +68,8 @@ define(function(require){
             console.log(metadata);
             var dsl = {
                 container: "main-vis",
-                viewport: [900, 800],
-                padding: {left: 50, right: 40, top: 40, bottom: 50},
+                viewport: [750, 400],
+                padding: {left: 50, right: 40, top: 40, bottom: 40},
                 data: data
             };
 
