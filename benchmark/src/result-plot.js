@@ -30,7 +30,7 @@ define(function(require){
         var result =  d3.nest().key(d => d[vmap.color]).entries(data),
             series = result.map(d => d.key);
 
-
+        console.log(series, result);
         x.domain( d3.nest().key(d => d[vmap.x]).entries(data).map(d => d.key) );
         y.domain([1, Math.pow(10, Math.ceil(Math.log10(yMax)))]);
         // y.domain([0.1, 100]);
@@ -41,15 +41,24 @@ define(function(require){
             d3: 'rgb(255, 127, 14)',
             vega: 'steelblue',
             lodash: 'purple',
-            stardust: 'rgb(214, 39, 40)'
+            stardust: 'rgb(214, 39, 40)',
+            'AMD HD7970': 'red',
+            'Intel HD520': '#0070c5',
+            'Nvidia GTX940m': 'black',
+            'Nvidia GTX Titan': 'rgb(44, 160, 44)',
         };
 
-        var name = {
+        var names = {
             p4gl: 'P4 (WebGL)',
             d3: 'D3 (SVG)',
             vega: 'Vega (Canvas)',
             stardust: 'Stardust (WebGL)',
             lodash: 'Lodash'
+        };
+
+        var name = function(d) {
+            if(names.hasOwnProperty(d)) return names[d];
+            else return d;
         }
 
         var xAxis = d3.svg.axis()
@@ -100,7 +109,7 @@ define(function(require){
               .attr("dy", "1.2em")
               .style("text-anchor", "middle")
               .style("font-size", "1.1em")
-              .text(options.titleY || 'Latency (ms)');
+              .text(options.titleY || 'Time (ms)');
         }
 
 
@@ -112,7 +121,7 @@ define(function(require){
         trend.append("path")
           .attr("class", "line")
           .attr("d", function(d) { return line(d.values); })
-          .style("stroke-width", 3)
+          .style("stroke-width", 2.5)
           .style("fill", 'none')
           .style("stroke", function(d) { return color[d.key]; });
 
@@ -127,20 +136,25 @@ define(function(require){
         if(chartTitle) {
             var title = svg.append("text")
                 .attr("x", width/2)
-                .attr("y", -margin.top/2)
+                .attr("y", -margin.top/3)
                 .style("text-anchor", "middle")
-                .style("font-size", "16px")
+                .style("font-size", "0.9em")
                 .style("text-transform", "capitalize")
                  .text(chartTitle);
         }
-
+        var accWidth = 0;
         if(legend !== null) {
             legend = svg.append("g")
                 .attr("class", "legend")
               .selectAll("g")
                 .data(series)
               .enter().append("g")
-                .attr("transform", function(d, i) { return "translate(" + (width + 10) + "," + (i * 20) + ")"; });
+                .attr("transform", function(d, i) {
+                    var t = "translate(" + accWidth + "," + (-margin.top+10) + ")";
+                    accWidth += 46+7*name(d).length;
+                    console.log(accWidth);
+                    return t
+                 });
 
             legend.append("line")
                 .style("stroke", function(d) { return color[d]; })
@@ -150,8 +164,8 @@ define(function(require){
 
             legend.append("text")
                 .attr("dy", ".35em")
-                .attr("x", 26)
-                .text(function(d) { return name[d]; });
+                .attr("x", 22)
+                .text(function(d) { return name(d) });
         }
     }
 })

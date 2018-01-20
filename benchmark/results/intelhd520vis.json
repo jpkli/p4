@@ -1,0 +1,19 @@
+[
+{"dataSize":"16K","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":211.2029999999999,"latency":35.80900000000038},
+{"dataSize":"32K","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":125.68200000000033,"latency":43.44400000000023},
+{"dataSize":"64K","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":127.40800000000164,"latency":64.17200000000157},
+{"dataSize":"128K","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":150.89099999999888,"latency":93.96099999999933},
+{"dataSize":"256K","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":185.26300000000046,"latency":182.85099999999875},
+{"dataSize":"512K","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":254.20899999999966,"latency":368.3209999999963},
+{"dataSize":"1M","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":686.0866666666674,"latency":730.8633333333322},
+{"dataSize":"2M","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":632.2133333333355,"latency":1395.7816666666695},
+{"dataSize":"4M","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":1311.050000000003,"latency":2415.895000000004},
+{"dataSize":"8M","gpu": "Intel HD520", "lib":"p4gl","dopt":"scatterPlot","init":2010.6549999999988,"latency":3930.605000000003},
+{"dataSize":"16K","gpu": "Intel HD520", "lib":"p4gl","dopt":"parallelCoordinates","init":360.09750000000076,"latency":240.4300000000003},
+{"dataSize":"32K","gpu": "Intel HD520", "lib":"p4gl","dopt":"parallelCoordinates","init":148.02499999999782,"latency":485.3100000000013},
+{"dataSize":"64K","gpu": "Intel HD520", "lib":"p4gl","dopt":"parallelCoordinates","init":161.47750000000087,"latency":929.8125},
+{"dataSize":"128K","gpu": "Intel HD520", "lib":"p4gl","dopt":"parallelCoordinates","init":198.2099999999955,"latency":1763.107500000002},
+{"dataSize":"256K","gpu": "Intel HD520", "lib":"p4gl","dopt":"parallelCoordinates","init":353.6875,"latency":3466.9199999999983},
+{"dataSize":"512K","gpu": "Intel HD520", "lib":"p4gl","dopt":"parallelCoordinates","init":349.0949999999975,"latency":7771.222500000007},
+{"dataSize":"1M","gpu": "Intel HD520", "lib":"p4gl","dopt":"parallelCoordinates","init":679.8799999999974,"latency":13839.3250000000044}
+]

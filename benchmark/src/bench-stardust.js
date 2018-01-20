@@ -63,13 +63,13 @@ define(function(require){
         });
 
         pcp.init();
-        pcp.render();
+        // pcp.render();
 
-        profile.total = performance.now() - ts;
+        profile.init = performance.now() - ts;
         ts = performance.now();
         pcp.render();
         profile.render = performance.now() - ts;
-        profile.init = profile.total - profile.render;
+        profile.total = profile.init + profile.render;
 
         return profile;
     }
@@ -95,7 +95,7 @@ define(function(require){
         ts = performance.now();
         scp.render();
         profile.render = performance.now() - ts;
-
+        profile.total = profile.init + profile.render;
 
         return profile;
     }

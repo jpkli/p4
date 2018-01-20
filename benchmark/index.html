@@ -90,7 +90,8 @@
     </nav>
 
 
-    <div class="container page">
+    <!-- <div class="container page"> -->
+    <div class="page">
       <div id="comparisons">
         <h3>Performance Comparisons</h3>
         <div id="comparative-results-dopts">
@@ -99,15 +100,24 @@
             <div id="result-aggregate" style="display: inline-block"></div>
         </div>
 
+        <div id="comparative-results-dopts">
+            <div id="gpu-select" style="display: inline-block"></div>
+            <div id="gpu-derive" style="display: inline-block"></div>
+            <div id="gpu-aggregate" style="display: inline-block"></div>
+        </div>
+
         <div id="comparative-results-vis">
             <div id="result-init-scatterPlot" style="display: inline-block"></div>
             <div id="result-scatterPlot" style="display: inline-block"></div>
-
         </div>
-
-        <div id="comparative-results-init">
+        <div id="vis-parallelCoordinates">
             <div id="result-init-parallelCoordinates" style="display: inline-block"></div>
             <div id="result-parallelCoordinates" style="display: inline-block"></div>
+        </div>
+
+        <div id="vis-gpus">
+            <div id="vis-gpus-scatterPlot" style="display: inline-block"></div>
+            <div id="vis-gpus-parallelCoordinates" style="display: inline-block"></div>
         </div>
       </div>
     </div>
@@ -131,14 +141,13 @@
                     data: data.filter(d => d.dopt == dopt),
                     container: '#result-' + dopt,
                     // dopt: dopt,
-                    width: 280,
-                    height: 280,
+                    width: 320,
+                    height: 200,
                     chartTitle: dopt,
                     yMax: yMax,
                 };
-
+                plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
                 if(pi == dopts.length - 1) {
-                    plotOptions.margin = {top: 30, right: 100, bottom: 60, left: 40};;
                     plotOptions.legend = true;
                 }
 
@@ -147,7 +156,40 @@
                 }
 
                 if(pi == 0) {
-                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 60};;
+                    plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 60};
+                    plotOptions.yLabel = true;
+                }
+
+                plotResults(plotOptions);
+            })
+        })
+        $.getJSON('benchmark/results/dopt-gpus.json', function(data) {
+            var dopts = ['select','derive', 'aggregate'];
+            var yMax = d3.max(data, function(d) { return d.latency; });
+            dopts.forEach(function(dopt, pi){
+                // $('#result-'+dopt).append($('<h4/>').text(dopt));
+                var plotOptions = {
+                    data: data.filter(d => d.dopt == dopt),
+                    container: '#gpu-' + dopt,
+                    // dopt: dopt,
+                    width: 320,
+                    height: 200,
+                    chartTitle: dopt,
+                    vmap: {color: 'gpu', x: 'dataSize', y: 'latency'},
+                    yMax: yMax,
+                };
+
+                // if(pi == dopts.length - 1) {
+                //     plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 60};;
+                //     // plotOptions.legend = true;
+                // }
+
+                if(pi == Math.floor(dopts.length/2)) {
+                    plotOptions.xLabel = true;
+                }
+                plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
+                if(pi == 0) {
+                    plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 60};;
 
                     plotOptions.yLabel = true;
                 }
@@ -156,28 +198,29 @@
             })
         })
 
-
-        $.getJSON('benchmark/results/vis-comparisons.json', function(data) {
+        $.getJSON('benchmark/results/vis-gpus.json', function(data) {
             var dopts = ['scatterPlot','parallelCoordinates'];
 
             dopts.forEach(function(dopt, pi){
                 // $('#result-'+dopt).append($('<h4/>').text(dopt));
                 var plotOptions = {
                     data: data.filter(d => d.dopt == dopt),
-                    container: '#result-' + dopt,
-                    chartTitle: 'Visualizing ' + dopt,
-                    width: 280,
-                    height: 280,
+                    container: '#vis-gpus-' + dopt,
+                    chartTitle: dopt,
+                    width: 320,
+                    height: 200,
+                    vmap: {color: 'gpu', x: 'dataSize', y: 'latency'},
                     yMax: d3.max(data, function(d) { return d.latency; })
                 };
-
+                plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
                 if(pi == dopts.length - 1) {
-                    plotOptions.margin = {top: 30, right: 160, bottom: 60, left: 60};;
-                    plotOptions.legend = true;
-                } else {
-                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 60};
-                }
 
+                    plotOptions.legend = true;
+                }
+                if(pi == 0) {
+                    plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
+                    // plotOptions.yLabel = true;
+                }
                 // plotOptions.yLabel = true;
                 plotOptions.xLabel = false;
                 plotResults(plotOptions);
@@ -194,8 +237,8 @@
                     data: data.filter(d => d.dopt == dopt),
                     container: '#result-init-' + dopt,
                     // dopt: dopt,
-                    width: 280,
-                    height: 280,
+                    width: 320,
+                    height: 200,
                     chartTitle: 'Initalizing ' + dopt,
                     yMax: d3.max(data, function(d) { return d.init; }),
                     vmap: {
@@ -204,19 +247,30 @@
                         y: 'init'
                     }
                 };
-
-                if(pi == 0) {
-                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 60};
-                    plotOptions.yLabel = true;
-                } else {
-                    plotOptions.margin = {top: 30, right: 20, bottom: 60, left: 40};
-                }
-
+                plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
                 plotOptions.legend = false;
                 plotOptions.xLabel = false;
+                plotResults(plotOptions);
+            })
 
+            var dopts = ['scatterPlot','parallelCoordinates'];
 
-
+            dopts.forEach(function(dopt, pi){
+                // $('#result-'+dopt).append($('<h4/>').text(dopt));
+                var plotOptions = {
+                    data: data.filter(d => d.dopt == dopt),
+                    container: '#result-' + dopt,
+                    chartTitle: 'Visualizing ' + dopt,
+                    width: 320,
+                    height: 200,
+                    yMax: d3.max(data, function(d) { return d.latency; })
+                };
+                plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
+                if(pi == dopts.length - 1) {
+                    plotOptions.legend = true;
+                }
+                // plotOptions.yLabel = true;
+                plotOptions.xLabel = false;
                 plotResults(plotOptions);
             })
         })

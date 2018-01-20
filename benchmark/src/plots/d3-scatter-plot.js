@@ -33,8 +33,8 @@ define(function(){
           .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        x.domain(d3.extent(data, function(d) { return d[vmap.x]; })).nice();
-        y.domain(d3.extent(data, function(d) { return d[vmap.y]; })).nice();
+        x.domain(d3.extent(data, function(d) { return d[vmap.x]; }));
+        y.domain(d3.extent(data, function(d) { return d[vmap.y]; }));
 
         profile.init = performance.now() - startTime;
         startTime = performance.now();
