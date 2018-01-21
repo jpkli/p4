@@ -4,7 +4,7 @@ define(function(require){
         render = require('./render'),
         reveal = require('./reveal');
 
-    const Chart = require('./chart/chart');
+    const Chart = require('./chart/view');
     const Brush = require('./chart/brush');
 
     const interact = require('./interact');
@@ -17,7 +17,7 @@ define(function(require){
     return function ($p) {
 
         var colorManager = colors($p),
-            padding = $p.padding || {left: 0, right: 0, top: 0, bottom: 0},
+            chartPadding = $p.padding || {left: 0, right: 0, top: 0, bottom: 0},
             viewport = [
                 $p.viewport[0],
                 $p.viewport[1],
@@ -25,10 +25,10 @@ define(function(require){
 
         var vis = new Chart({
             container: $p.container,
-            width: viewport[0] + padding.left + padding.right,
-            height: viewport[1] + padding.top + padding.bottom,
+            width: viewport[0] + chartPadding.left + chartPadding.right,
+            height: viewport[1] + chartPadding.top + chartPadding.bottom,
             canvas: $p.canvas,
-            padding: padding
+            padding: chartPadding
         });
 
         $p.uniform('uVisualEncodings',  'int',   new Array(visualEncodings.length).fill(-1))
@@ -77,14 +77,17 @@ define(function(require){
                 mark = options.mark || vmap.mark || 'line',
                 data = options.data || null,
                 interaction = options.interaction,
-                viewOrder = options.viewOrder;
+                viewIndex = options.viewIndex;
 
             var visDomain = {},
-                visDimension = vmap.viewport || [$p.views[viewOrder].width, $p.views[viewOrder].height] || viewport;
+                visDimension = vmap.viewport || [$p.views[viewIndex].width, $p.views[viewIndex].height] || viewport;
 
             var width = visDimension[0],
                 height =  visDimension[1],
-                offset = $p.views[viewOrder].offset || [0, 0];
+                padding = $p.views[viewIndex].padding || chartPadding,
+                offset = $p.views[viewIndex].offset || [0, 0];
+
+            console.log($p.views, padding, chartPadding);
 
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
@@ -137,6 +140,7 @@ define(function(require){
                 vmap: vmap,
                 onclick: interaction,
                 categories: $p.categoryLookup,
+                padding: padding,
                 left: offset[0],
                 top: viewport[1] - height - offset[1]
             };
@@ -181,8 +185,8 @@ define(function(require){
             }
 
             gl.viewport(
-                offset[0],
-                offset[1],
+                offset[0] + padding.left,
+                offset[1] + padding.bottom,
                 width-padding.left-padding.right,
                 height-padding.top-padding.bottom
             );
@@ -212,7 +216,7 @@ define(function(require){
 
             //TODO: Maybe just save the needed data domains instead of copying all
             if(!$p._update) {
-                var pv = $p.views[viewOrder];
+                var pv = $p.views[viewIndex];
                 pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
                 $p.uniform.uVisDomains = pv.domains;
 
@@ -220,10 +224,10 @@ define(function(require){
                     pv.chart.svg.remove();
                 pv.chart = vis.addLayer(viewSetting);
             } else {
-                $p.uniform.uVisDomains = $p.views[viewOrder].domains;
+                $p.uniform.uVisDomains = $p.views[viewIndex].domains;
                 if(mark == 'bar'){
                     var result = $p.readResult('row');
-                    $p.views[viewOrder].chart.update({
+                    $p.views[viewIndex].chart.update({
                         data: result
                     })
                 }
@@ -271,7 +275,8 @@ define(function(require){
 
                 interact($p, {
                     actions: actions,
-                    vis: $p.views[viewOrder],
+                    vis: $p.views[viewIndex],
+                    padding: $p.views[viewIndex].padding,
                     callback: interaction
                 });
             }

@@ -11,7 +11,7 @@ define(function(require){
             svg = this.$svg(),
             vmap = option.vmap,
             color = option.color || "steelblue",
-            padding = this.$padding || {left: 0, right: 0, top: 0, bottom: 0},
+            chartPadding = this.$padding || {left: 0, right: 0, top: 0, bottom: 0},
             domain = option.domain || {x: [0, 1000], y: [0, 1]},
             scales = option.scales || {x: 'linear', y: 'linear'};
 
@@ -32,6 +32,7 @@ define(function(require){
                 onclick = options.onclick || null,
                 onhover = options.onhover || null,
                 tickOffset = options.axisOffset || [0, 0],
+                padding = options.padding || chartPadding,
                 marks = [];
 
             var scaleX = options.scaleX || 'linear',

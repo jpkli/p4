@@ -53,6 +53,9 @@ define(function(require) {
                     v.chart.svg.remove();
                     delete v.chart;
                 }
+                if(!v.hasOwnProperty('padding')) {
+                    v.padding = {left: 30, right: 30, top: 30, bottom: 30};
+                }
             })
             $p.views = views;
         }
@@ -196,6 +199,7 @@ define(function(require) {
         }
 
         pipeline.select = pipeline.filter;
+        pipeline.match = pipeline.filter;
 
         pipeline.derive = function(spec) {
             addToPipeline('derive', spec);
@@ -239,7 +243,7 @@ define(function(require) {
 
             var viewOptions = {
                 vmap: vmap,
-                viewOrder: viewIndex
+                viewIndex: viewIndex
             };
 
             if(!rerun) {
@@ -328,7 +332,7 @@ define(function(require) {
             return pipeline;
         }
 
-        var branchID = 0;;
+        var branchID = 0;
         pipeline.branch = function(branches) {
             pipeline.register('_branch'+branchID);
 

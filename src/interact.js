@@ -6,7 +6,7 @@ define(function(require){
             callback = options.callback || function() {};
 
         var vmap = vis.vmap,
-            p = $p.padding,
+            p = options.padding || $p.padding,
             w = vis.width - p.left - p.right,
             h = vis.height - p.top - p.bottom;
 
