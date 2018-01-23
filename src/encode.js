@@ -64,6 +64,33 @@ define(function(require){
             }
         }
 
-        return vmapIndex;
+        var dimSetting = {};
+        if (vmap.mark == 'rect') {
+            if(vmapIndex[0] > -1) {
+                var len = $p.fieldWidths[vmapIndex[0]],
+                    ext = $p.fieldDomains[vmapIndex[0]];
+                dimSetting.scaleX = 'ordinal';
+                if($p.categoryLookup.hasOwnProperty(vmap.x)){
+                     dimSetting.domainX = new Array(len).fill(0).map(
+                         (d,i)=>$p.categoryLookup[vmap.x][i]
+                     );
+                 } else {
+                     dimSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
+                 }
+            }
+            if(vmapIndex[1] > -1) {
+                var len = $p.fieldWidths[vmapIndex[1]],
+                    ext = $p.fieldDomains[vmapIndex[1]];
+                dimSetting.scaleY = 'ordinal';
+                if($p.categoryLookup.hasOwnProperty(vmap.y)){
+                     dimSetting.domainY = new Array(len).fill(0).map(
+                         (d,i)=>$p.categoryLookup[vmap.y][i]
+                     ).reverse();
+                } else {
+                    dimSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
+                }
+            }
+        }
+        return dimSetting;
     }
 });

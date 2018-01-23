@@ -87,8 +87,6 @@ define(function(require){
                 padding = $p.views[viewIndex].padding || chartPadding,
                 offset = $p.views[viewIndex].offset || [0, 0];
 
-            console.log($p.views, padding, chartPadding);
-
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
                 if(vmap.zero && visDomain[f][0]>0) visDomain[f][0] = 0;
@@ -96,7 +94,7 @@ define(function(require){
                 visDomain[f][1] *= $p.uniform.uVisScale.data[1];
             });
 
-            var vmapIndex = encode($p, vmap, colorManager);
+            var dimSetting = encode($p, vmap, colorManager);
 
             var gl = $p.program($p.renderMode);
             $p.framebuffer.enableRead('fFilterResults');
@@ -145,32 +143,7 @@ define(function(require){
                 top: viewport[1] - height - offset[1]
             };
 
-            if (mark == 'rect') {
-                if(vmapIndex[0] > -1) {
-                    var len = $p.fieldWidths[vmapIndex[0]],
-                        ext = $p.fieldDomains[vmapIndex[0]];
-                    viewSetting.scaleX = 'ordinal';
-                    if($p.categoryLookup.hasOwnProperty(vmap.x)){
-                         viewSetting.domainX = new Array(len).fill(0).map(
-                             (d,i)=>$p.categoryLookup[vmap.x][i]
-                         );
-                     } else {
-                         viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
-                     }
-                }
-                if(vmapIndex[1] > -1) {
-                    var len = $p.fieldWidths[vmapIndex[1]],
-                        ext = $p.fieldDomains[vmapIndex[1]];
-                    viewSetting.scaleY = 'ordinal';
-                    if($p.categoryLookup.hasOwnProperty(vmap.y)){
-                         viewSetting.domainY = new Array(len).fill(0).map(
-                             (d,i)=>$p.categoryLookup[vmap.y][i]
-                         ).reverse();
-                    } else {
-                        viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
-                    }
-                }
-            }
+            viewSetting = Object.assign(viewSetting, dimSetting);
 
             if($p.revealDensity) {
                 $p.bindFramebuffer('offScreenFBO');
@@ -197,14 +170,6 @@ define(function(require){
             gl.enable( gl.BLEND );
             gl.blendEquation(gl.FUNC_ADD);
 
-            function sortData(data) {
-                return data.sort(function(a,b){
-                    if(typeof(a[vmap.x]) == 'string')
-                        return a[vmap.x] > b[vmap.x];
-                    else
-                        return a[vmap.x] - b[vmap.x];
-                })
-            }
 
             if(mark == 'bar') {
                 var result = $p.readResult('row');

@@ -78,8 +78,9 @@ define(function(require){
                     function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
                 );
                 if(maxStrLength > 10) {
-                    xAxisOption.labelAngle = -15;
-                    xAxisOption.labelPos = {x: 0, y: -22};
+                    xAxisOption.labelAngle = -30;
+                    xAxisOption.tickLabelAlign = 'end';
+                    xAxisOption.labelPos = {x: 0, y: -10};
                 }
             }
 
@@ -191,9 +192,9 @@ define(function(require){
                     function(d){ return (typeof(d) == 'string') ? d.toString().length : 1; })
                 );
                 if(maxStrLength > 10) {
-                    xAxisOption.labelAngle = -15;
-                    xAxisOption.tickLabelAlign = 'middle';
-                    xAxisOption.labelPos = {x: 0, y: -22};
+                    xAxisOption.labelAngle = -20;
+                    xAxisOption.tickLabelAlign = 'end';
+                    xAxisOption.labelPos = {x: 0, y: -12};
                 }
                 xAxisOption.scale = "ordinal";
                 xAxisOption.ticks = (xAxisOption.domain.length < 16)
