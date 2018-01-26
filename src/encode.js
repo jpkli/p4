@@ -42,12 +42,48 @@ define(function(require){
                 $p.uniform.uInterleaveX = 0;
             }
             if(Array.isArray(vmap.y)) $p.uniform.uInterleaveX = 1;
-        } else if(vmap.mark && vmap.mark == 'rect') {
+        } else if(vmap.mark && ['rect', 'bar'].indexOf(vmap.mark) !== -1) {
             $p.renderMode = 'polygon';
         }
 
         if(vmapIndex[6] === -1 && typeof(vmap.size) == 'number') {
             $p.uniform.uMarkSize = vmap.size;
+        }
+
+        var dimSetting = {};
+        if (['rect', 'bar'].indexOf(vmap.mark) !== -1) {
+            var markSpace = [0, 0];
+            if(vmapIndex[0] > -1) {
+                var len = $p.fieldWidths[vmapIndex[0]],
+                    ext = $p.fieldDomains[vmapIndex[0]];
+                dimSetting.scaleX = 'ordinal';
+                if($p.categoryLookup.hasOwnProperty(vmap.x)){
+                     dimSetting.domainX = new Array(len).fill(0).map(
+                         (d,i)=>$p.categoryLookup[vmap.x][i]
+                     );
+                 } else {
+                     dimSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
+                 }
+                 markSpace[0] = 0.02;
+            }
+            if(vmapIndex[1] > -1) {
+                var len = $p.fieldWidths[vmapIndex[1]],
+                    ext = $p.fieldDomains[vmapIndex[1]];
+                dimSetting.scaleY = 'ordinal';
+                if($p.categoryLookup.hasOwnProperty(vmap.y)){
+                     dimSetting.domainY = new Array(len).fill(0).map(
+                         (d,i)=>$p.categoryLookup[vmap.y][i]
+                     ).reverse();
+                } else {
+                    dimSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
+                }
+                markSpace[1] = 0.02;
+            }
+
+            if(vmapIndex[0] > -1 && vmapIndex[1] > -1)
+                markSpace = [0, 0];
+
+            $p.uniform.uMarkSpace = markSpace;
         }
 
         if(!$p._update) {
@@ -64,33 +100,6 @@ define(function(require){
             }
         }
 
-        var dimSetting = {};
-        if (vmap.mark == 'rect') {
-            if(vmapIndex[0] > -1) {
-                var len = $p.fieldWidths[vmapIndex[0]],
-                    ext = $p.fieldDomains[vmapIndex[0]];
-                dimSetting.scaleX = 'ordinal';
-                if($p.categoryLookup.hasOwnProperty(vmap.x)){
-                     dimSetting.domainX = new Array(len).fill(0).map(
-                         (d,i)=>$p.categoryLookup[vmap.x][i]
-                     );
-                 } else {
-                     dimSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
-                 }
-            }
-            if(vmapIndex[1] > -1) {
-                var len = $p.fieldWidths[vmapIndex[1]],
-                    ext = $p.fieldDomains[vmapIndex[1]];
-                dimSetting.scaleY = 'ordinal';
-                if($p.categoryLookup.hasOwnProperty(vmap.y)){
-                     dimSetting.domainY = new Array(len).fill(0).map(
-                         (d,i)=>$p.categoryLookup[vmap.y][i]
-                     ).reverse();
-                } else {
-                    dimSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
-                }
-            }
-        }
         return dimSetting;
     }
 });

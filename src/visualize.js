@@ -40,6 +40,7 @@ define(function(require){
             .uniform('uPosOffset',      'vec2', [0.0, 0.0])
             .uniform('uFeatureCount',   'int',   0)
             .uniform('uMarkSize',       'float', 10.0)
+            .uniform('uMarkSpace',      'vec2',  [0.02, 0.02])
             .uniform('uDefaultAlpha',   'float', 1.0)
             .uniform('uDefaultWidth',   'float', 1.0 / $p.viewport[0])
             .uniform('uDefaultHeight',  'float', 1.0 / $p.viewport[1])
@@ -171,7 +172,7 @@ define(function(require){
             gl.blendEquation(gl.FUNC_ADD);
 
 
-            if(mark == 'bar') {
+            if(mark == 'stack') {
                 var result = $p.readResult('row');
                 viewSetting.data = result.filter(d=>d[vmap.y]>0);
                 viewSetting.fields = $p.fields;
@@ -190,7 +191,7 @@ define(function(require){
                 pv.chart = vis.addLayer(viewSetting);
             } else {
                 $p.uniform.uVisDomains = $p.views[viewIndex].domains;
-                if(mark == 'bar'){
+                if(mark == 'stack'){
                     var result = $p.readResult('row');
                     $p.views[viewIndex].chart.update({
                         data: result
@@ -199,7 +200,7 @@ define(function(require){
             }
 
             var primitive = gl.POINTS;
-            if(['rect'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
+            if(['rect', 'bar'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
             else if(mark == 'line') primitive = gl.LINE_STRIP;
 
             function draw() {
@@ -221,7 +222,7 @@ define(function(require){
                     $p.uniform.uDefaultColor = colorManager.rgb('lightgrey');
                 }
                 // if($p.revealDensity) enhance([width, height]);
-                if(mark !='bar' ) draw();
+                if(mark !='stack' ) draw();
                 $p.uniform.uVisLevel = 0.2;
                 if(typeof vmap.color == 'string')
                     $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
@@ -229,7 +230,7 @@ define(function(require){
                 $p.uniform.uVisLevel = 0.1;
             }
 
-            if(mark!='bar') draw();
+            if(mark!='stack') draw();
 
             if($p.revealDensity) enhance([width, height]);
             $p.bindFramebuffer(null);

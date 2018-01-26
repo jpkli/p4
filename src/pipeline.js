@@ -335,7 +335,6 @@ define(function(require) {
         var branchID = 0;
         pipeline.branch = function(branches) {
             pipeline.register('_branch'+branchID);
-
             branches.forEach(function(b){
                 var operations = Object.keys(b).map(function(o) {
                     var obj = {};
@@ -345,12 +344,7 @@ define(function(require) {
                 pipeline.run(operations);
                 pipeline.resume('_branch' + branchID);
             })
-
             branchID++;
-        }
-
-        pipeline.pipeline = function() {
-            console.log($p.pipeline);
         }
 
         pipeline.run = function(opts) {
@@ -396,8 +390,7 @@ define(function(require) {
             return result.filter(function(d, i){ return i%4===3;} );
         }
 
-        pipeline.runSpec = function(specs) {
-            pipeline.head();
+        pipeline.clearViews() {
             $p.bindFramebuffer("offScreenFBO");
             $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
             $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
@@ -407,6 +400,11 @@ define(function(require) {
             $p.bindFramebuffer(null);
             $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
             $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        }
+
+        pipeline.runSpec = function(specs) {
+            pipeline.head();
+            pipeline.clearViews();
             $p.pipeline = [];
             $p.crossfilters = [];
             $p.uniform.uFilterFlag.data = 0;
@@ -425,9 +423,7 @@ define(function(require) {
         pipeline.head = function() {
             pipeline.resume('__init__');
             return pipeline;
-
         }
-        // pipeline.restart = pipeline.head;
 
         if(options.hasOwnProperty('data')) {
             pipeline.data(options.data);
