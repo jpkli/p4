@@ -57,6 +57,7 @@ define(function(require){
 
         return function(options) {
             var gl,
+                viewIndex = options.viewIndex,
                 viewDim = options.dim,
                 offset = options.offset || [0, 0],
                 padding = options.padding || {left: 0, right: 0, left: 0, right:0};
@@ -83,8 +84,10 @@ define(function(require){
                 if(max[3] == 0) {
                     max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
                 }
-                $p.uniform.uMaxRGBA = max;
+                $p.views[viewIndex].maxRGBA = max;
             }
+
+            $p.uniform.uMaxRGBA = $p.views[viewIndex].maxRGBA;
 
             $p.bindFramebuffer(null);
             gl = $p.program("vis-render");

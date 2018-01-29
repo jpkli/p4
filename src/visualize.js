@@ -214,6 +214,7 @@ define(function(require){
 
             if(mark!='stack') draw();
             if($p.revealDensity) enhance({
+                viewIndex: viewIndex,
                 dim: [width, height],
                 offset: offset,
                 padding: padding
