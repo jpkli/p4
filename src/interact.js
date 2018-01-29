@@ -1,12 +1,14 @@
 define(function(require){
     const Brush = require('./chart/brush');
     return function($p, options) {
-        var vis = options.vis || options.chart,
+        var vis = options.vis || options.view || $p.views[0],
             actions = options.actions || options.events || [],
             callback = options.callback || function() {};
 
+        if($p._update) return;
+
         var vmap = vis.vmap,
-            p = options.padding || $p.padding,
+            p = vis.padding || $p.padding,
             w = vis.width - p.left - p.right,
             h = vis.height - p.top - p.bottom;
 
@@ -35,6 +37,7 @@ define(function(require){
             sy = e.clientY;
             $p.uniform.uPosOffset.data = [tx / w, ty / h];
         }
+
 
         actions.forEach(function(action){
             if(action == 'brush') {
@@ -140,7 +143,6 @@ define(function(require){
                     svg.onmousemove = function(e) {
                         sx = e.clientX;
                         sy = e.clientY;
-
                         console.log('hover', sx, sy);
                     }
 
@@ -153,5 +155,6 @@ define(function(require){
                 }
             }
         })
+
     }
 })

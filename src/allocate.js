@@ -65,11 +65,9 @@ define(function(require){
             var min = stats[field].min,
                 max = stats[field].max,
                 fi = dkeys.indexOf(field);
-            console.log(fi, [min, max]);
             $p.fieldWidths[fi] = getDataWidth(fi, [min, max]);
         });
         $p.getDataWidth = getDataWidth;
-        console.log($p.dataDimension, $p.dataSize);
         $p.deriveDomains = new Array($p.deriveMax).fill([0, 1]);
         $p.deriveWidths = new Array($p.deriveMax).fill(1);
         $p.deriveFieldCount = 0;

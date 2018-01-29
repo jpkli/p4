@@ -7,17 +7,21 @@ define(function(require) {
         config = require('./config'),
         cstore = require('./cstore'),
         compile = require('./compile'),
-        optDerive = require('./derive');
+        optDerive = require('./derive'),
+        interact = require('./interact');
 
     return function pipeline(options) {
         var pipeline = {},
             registers = {},
             profiles  = [],
-            opt = {},
+            operation = {},
             optID = 0,
             rerun = false;
 
         var $p = config(options);
+
+        $p.interactions = [];
+        $p.response = {};
 
         $p.getResult = function() {};
 
@@ -34,16 +38,15 @@ define(function(require) {
 
         pipeline.data = function(dataOptions) {
             allocate($p, dataOptions);
-            opt = compile($p);
+            operation = compile($p);
             if(!$p.hasOwnProperty('fieldDomains')) {
-                var dd = opt.extent($p.fields.map((f, i) => i), $p.dataDimension);
-                console.log(dd);
+                var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
+                // console.log(dd);
                 // $p.uniform.uFieldDomains.data = $p.fieldDomains;
             }
-            $p.opt = opt;
+            $p.opt = operation;
             pipeline.ctx = $p.ctx;
             pipeline.register('__init__');
-
             return pipeline;
         }
 
@@ -182,7 +185,7 @@ define(function(require) {
             if(Object.keys($p.crossfilters).length)
                 $p.uniform.uFilterFlag = 1;
 
-            opt.aggregate.execute(spec);
+            operation.aggregate.execute(spec);
             // console.log(pipeline.result('row'));
             return pipeline;
         }
@@ -190,8 +193,8 @@ define(function(require) {
         pipeline.filter = function(spec) {
             addToPipeline('filter', spec);
 
-            opt.select.execute(spec);
-            $p.getResult = opt.select.result;
+            operation.select.execute(spec);
+            $p.getResult = operation.select.result;
             // console.log($p.getResult());
 
 
@@ -207,111 +210,16 @@ define(function(require) {
             //TODO: support JS function as expression for deriving new variable
             //.replace(/function\s*[\w|\d]+\s*\((.+)\)/g, "$1")
             // if (!opt.hasOwnProperty('derive')) {
-                opt.derive = optDerive($p, spec);
+                operation.derive = optDerive($p, spec);
             // }
-            opt.derive.execute(spec);
-            $p.getResult = opt.derive.result;
+            operation.derive.execute(spec);
+            $p.getResult = operation.derive.result;
             return pipeline;
         }
 
         pipeline.cache = function(tag) {
-            opt.cache.execute(tag);
+            operation.cache.execute(tag);
             // console.log(cache.result());
-            return pipeline;
-        }
-
-        pipeline.visualize = function(vmap) {
-            var optID = addToPipeline('visualize', vmap);
-            var viewIndex = 0,
-                filters = {};
-
-            if(typeof vmap.id == 'string') {
-                viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
-                if(viewIndex == -1) {
-                    //find next available view slot in all views
-                    for(var vi = 0; vi < $p.views.length; vi++){
-                        if(!$p.views[vi].id) {
-                            viewIndex = vi;
-                            $p.views[viewIndex].id = vmap.id;
-                            break;
-                        }
-                    }
-                }
-
-            }
-            $p.views[viewIndex].vmap = vmap;
-
-            var viewOptions = {
-                vmap: vmap,
-                viewIndex: viewIndex
-            };
-
-            if(!rerun) {
-                if(vmap.hasOwnProperty('interact')) {
-                    viewOptions.interaction = function(d) {
-                        // console.log(d);
-                        $p._update = true;
-                        rerun = true;
-                        // pipeline.head();
-                        vmap.interact(d);
-                        rerun = false;
-                    }
-                }
-                else if($p.interaction == 'auto') {
-                    viewOptions.interaction = function(selection) {
-                        // console.log('selections:::::::::', selection);
-                        // $p._update = true;
-                        rerun = true;
-                        if(typeof selection == 'object') {
-                            Object.keys(selection).forEach(function(k) {
-                                if(selection[k].length < 2) {
-                                    if($p.intervals.hasOwnProperty(k)) {
-                                        var value = (Array.isArray(selection[k]))
-                                            ? selection[k][0]
-                                            : selection[k];
-                                        selection[k] = [value-$p.intervals[k].interval, value];
-                                    } else if(!$p.categoryLookup.hasOwnProperty(k)) {
-                                        selection[k] = [selection[k][0] + selection[k][0] + 1];
-                                    }
-                                }
-                                $p.crossfilters[k] = selection[k];
-                            });
-
-                            pipeline.update();
-                            // console.log('$p.crossfilters::::::', $p.crossfilters, $p.fieldDomains);
-
-                            var operations = $p.pipeline.slice(0, optID);
-
-                            for (var i = 0, l = $p.pipeline.length; i < l; i++) {
-                                var p = $p.pipeline[i];
-                                if(Object.keys(p)[0] == 'filter') {
-                                    Object.keys(selection).forEach(function(k) {
-                                        p.filter[k] = selection[k];
-                                    });
-
-                                    break;
-                                }
-                            }
-                        } else {
-                            pipeline.update();
-                        }
-
-                        pipeline.run();
-                        // Object.keys(d).forEach(function(k) {
-                        //     delete $p.crossfilters[k];
-                        // });
-                        rerun = false;
-                        // pipeline.run(operations.concat($p.pipeline.slice(optID)));
-                        // pipeline.run([{filter: filters}].concat($p.pipeline));
-
-                        // console.log('**interactive latency:', performance.now() - start);
-                    };
-                }
-                $p.viewID++;
-
-            }
-
-            opt.visualize(viewOptions);
             return pipeline;
         }
 
@@ -386,11 +294,10 @@ define(function(require) {
                 result = new Uint8Array(rowSize * colSize * 4);
 
             gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, result);
-            // console.log(result);
             return result.filter(function(d, i){ return i%4===3;} );
         }
 
-        pipeline.clearViews() {
+        pipeline.clearViews = function() {
             $p.bindFramebuffer("offScreenFBO");
             $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
             $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
@@ -405,6 +312,8 @@ define(function(require) {
         pipeline.runSpec = function(specs) {
             pipeline.head();
             pipeline.clearViews();
+            $p.interactions = [];
+            $p.response = {};
             $p.pipeline = [];
             $p.crossfilters = [];
             $p.uniform.uFilterFlag.data = 0;
@@ -423,6 +332,99 @@ define(function(require) {
         pipeline.head = function() {
             pipeline.resume('__init__');
             return pipeline;
+        }
+
+        pipeline.visualize = function(vmap) {
+
+            var optID = addToPipeline('visualize', vmap);
+            var viewIndex = 0,
+                filters = {};
+
+            if(typeof vmap.id == 'string') {
+                viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
+                if(viewIndex == -1) {
+                    //find next available view slot in all views
+                    for(var vi = 0; vi < $p.views.length; vi++){
+                        if(!$p.views[vi].id) {
+                            viewIndex = vi;
+                            $p.views[viewIndex].id = vmap.id;
+                            break;
+                        }
+                    }
+                }
+
+            }
+            if(vmap.mark == 'bar') vmap.zero = true;
+            $p.views[viewIndex].vmap = vmap;
+            var encoding = vmap,
+                viewTag = $p.views[viewIndex].id;
+
+            if($p._update && $p.response.hasOwnProperty(viewTag)) {
+                if($p.response[viewTag].hasOwnProperty($p._responseType)) {
+                    encoding = Object.assign({}, vmap, $p.response[viewTag][$p._responseType]);
+                }
+            }
+
+            operation.visualize({
+                vmap: encoding,
+                viewIndex: viewIndex
+            });
+
+            pipeline.interact();
+            return pipeline;
+        }
+
+        pipeline.interact = function(spec) {
+            if(typeof(spec) != 'undefined') $p.interactions.push(spec);
+            $p.interactions.forEach(function(interaction){
+                interact($p, {
+                    actions: [interaction.event],
+                    view: $p.views.filter(v=>v.id == interaction.from)[0],
+                    callback: function(selection) {
+                        $p.response = interaction.response;
+                        if(!rerun) {
+                            // $p._update = true;
+                            rerun = true;
+                            if(typeof selection == 'object') {
+                                Object.keys(selection).forEach(function(k) {
+                                    if(selection[k].length < 2) {
+                                        if($p.intervals.hasOwnProperty(k)) {
+                                            var value = (Array.isArray(selection[k]))
+                                                ? selection[k][0]
+                                                : selection[k];
+                                            selection[k] = [value-$p.intervals[k].interval, value];
+                                        } else if(!$p.categoryLookup.hasOwnProperty(k)) {
+                                            selection[k] = [selection[k][0] + selection[k][0] + 1];
+                                        }
+                                    }
+                                    $p.crossfilters[k] = selection[k];
+                                });
+
+                                // var operations = $p.pipeline.slice(0, optID);
+                                // for (var i = 0, l = $p.pipeline.length; i < l; i++) {
+                                //     var p = $p.pipeline[i];
+                                //     if(['filter', 'match', 'select'].indexOf(Object.keys(p)[0]) !== -1) {
+                                //         Object.keys(selection).forEach(function(k) {
+                                //             p.filter[k] = selection[k];
+                                //         });
+                                //         break;
+                                //     }
+                                // }
+                            }
+                            pipeline.update();
+                            $p._responseType = 'unselected';
+                            pipeline.run();
+                            $p.uniform.uVisLevel.data = 0.2;
+                            pipeline.update();
+                            $p._responseType = 'selected';
+                            pipeline.run();
+                            $p.uniform.uVisLevel.data = 0.1;
+                            rerun = false;
+                            // console.log('**interactive latency:', performance.now() - start);
+                        }
+                    }
+                })
+            })
         }
 
         if(options.hasOwnProperty('data')) {

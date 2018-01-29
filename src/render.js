@@ -126,10 +126,10 @@ define(function(){
     }
 
     interleave.fs = function() {
-        if(this.vResult < this.uVisLevel)
-            discard;
-        else
+        if(this.vResult <= this.uVisLevel + 0.01 && this.vResult >= this.uVisLevel - 0.01)
             gl_FragColor = this.vColorRGBA;
+        else
+            discard;
 
     }
 
@@ -142,7 +142,7 @@ define(function(){
         j = (floor(this.aDataItemId / this.uDataDim.x) + 0.5) / this.uDataDim.y;
 
         this.vResult = this.uVisLevel;
-        this.vResult = this.uVisLevel;
+
         if(this.uFilterFlag == 1) {
             this.vResult = texture2D(this.fFilterResults, vec2(i, j)).a;
         }
@@ -187,7 +187,7 @@ define(function(){
     }
 
     polygon.fs = function() {
-        if(this.vResult <= 0.1 + 0.01 && this.vResult >= 0.1 - 0.01)
+        if(this.vResult <= this.uVisLevel + 0.01 && this.vResult >= this.uVisLevel - 0.01)
             gl_FragColor = this.vColorRGBA;
         else
             discard;

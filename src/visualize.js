@@ -1,17 +1,14 @@
 define(function(require){
-    var colors = require('./color'),
-        ctypes = require('./ctypes'),
-        render = require('./render'),
-        reveal = require('./reveal');
-
-    const Chart = require('./chart/view');
-    const Brush = require('./chart/brush');
-
+    const colors = require('./color');
+    const ctypes = require('./ctypes');
+    const render = require('./render');
+    const reveal = require('./reveal');
+    const encode =require('./encode');
     const interact = require('./interact');
 
-    const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
+    const Chart = require('./chart/view');
 
-    const encode =require('./encode');
+    const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
     const userActions = ['click', 'hover', 'brush', 'zoom', 'pan']
 
     return function ($p) {
@@ -78,7 +75,8 @@ define(function(require){
                 mark = options.mark || vmap.mark || 'line',
                 data = options.data || null,
                 interaction = options.interaction,
-                viewIndex = options.viewIndex;
+                viewIndex = options.viewIndex,
+                viewTag = $p.views[viewIndex].id;
 
             var visDomain = {},
                 visDimension = vmap.viewport || [$p.views[viewIndex].width, $p.views[viewIndex].height] || viewport;
@@ -171,7 +169,6 @@ define(function(require){
             gl.enable( gl.BLEND );
             gl.blendEquation(gl.FUNC_ADD);
 
-
             if(mark == 'stack') {
                 var result = $p.readResult('row');
                 viewSetting.data = result.filter(d=>d[vmap.y]>0);
@@ -214,37 +211,36 @@ define(function(require){
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
                 }
             }
-            if($p._update && vmap.hasOwnProperty('brush')) {
-                $p.uniform.uVisLevel = 0.1;
-                if(typeof(vmap.brush) == 'object') {
-                    $p.uniform.uDefaultColor = colorManager.rgb(vmap.brush.unselected.color);
-                } else  {
-                    $p.uniform.uDefaultColor = colorManager.rgb('lightgrey');
-                }
-                // if($p.revealDensity) enhance([width, height]);
-                if(mark !='stack' ) draw();
-                $p.uniform.uVisLevel = 0.2;
-                if(typeof vmap.color == 'string')
-                    $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
-            } else {
-                $p.uniform.uVisLevel = 0.1;
-            }
 
             if(mark!='stack') draw();
-
-            if($p.revealDensity) enhance([width, height]);
+            if($p.revealDensity) enhance({
+                dim: [width, height],
+                offset: offset,
+                padding: padding
+            });
             $p.bindFramebuffer(null);
 
             if(!$p._update) {
                 var actions = Object.keys(vmap)
                     .filter(function(act){ return userActions.indexOf(act) !== -1});
 
-                interact($p, {
-                    actions: actions,
-                    vis: $p.views[viewIndex],
-                    padding: $p.views[viewIndex].padding,
-                    callback: interaction
-                });
+                actions.forEach(function(action) {
+                    var viewId = vmap.id || $p.views[viewIndex].id,
+                        response = {};
+                    response[viewId] = vmap[action];
+                    $p.interactions.push({
+                        event: action,
+                        from: viewId,
+                        response: response
+                    })
+                })
+
+                // interact($p, {
+                //     actions: actions,
+                //     vis: $p.views[viewIndex],
+                //     padding: $p.views[viewIndex].padding,
+                //     callback: interaction
+                // });
             }
         }
 

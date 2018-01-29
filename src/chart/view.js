@@ -94,7 +94,6 @@ define(function(require){
             var x, y, xAxes = [], yAxes = [];
 
             // For parallel coordinates
-
             if(Array.isArray(vmap.x)) {
                 var axisDist = height / (vmap.x.length-1);
 
@@ -279,7 +278,9 @@ define(function(require){
                 if((vmap.x || vmap.width) && !Array.isArray(vmap.x)) x = Axis(xAxisOption);
                 if((vmap.y || vmap.height) && !Array.isArray(vmap.y)) y = Axis(yAxisOption);
             }
-            if(vmap.hasOwnProperty('x') && !Array.isArray(vmap.x)) {
+            if((vmap.hasOwnProperty('x') || vmap.hasOwnProperty('width')) && !Array.isArray(vmap.x)) {
+                var xAxisTitle = vmap.x || vmap.width;
+                // xAxisTitle = xAxisTitle.replace(/_/g, ' ');
                 // xAxisOption.grid = 1;
                 labels.append("g")
                   .append("text")
@@ -290,11 +291,12 @@ define(function(require){
                     .css("font-size", "1.0em")
                     .css("font-weight", "bold")
                     .css(" text-transform", "capitalize")
-                    .text(vmap.x.replace(/_/g, ' '));
-
+                    .text(xAxisTitle);
 
             }
-            if(vmap.hasOwnProperty('y') && !Array.isArray(vmap.y)) {
+            if((vmap.hasOwnProperty('y') || vmap.hasOwnProperty('height')) && !Array.isArray(vmap.y)) {
+                var yAxisTitle = vmap.y || vmap.height;
+                // yAxisTitle = yAxisTitle.replace(/_/g, ' ');
                 // yAxisOption.grid = 1;
                 if(!Array.isArray(vmap.y)) {
                     labels.append("g")
@@ -307,7 +309,7 @@ define(function(require){
                         .css("font-size", "1.0em")
                         .css("font-weight", "bold")
                         .css(" text-transform", "capitalize")
-                        .text(vmap.y.replace(/_/g, ' '));
+                        .text(yAxisTitle);
                     }
 
             }
