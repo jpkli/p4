@@ -154,7 +154,7 @@ define(function(require) {
             var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
             var binInterval = (binDomain[1] - binDomain[0]) / binCount;
 
-            var histFunction = (function() {max(ceil((binAttr - binMin) / float(binInterval)), 1.0)})
+            var histFunction = (function() {max(ceil((binAttr - binMin) / float(binInterval)), 1.0) })
                 .toString()
                 .slice(13, -1) // remove "function () {" from function.toString
                 .replace('binAttr', binAttr)
@@ -273,7 +273,7 @@ define(function(require) {
             $p.uniform.uFilterLevel.data = 0.2;
             pipeline.resume('__init__');
 
-            pipeline.filter($p.crossfilters);
+            // pipeline.filter($p.crossfilters);
             // pipeline.register('__init__');
             return pipeline;
         }
@@ -352,7 +352,6 @@ define(function(require) {
                         }
                     }
                 }
-
             }
             if(vmap.mark == 'bar') vmap.zero = true;
             $p.views[viewIndex].vmap = vmap;
@@ -364,13 +363,13 @@ define(function(require) {
                     encoding = Object.assign({}, vmap, $p.response[viewTag][$p._responseType]);
                 }
             }
-
-            operation.visualize({
-                vmap: encoding,
-                viewIndex: viewIndex
-            });
-
-            pipeline.interact();
+            if(encoding.opacity != 0){
+                operation.visualize({
+                    vmap: encoding,
+                    viewIndex: viewIndex
+                });
+                pipeline.interact();
+            }
             return pipeline;
         }
 
@@ -416,6 +415,8 @@ define(function(require) {
                             pipeline.run();
                             $p.uniform.uVisLevel.data = 0.2;
                             pipeline.update();
+                            pipeline.filter($p.crossfilters);
+                            $p.crossfilters= {};
                             $p._responseType = 'selected';
                             pipeline.run();
                             $p.uniform.uVisLevel.data = 0.1;

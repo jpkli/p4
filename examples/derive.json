@@ -1,7 +1,7 @@
 {
     "data" : {
-        "url": "data/NatalityUSA2015.csv",
-        "dtype": "csv",
+        "url": "data/NatalityUSA2015Dec.csv",
+        "format": "csv",
         "schema": {
             "BirthMonth"   : "int",
             "BabyGender"   : "string",
@@ -18,7 +18,7 @@
             "FatherEdu"    : "string"
         }
     },
-    "pipeline": [
+    "operations": [
         {
             "$derive": {
                 "AgeDiff": "FatherAge - MotherAge"
@@ -35,11 +35,10 @@
         },
         {
             "$visualize": {
-                "id": "chart",
                 "mark": "bar",
                 "color": "steelblue",
                 "x": "AgeDiff",
-                "y": "Babies"
+                "height": "Babies"
             }
         }
     ]

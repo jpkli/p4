@@ -12,25 +12,38 @@
             "MotherEdu"    : "string",
             "MotherHeight" : "float",
             "MotherWeight" : "float",
-            "MotherWgtGain": "float"
+            "MotherWgtGain": "float",
+            "FatherAge"    : "int",
+            "FatherRace"   : "string",
+            "FatherEdu"    : "string"
         }
     },
     "operations": [
         {
+            "$derive": {
+                "AgeDiff": "abs(FatherAge - MotherAge)"
+            }
+        },
+        {
+            "$match": {
+                "AgeDiff": [0, 10]
+            }
+        },
+        {
             "$aggregate" : {
-                "$group": "MotherEdu",
+                "$group": "AgeDiff",
                 "$reduce" : {
                     "Babies": { "$count": "*"},
-                    "AvgWeight": { "$avg": "BabyWeight"}
+                    "BabyAvgWeight": { "$avg": "BabyWeight"}
                 }
             }
         },
         {
             "$visualize": {
                 "mark": "bar",
-                "color": "steelblue",
-                "x": "MotherEdu",
-                "height": "Babies"
+                "height": "Babies",
+                "x": "AgeDiff",
+                "color": "BabyAvgWeight"
             }
         }
     ]

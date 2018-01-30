@@ -22,8 +22,9 @@
         "views": [
             {
                 "width": 500,
-                "height": 400,
-                "offset": [0, 0]
+                "height": 450,
+                "offset": [0, 0],
+                "padding": {"left": 50, "right": 20, "top": 40, "bottom": 60}
             }
         ]
     },
@@ -39,8 +40,16 @@
                 "file": "derive.json"
             },
             {
-                "name": "Derive+Select+Group",
-                "file": "parallel-coordinates.json"
+                "name": "Derive+Match+Group",
+                "file": "derive-match-group.json"
+            }
+        ],
+        "views": [
+            {
+                "width": 500,
+                "height": 400,
+                "offset": [0, 0],
+                "padding": {"left": 70, "right": 20, "top": 40, "bottom": 60}
             }
         ]
     },

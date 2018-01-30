@@ -86,11 +86,10 @@ define(function(require){
                 padding = $p.views[viewIndex].padding || chartPadding,
                 offset = $p.views[viewIndex].offset || [0, 0];
 
+
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
-                if(vmap.zero && visDomain[f][0]>0) visDomain[f][0] = 0;
-                visDomain[f][0] *= $p.uniform.uVisScale.data[0];
-                visDomain[f][1] *= $p.uniform.uVisScale.data[1];
+                if(vmap.zero && (f == vmap.height || f == vmap.width ) && visDomain[f][0]>0) visDomain[f][0] = 0;
             });
 
             var dimSetting = encode($p, vmap, colorManager);
@@ -195,7 +194,7 @@ define(function(require){
                     })
                 }
             }
-
+            // console.log( $p.views[viewIndex].domains);
             var primitive = gl.POINTS;
             if(['rect', 'bar'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
             else if(mark == 'line') primitive = gl.LINE_STRIP;
@@ -235,13 +234,6 @@ define(function(require){
                         response: response
                     })
                 })
-
-                // interact($p, {
-                //     actions: actions,
-                //     vis: $p.views[viewIndex],
-                //     padding: $p.views[viewIndex].padding,
-                //     callback: interaction
-                // });
             }
         }
 

@@ -88,7 +88,6 @@ define(function(require){
                                     callback(spec);
                                 }
                             }
-
                             brushOptions.container = axisSelect;
                             brushOptions[dim] = vis.chart[dim][i].invert;
 

@@ -224,16 +224,16 @@ define(function(require){
                     return Object.keys(newFieldSpec[newFieldNames[i]])[0];
                 });
 
-            if(!$p._update)
+            if(!$p._update) {
                 $p.framebuffer(
                     "fGroupResults",
                     "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFields.length]
                 );
+            }
             _execute(operators, groupFieldIds, resultFieldIds);
 
             $p.getResult = aggregate.result;
             console.log($p.getResult());
-
 
             $p.indexes = groupFields;
 
@@ -262,6 +262,7 @@ define(function(require){
             $p.fieldWidths = newFieldIds.map(function(f) {
                 return $p.fieldWidths[f];
             });
+
             $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
 
             $p.attribute.aDataItemId = utils.seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);

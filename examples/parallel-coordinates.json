@@ -1,7 +1,7 @@
 {
     "data" : {
-        "url": "data/synthetic",
-        "format": "typedArray",
+        "url": "data/NatalityUSA2015Dec.csv",
+        "format": "csv",
         "schema": {
             "BirthMonth"   : "int",
             "BabyGender"   : "string",
@@ -15,7 +15,15 @@
             "MotherWgtGain": "float"
         }
     },
-    "pipeline": [
+    "views": [
+        {
+            "id": "chart",
+            "width": 700,
+            "height": 400,
+            "padding": {"left": 50, "right": 10, "top" : 50, "bottom": 10}
+        }
+    ],
+    "operations": [
         {
             "$visualize": {
                 "mark": "line",
@@ -26,7 +34,11 @@
                     "MotherWeight",
                     "MotherWgtGain",
                     "MotherHeight"
-                ]
+                ], "brush": {
+                    "unselected": {
+                        "opacity": 0
+                    }
+                }
             }
         }
     ]

@@ -44,6 +44,8 @@ define(function(require){
             var range = Math.abs(range[1] - range[0]);
             if (dtypes[fid] == "index" || dtypes[fid] == "int" || dtypes[fid] == "string") {
                 return range + 1;
+            } else if (dtypes[fid] == "histogram") {
+                return range;
             } else if (dtypes[fid] == "time") {
                 var interval = stats[$p.fields[fid]].min;
                 if (interval === 0) interval = (data[fid][1] - data[fid][0]) || 1;

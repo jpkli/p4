@@ -46,10 +46,6 @@ define(function(){
         alpha = this.visMap(this.uVisualEncodings[3], i, j, this.aDataValx, this.aDataValy, this.uDefaultAlpha, 0.0);
         size = this.visMap(this.uVisualEncodings[6], i, j, this.aDataValx, this.aDataValy, 1.0,  0.0);
 
-        posX *= this.uVisScale.x;
-        posY *= this.uVisScale.y;
-        posX += this.uPosOffset.x;
-        posY -= this.uPosOffset.y;
         posX = posX * 2.0 - 1.0;
         posY = posY * 2.0 - 1.0;
 

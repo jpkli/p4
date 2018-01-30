@@ -17,24 +17,24 @@
     },
     "operations": [
         {
-            "$select": {
-                "BabyWeight": [0, 15],
-                "MotherWeight": [70, 370]
+            "$match": {
+                "MotherAge": [15, 46]
+            }
+        },
+        {
+            "$aggregate": {
+                "$bin": {"MotherAge": 6},
+                "$reduce" : {
+                    "Babies": { "$count": "*"}
+                }
             }
         },
         {
             "$visualize": {
-                "mark": "circle",
-                "size": 8,
-                "color": "red",
-                "opacity": "auto",
-                "x": "MotherWeight",
-                "y": "BabyWeight",
-                "brush": {
-                    "unselected": {
-                        "color": "gray"
-                    }
-                }
+                "mark": "bar",
+                "color": "steelblue",
+                "x": "MotherAge",
+                "height": "Babies"
             }
         }
     ]

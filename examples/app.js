@@ -68,8 +68,8 @@ define(function(require){
             console.log(metadata);
             var dsl = {
                 container: "main-vis",
-                viewport: [750, 400],
-                padding: {left: 50, right: 40, top: 40, bottom: 40},
+                viewport: [800, 450],
+                // padding: {left: 50, right: 40, top: 40, bottom: 40},
                 data: data
             };
 
@@ -104,7 +104,7 @@ define(function(require){
                                     program.view(ex.views);
                                 }
                                 editor.session.insert({row:0, column: 0}, json);
-                                program.runSpec(spec.pipeline);
+                                program.runSpec(spec.operations || spec.pipeline);
                             })
                         })
 
@@ -143,7 +143,7 @@ define(function(require){
         $('#run-spec').click(function(){
             var spec = JSON.parse(editor.getValue());
             if(spec.hasOwnProperty('views')) program.view(spec.views);
-            program.runSpec(spec.pipeline);
+            program.runSpec(spec.operations || spec.pipeline);
 
         })
     };

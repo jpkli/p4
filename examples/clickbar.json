@@ -20,18 +20,18 @@
             "id": "c1",
             "width": 360,
             "height": 360,
-            "padding": {"left": 80, "right": 20, "top": 20, "bottom": 100},
+            "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
             "offset": [0, 0]
         },
         {
             "id": "c2",
             "width": 360,
             "height": 360,
-            "padding": {"left": 80, "right": 20, "top": 20, "bottom": 100},
-            "offset": [330, 0]
+            "padding": {"left": 50, "right": 10, "top": 10, "bottom": 70},
+            "offset": [360, 0]
         }
     ],
-    "pipeline": [
+    "operations": [
         {
             "$visualize": {
                 "id": "c1",

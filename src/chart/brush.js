@@ -142,14 +142,14 @@ define(function(require){
 
             window.addEventListener("mousemove", ondrag, false);
             window.addEventListener("mouseup", function(evt){
-                brushend.call(this, selection);
                 if(intStart){
+                    ondrag(evt);
                     intStart = false;
                     if(drag){
                         drag = false;
                     }
-
                 }
+                brushend.call(this, selection);
                 window.removeEventListener("mousemove", ondrag, false);
             }, false);
         });

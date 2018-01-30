@@ -115,7 +115,7 @@ define(function(require){
         colorManager.updateScheme = function(colors) {
             if(typeof colors == "string")
                 colors = colorSchemes[colors].reverse()
-            fxgl.texture = tColorGraident = setColorScheme(colors);
+            fxgl.texture.tColorGraident = setColorScheme(colors);
         }
 
         colorManager.updateTable = function(colors) {

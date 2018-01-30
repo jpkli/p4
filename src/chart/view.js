@@ -216,7 +216,6 @@ define(function(require){
                     });
                 }
 
-
                 data.forEach(function(d, i){
                     var barHeight = isFinite(y(d[vmap.y])) ? y(d[vmap.y]) : height;
 
@@ -274,6 +273,13 @@ define(function(require){
                     }
                 });
             } else {
+
+                if(isHistogram) {
+                    xAxisOption.tickPosition = [width / domainX.length /2, 0];
+                    xAxisOption.scale = "ordinal";
+                    xAxisOption.domain = domainX;
+                    xAxisOption.ticks = domainX.length;
+                }
 
                 if((vmap.x || vmap.width) && !Array.isArray(vmap.x)) x = Axis(xAxisOption);
                 if((vmap.y || vmap.height) && !Array.isArray(vmap.y)) y = Axis(yAxisOption);

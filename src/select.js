@@ -5,21 +5,30 @@ define(function(){
 
         var i, j, k, value;
         var filter = new Int(0);
+        var sel = new Int(0);
+
 
         i = (this.aDataIdx+0.5) / this.uDataDim.x;
         j = (this.aDataIdy+0.5) / this.uDataDim.y;
 
-        this.vResult = this.uFilterLevel;
         for(var f = 0; f < $(fieldCount)+$(indexCount); f++) {
-            if(this.uFilterControls[f] == 1) {
+            if(this.uFilterControls[f] > 0) {
                 value = this.getData(f, i, j);
                 if(value < this.uFilterRanges[f].x || value >= this.uFilterRanges[f].y) {
-                    filter -= 1;
+                    if(this.uFilterControls[f] == 1) {
+                        filter -= 1;
+                    }
+                    if(this.uFilterControls[f] == 2) {
+                        sel -= 1;
+                    }
                 }
             }
         }
-
-        this.vResult = (filter < 0) ? this.uFilterLevel - 0.1 : this.uFilterLevel;
+        if(filter < 0) {
+            this.vResult = 0.0;
+        } else {
+            this.vResult = (sel < 0) ? this.uFilterLevel - 0.1 : this.uFilterLevel;
+        }
 
         var x = i * 2.0 - 1.0;
         var y = j * 2.0 - 1.0;
@@ -134,10 +143,14 @@ define(function(){
             }
 
             var filterSelections = Object.keys(spec).filter(function(s){
-                return !spec[s].hasOwnProperty('$in');
+                return !spec[s].hasOwnProperty('$in') && !spec[s].hasOwnProperty('$vis');
             });
 
-            if(filterSelections.length){
+            var viewSelections = Object.keys(spec).filter(function(s){
+                return spec[s].hasOwnProperty('$vis');
+            });
+
+            if(filterSelections.length || viewSelections.length){
                 filterControls = new Array(fieldCount).fill(0);
 
                 filterSelections.forEach(function(k){
@@ -151,7 +164,13 @@ define(function(){
                     // filterRanges[fieldId*2+1] = spec[k][1];
                 });
 
-
+                viewSelections.forEach(function(k){
+                    var fieldId = fields.indexOf(k);
+                    if(fieldId === -1) throw new Error('Invalid data field ' + k);
+                    if(spec[k].$vis.length < 2) spec[k].$vis[1] = spec[k].$vis[0];
+                    filterControls[fieldId] = 2;
+                    filterRanges[fieldId] = spec[k].$vis;
+                });
                 $p.uniform.uFilterControls = filterControls;
                 $p.uniform.uFilterRanges= filterRanges;
 
@@ -176,7 +195,7 @@ define(function(){
             var filterSpec = spec;
 
             Object.keys($p.crossfilters).forEach(function(c){
-                filterSpec[c] = $p.crossfilters[c];
+                filterSpec[c] = {$vis: $p.crossfilters[c]};
             });
 
             Object.keys(filterSpec).forEach(function(k, i) {
@@ -201,7 +220,7 @@ define(function(){
                 $p.uniform.uFieldDomains.data = $p.fieldDomains;
                 $p.uniform.uFieldWidths.data = $p.fieldWidths;
             }
-            select.result();
+
         }
 
         select.result = function(arg) {

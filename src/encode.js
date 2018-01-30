@@ -50,32 +50,32 @@ define(function(require){
             $p.uniform.uMarkSize = vmap.size;
         }
 
-        var dimSetting = {};
+        var viewSetting = {};
         if (['rect', 'bar'].indexOf(vmap.mark) !== -1) {
             var markSpace = [0, 0];
             if(vmapIndex[0] > -1) {
                 var len = $p.fieldWidths[vmapIndex[0]],
                     ext = $p.fieldDomains[vmapIndex[0]];
-                dimSetting.scaleX = 'ordinal';
+                viewSetting.scaleX = 'ordinal';
                 if($p.categoryLookup.hasOwnProperty(vmap.x)){
-                     dimSetting.domainX = new Array(len).fill(0).map(
+                     viewSetting.domainX = new Array(len).fill(0).map(
                          (d,i)=>$p.categoryLookup[vmap.x][i]
                      );
                  } else {
-                     dimSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
+                     viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
                  }
                  markSpace[0] = 0.02;
             }
             if(vmapIndex[1] > -1) {
                 var len = $p.fieldWidths[vmapIndex[1]],
                     ext = $p.fieldDomains[vmapIndex[1]];
-                dimSetting.scaleY = 'ordinal';
+                viewSetting.scaleY = 'ordinal';
                 if($p.categoryLookup.hasOwnProperty(vmap.y)){
-                     dimSetting.domainY = new Array(len).fill(0).map(
+                     viewSetting.domainY = new Array(len).fill(0).map(
                          (d,i)=>$p.categoryLookup[vmap.y][i]
                      ).reverse();
                 } else {
-                    dimSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
+                    viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
                 }
                 markSpace[1] = 0.02;
             }
@@ -84,6 +84,20 @@ define(function(require){
                 markSpace = [0, 0];
 
             $p.uniform.uMarkSpace = markSpace;
+        }
+
+        if($p.intervals.hasOwnProperty(vmap.x) || $p.intervals.hasOwnProperty(vmap.y)) {
+            var histDim = vmap.x || vmap.y,
+                histMin = $p.intervals[histDim].min,
+                histMax = $p.intervals[histDim].max,
+                histIntv = $p.intervals[histDim].interval,
+                histBin = (histMax - histMin) / histIntv;
+
+            // viewSetting.fields = $p.fields;
+            viewSetting.isHistogram = true;
+            // viewSetting.domain = {};
+            viewSetting.domainX= new Array(histBin).fill(histMin).map(function(h, i) { return h + i*histIntv});
+
         }
 
         if(!$p._update) {
@@ -99,7 +113,6 @@ define(function(require){
                 $p.uniform.uDefaultHeight = vmap.height / height;
             }
         }
-
-        return dimSetting;
+        return viewSetting;
     }
 });
