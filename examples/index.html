@@ -14,47 +14,39 @@
     <title>P4.GL Examples</title>
 </head>
 <body>
+
     <nav class="navbar navbar-default navbar-top page-header" id="page-header">
         <div class="container-fluid">
             <div class="row">
-            <div class="navbar-header col-md-2">
+            <h1 class="page-title">P6 Examples</h1>
+            <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">P4 Examples</a>
             </div>
-            <div id="navbar" class="navbar-collapse collapse col-md-5">
-                <form class="navbar-form navbar-left">
-                    <label class="radio-inline">
-                        <input type="radio" name="editor-mode" checked="checked" id="mode-json">JSON</label>
-                    <label class="radio-inline">
-                        <input type="radio" name="editor-mode" id="mode-javascript">JavaScript</label>
-                    <button type="button" id="run-spec" class="btn btn-success" style="margin-left: 2em;"> Update &amp; Run >> </button>
-                </form>
-            </div>
-
-            <div class="col-md-6">
-                <form class="navbar-form navbar-right">
-                <button type="button" class="btn btn-info" style="margin-left: 2em;"> Import Dataset </button>
-                <button type="button" class="btn btn-primary" style="margin-left: 2em;"> Save Spec </button>
-                </form>
-            </div>
-
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav navbar-right" >
+                <li ><a href="/"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                <li><a href="/#document"><span class="glyphicon glyphicon-info-sign"></span> Doc</a></li>
+              </ul>
             </div>
         </div>
     </nav>
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-1 sidebar column" id="list-examples">
+            <div class=" column sidebar" id="list-examples">
             </div>
-            <div class="col-md-4 editor column">
+            <div class=" editor column">
                 <div id="editor"></div>
             </div>
-            <div class="col-md-6 main column">
+            <div class=" main column">
+                <div style="border-bottom: 1px solid #CCC; padding: 10px;">
+                    <button type="button" id="run-spec" class="btn btn-success" > Update <span class="glyphicon glyphicon-flash"></span></button>
+                </div>
                 <div id="main-vis"></div>
             </div>
         </div>

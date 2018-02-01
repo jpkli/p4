@@ -18,8 +18,8 @@
     "views": [
         {
             "id": "chart",
-            "width": 700,
-            "height": 400,
+            "width": 600,
+            "height": 360,
             "padding": {"left": 50, "right": 10, "top" : 50, "bottom": 10}
         }
     ],
@@ -27,7 +27,7 @@
         {
             "$visualize": {
                 "mark": "line",
-                "color": "red",
+                "color": "darkblue",
                 "opacity": "auto",
                 "y": [
                     "BabyWeight",

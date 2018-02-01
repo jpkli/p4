@@ -43,14 +43,14 @@ define(function(){
 
         i = (this.aDataIdx+0.5) / this.uDataDim.x;
         j = (this.aDataIdy+0.5) / this.uDataDim.y;
-        this.vResult = 0.0;
+        this.vResult = this.uFilterLevel - 0.1;
 
         value = this.getData(this.uFieldId, i, j);
 
         for(var l = 0; l < 500; l++){
             if(l < this.uSelectCount) {
                 if(value == this.uInSelections[l]) {
-                    this.vResult = 1.0;
+                    this.vResult = this.uFilterLevel;
                 }
             }
         }
@@ -67,7 +67,7 @@ define(function(){
 
     return function program($p) {
         const SELECT_MAX = 500;
-        var select = {},
+        var match = {},
             dataDimension = $p.uniform.uDataDim.data,
             fieldCount = $p.fields.length,
             filterControls = new Array(fieldCount).fill(0),
@@ -91,24 +91,25 @@ define(function(){
         };
 
         $p.program("filter", filter.vs, filter.fs);
-        $p.program("select", sel.vs, sel.fs);
+        $p.program("match", sel.vs, sel.fs);
 
-        select.control = function(ctrl) {
+        match.control = function(ctrl) {
             filterControls = ctrl;
         }
 
         function _execute(spec){
             var fields = $p.fields
             var gl;
-            var selectFields = Object.keys(spec).filter(function(s){
+            var matchFields = Object.keys(spec).filter(function(s){
                 return spec[s].hasOwnProperty('$in');
             });
+            console.log(matchFields);
             $p.bindFramebuffer("fFilterResults");
             $p.framebuffer.enableRead("fDerivedValues");
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
-            if(selectFields.length) {
-                gl = $p.program("select");
+            if(matchFields.length) {
+                gl = $p.program("match");
                 gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
@@ -120,7 +121,7 @@ define(function(){
                 gl.blendFunc( gl.ONE, gl.ONE );
                 gl.blendEquation(gl.MIN_EXT);
 
-                selectFields.forEach(function(k){
+                matchFields.forEach(function(k){
                     var fieldId = fields.indexOf(k);
 
                     if($p.categoryIndex.hasOwnProperty(k)) {
@@ -190,7 +191,7 @@ define(function(){
             return filterRanges;
         }
 
-        select.execute = function(spec) {
+        match.execute = function(spec) {
 
             var filterSpec = spec;
 
@@ -203,7 +204,7 @@ define(function(){
                     spec[k] = {$in: spec[k]};
                 }
             });
-            console.log('filter spec::::::::::', spec);
+
             $p.uniform.uFilterFlag = 1;
             filterRanges = $p.fieldDomains.slice();
             var newDomains = _execute(spec);
@@ -223,7 +224,7 @@ define(function(){
 
         }
 
-        select.result = function(arg) {
+        match.result = function(arg) {
             var options = arg || {},
                 offset = options.offset || [0, 0],
                 resultSize = options.size || $p.dataDimension[0]* $p.dataDimension[1],
@@ -244,6 +245,6 @@ define(function(){
             return  bitmap;
         }
 
-        return select;
+        return match;
     }
 })

@@ -38,7 +38,6 @@ define(function(require){
             $p.uniform.uPosOffset.data = [tx / w, ty / h];
         }
 
-
         actions.forEach(function(action){
             if(action == 'brush') {
                 svg.style.cursor = "crosshair";
@@ -59,7 +58,8 @@ define(function(require){
                     new Brush(brushOptions);
                 }
 
-                var dims = ['x', 'y'];
+                var dims = ['x', 'y'],
+                    selections = {};
 
                 dims.forEach(function(dim){
                     if(Array.isArray(vmap[dim]) && Array.isArray(vis.chart[dim])){
@@ -75,17 +75,15 @@ define(function(require){
                                 brushOptions.height = axisDist * 0.2;
                                 axisSelect.translate(0, axisDist * (i - 0.1));
                                 brushOptions.brush = function(range) {
-                                    var spec = {};
-                                    spec[d] = range[dim];
-                                    callback(spec);
+                                    selections[d] = range[dim];
+                                    callback(selections);
                                 }
                             } else {
                                 brushOptions.width = axisDist * 0.2;
                                 axisSelect.translate(axisDist * (i - 0.1), 0);
                                 brushOptions.brush = function(range) {
-                                    var spec = {};
-                                    spec[d] = range[dim].reverse();
-                                    callback(spec);
+                                    selections[d] = range[dim].reverse();
+                                    callback(selections);
                                 }
                             }
                             brushOptions.container = axisSelect;

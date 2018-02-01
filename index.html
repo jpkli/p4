@@ -12,143 +12,281 @@
             font-weight: bolder;
         }
 
-        .navbar-nav > li > a {
+        .navbar-nav>li>a {
             font-size: 1.2em;
-            padding: 15px 30px;
+            padding: 15px 20px;
         }
 
         .navbar-brand {
-            font-size: 2.0em;
+            font-size: 3em;
             padding-right: 30px;
+            font-weight: bolder;
             color: steelblue!important;
         }
+
+        .container {
+            max-width: 880px;
+        }
+
         .title {
             color: #000;
         }
+
         .sidebar-module {
             margin-bottom: 30px;
         }
+
+        .example-image {
+            overflow: hidden;
+        }
+
+        .example-image img {
+            width: 90%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            width: 100%;
+            opacity: 0;
+            transition: .5s ease;
+            background-color: #222;
+        }
+
+        .example-image:hover .overlay {
+            opacity: 0.5;
+        }
+
+        .text {
+            color: white;
+            font-size: 1.1em;
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        /*.example-image:hover img {
+            -ms-transform: scale(1.1);
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }*/
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-default navbar-top">
-      <div class="container">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="#">P4</a>
+    <!-- <nav class="navbar navbar-default navbar-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">P4</a>
+            </div>
+            <div id="main-menu" class="navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#home">Home</a></li>
+                    <li><a href="#documentation">Documentation</a></li>
+                    <li><a href="examples">Examples</a></li>
+                    <li><a href="benchmark">Benchmarks</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="../navbar/">Github</a></li>
+                </ul>
+            </div>
         </div>
-        <div id="main-menu" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#home">Home</a></li>
-            <li><a href="#documentation">Documentation</a></li>
-            <li><a href="examples">Examples</a></li>
-            <li><a href="benchmark">Benchmarks</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="../navbar/">Github</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
+    </nav> -->
+
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">P6</a>
+            </div>
+            <div id="main-menu" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#home">Home</a></li>
+                    <li><a href="#documentation">Documentation</a></li>
+                    <li><a href="examples">Examples</a></li>
+                    <li><a href="benchmark">Benchmarks</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="../navbar/">Github</a></li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
     </nav>
 
 
     <div class="container page" id="home">
-      <div class="page-header" style="margin: 0">
-        <h2 class="title"><strong>P4</strong> - Portable Parallel Processing Pipelines </h2>
-              <p class="lead">A GPU accelerated JavaScript library for data processing and interactive visualization.</p>
-      </div>
+        <div class="page-header" style="margin: 0">
+            <h2 class="title">
+                <strong>P6</strong> - Portable Parallel Processing Pipelines </h2>
+            <p class="lead">A GPU accelerated JavaScript library for data processing and interactive visualization.</p>
+        </div>
 
-      <!-- <object width="100%" height="100%" data="benchmark.html"></object> -->
-      <!-- <div>
-          <h3>Pipeline Architecture</h3>
-      </div> -->
+        <div class="row">
+            <div class="col-xs-6 col-lg-4">
+                <a href="examples#bar-chart" class="example-image">
+                    <img src="site/images/barchart.png" />
+                    <div class="overlay">
+                        <div class="text">Aggregation <br />(Bar Chart)</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="examples#scatter-plot">
+                    <img src="site/images/scatterplot.png" />
+                    <div class="overlay">
+                        <div class="text">Match <br /> (Scatter Plot)</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="examples#heatmap">
+                    <img src="site/images/heatmap.png" />
+                    <div class="overlay">
+                        <div class="text">Match &amp; Group <br /> (2D Heatmap)</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="examples#derive-match-group">
+                    <img src="site/images/colorbars.png" />
+                    <div class="overlay">
+                        <div class="text">Derive, Match, &amp; Group <br /> (Column Chart)</div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="examples#parallel-coordinates">
+                    <img src="site/images/parallelcoordinates.png" />
+                    <div class="overlay">
+                        <div class="text">Mutiple Matches <br />(Parallel Coordinates)</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="examples#multiviews">
+                    <img src="site/images/multiviews.png" />
+                    <div class="overlay">
+                        <div class="text">Brushing &amp; Linking <br />(Multiple Views)</div>
+                    </div>
+                </a>
+            </div>
+
+
+        </div>
+        <!--/row-->
+
+        <div class="row">
+
+            <div class="col-xs-6 col-lg-4">
+                <h3>Performance</h3>
+                <p>Parallel processing via GPU computing for accelerating transformation and visualization of big data.
+                    <a href="#">learn more</a>
+                </p>
+            </div>
+            <div class="col-xs-6 col-lg-4">
+                <h3>Productivity</h3>
+                <p>An easy-to-use programming interface for rapid specification of data processing, visualization, and interaction.
+                    <a href="#">learn more</a>
+                </p>
+            </div>
+            <div class="col-xs-6 col-lg-4">
+                <h3>Portability</h3>
+                <p>Run accross computing devices and web browsers, seamlessly cooperating with various web technologies.
+                    <a href="#">learn more</a>
+                </p>
+            </div>
+            <div class="col-xs-6 col-lg-4">
+                <h3>Programmability</h3>
+                <p>Runtime GPU code generation for adding flexibility, expressivenenss, and customizations.
+                    <a href="#">learn more</a>
+                </p>
+            </div>
+            <div class="col-xs-6 col-lg-4">
+                <h3>Pipelining</h3>
+                <p>Seamless interoperability between data processing and visualizantion rendering.
+                    <a href="#">learn more</a>
+                </p>
+            </div>
+            <div class="col-xs-6 col-lg-4">
+                <h3>Perception</h3>
+                <p>Advanced tenchinques for enhancing percetual scalability and augmenting human cognition.
+                    <a href="#">learn more</a>
+                </p>
+            </div>
+        </div>
+        <!--/row-->
     </div>
-
 
     <div class="container page" id="documentation">
-      <div class="row page">
-          <div class="col-sm-2">
-            <div class="sidebar-module">
-              <h4>Overview</h4>
-              <ol class="list-unstyled">
-                <li><a href="#">Pipeline</a></li>
-                <li><a href="#">Data and I/O</a></li>
-                <li><a href="#">Operations</a></li>
-                <li><a href="#">Control flow</a></li>
-              </ol>
+        <div class="row page">
+            <div class="col-sm-2">
+                <div class="sidebar-module">
+                    <h5>Overview</h5>
+                    <ol class="list-unstyled">
+                        <li><a href="#">Pipeline</a></li>
+                        <li><a href="#">Data and I/O</a></li>
+                        <li><a href="#">Operations</a></li>
+                        <li><a href="#">Control flow</a></li>
+                    </ol>
+                </div>
+                <div class="sidebar-module">
+                    <h5>Data Transform</h5>
+                    <ol class="list-unstyled">
+                        <li><a href="#">Match</a></li>
+                        <li><a href="#">Derive</a></li>
+                        <li><a href="#">Aggregate</a></li>
+                    </ol>
+                </div>
+                <div class="sidebar-module">
+                    <h5>Visualization</h5>
+                    <ol class="list-unstyled">
+                        <li><a href="#">Visual encodings</a></li>
+                        <li><a href="#">Views</a></a>
+                        </li>
+                        <li><a href="#">Colors</a></li>
+                    </ol>
+                </div>
+                <div class="sidebar-module">
+                    <h5>Interaction</h5>
+                    <ol class="list-unstyled">
+                        <li><a href="#">Events</a></li>
+                        <li><a href="#">Responses</a></a>
+                        </li>
+                        <li><a href="#">Across Views</a></li>
+                    </ol>
+                </div>
             </div>
-            <div class="sidebar-module">
-              <h4>Data Processing</h4>
-              <ol class="list-unstyled">
-                <li><a href="#">Filter and Select</a></li>
-                <li><a href="#">Derive</a></li>
-                <li><a href="#">Aggregate</a></li>
-              </ol>
+            <div class="col-sm-10">
+                <div>
+                    <h3>Pipeline Architecture</h3>
+                </div>
             </div>
-            <div class="sidebar-module">
-              <h4>Visualization</h4>
-              <ol class="list-unstyled">
-                <li><a href="#">Primitives and marks</a></li>
-                <li><a href="#">Visual encodings</a></li>
-                <li><a href="#">Colors</a></li>
-                <li><a href="#"></a></li>
-              </ol>
-            </div>
-          </div>
-
-        <div class="col-sm-10">
-          <div>
-            <h3>Pipeline Architecture</h3>
-          </div>
         </div>
-      </div>
-    </div>
-
-    <div class="container page" id="examples">
-      <div class="row page">
-          <div class="col-sm-2">
-            <div class="sidebar-module">
-              <h4>Overview</h4>
-              <ol class="list-unstyled">
-                <li><a href="#">Pipeline</a></li>
-                <li><a href="#">Data and I/O</a></li>
-                <li><a href="#">Operations</a></li>
-                <li><a href="#">Control flow</a></li>
-              </ol>
-            </div>
-            <div class="sidebar-module">
-              <h4>Data Processing</h4>
-              <ol class="list-unstyled">
-                <li><a href="#">Filter and Select</a></li>
-                <li><a href="#">Derive</a></li>
-                <li><a href="#">Aggregate</a></li>
-              </ol>
-            </div>
-            <div class="sidebar-module">
-              <h4>Visualization</h4>
-              <ol class="list-unstyled">
-                <li><a href="#">Primitives and marks</a></li>
-                <li><a href="#">Visual encodings</a></li>
-                <li><a href="#">Colors</a></li>
-                <li><a href="#"></a></li>
-              </ol>
-            </div>
-          </div>
-
-        <div class="col-sm-10">
-          <div>
-            <h3>Pipeline Architecture</h3>
-          </div>
-        </div>
-      </div>
     </div>
     <script>
-        $('.page').each(function(i){
-            if(i > 0)
-            $('#'+$(this).attr('id')).hide();
+        $('.page').each(function(i) {
+            if (i > 0)
+                $('#' + $(this).attr('id')).hide();
         })
 
-        $('#main-menu a').click(function(){
+        $('#main-menu a').click(function() {
             $($('#main-menu > ul > li.active > a').first().attr('href')).hide();
             $('#main-menu > ul > li.active').first().removeClass('active');
 

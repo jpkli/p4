@@ -6,7 +6,7 @@ define(function(require){
             reveal    : require('./reveal'),
             aggregate : require('./aggregate'),
             cache     : require('./cache'),
-            select    : require('./select'),
+            match    : require('./match'),
             extent    : require('./extent'),
             visualize : require('./visualize'),
         };
@@ -14,7 +14,7 @@ define(function(require){
         var operations = {
             aggregate : kernels.aggregate(fxgl),
             cache     : kernels.cache(fxgl),
-            select    : kernels.select(fxgl, fields),
+            match    : kernels.match(fxgl, fields),
             extent    : kernels.extent(fxgl),
             visualize : kernels.visualize(fxgl),
             // perceive  : kernels.reveal(fxgl)

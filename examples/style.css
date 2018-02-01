@@ -1,6 +1,17 @@
+.page-title {
+    position: absolute;
+    width:100%;
+    padding: 0.5em;
+    margin: 0;
+    font-size: 1.28em;
+    text-align: center;
+}
+
 .sidebar {
     background-color: #F5F5F5;
-    min-width: 200px;
+    width: 10%;
+    padding-left: 1.5em;
+    float: left;
 }
 
 .sidebar>h4 {
@@ -8,12 +19,13 @@
     border-bottom: 1px solid steelblue;
 }
 
-.sidebar-module>h4 {
-    margin-left: 0.25em;
+.sidebar-module {
+    margin-bottom: 2em;
 }
 
+
 .example-list {
-    margin-left: 1em;
+    margin-left: 0.2em;
 }
 
 .example-list .active {
@@ -26,19 +38,57 @@
     border-bottom: 1px solid #CCC;
 }
 
+
 .editor {
     padding: 0;
 }
 
 .page-header {
     margin: 0;
-    background-color: #EEE;
+    padding: 0;
 }
 
 .navbar-brand {
     font-size: 1.6em;
     padding-right: 30px;
     color: steelblue!important;
+}
+
+.navbar-header {
+    float: left;
+    text-align: center;
+    width: 100%;
+}
+
+.navbar-nav > li > a {
+    padding-top:5px !important;
+    padding-bottom:5px !important;
+    border-left: 1px solid #CCC;
+}
+
+.navbar-nav > li > a:hover {
+    background-color: #EEE!important;
+}
+
+.navbar {
+    background-color: #F8F8F8;
+    min-height:36px !important
+}
+
+.editor {
+    float: left;
+    width: 40%;
+    resize: horizontal;
+}
+
+.main {
+    float: left;
+    width: 50%;
+}
+
+
+#editor {
+    border-bottom: 1px solid #CCC;
 }
 
 svg text {

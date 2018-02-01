@@ -30,14 +30,6 @@ define(function(require){
         });
         editor.$blockScrolling = Infinity;
 
-        var dataProps = [
-            {name: 'height', dtype: 'float', dist: 'normal', min: 50, max: 90, mean: 70, std: 10},
-            {name: 'weight', dtype: 'float', dist: 'normal', min: 60, max: 300, mean: 150, std: 50},
-            {name: 'iq', dtype: 'int', dist: 'normal', min: 10, max: 200, mean: 110, std: 80},
-            {name: 'age', dtype: 'int', dist: 'normal', min: 16, max: 85, mean: 50, std:20},
-            {name: 'race', dtype: 'string', values: ['Native', 'Asian', 'Black', 'White', 'Hispanic',  'Other', 'Two or More']}
-        ];
-
         ajax.get({
             url: 'data/Nat2015result-200k.csv',
             dataType: 'text'
@@ -65,28 +57,26 @@ define(function(require){
             data.CAMs = metadata.CAMs;
             data.TLBs = metadata.TLBs;
             data.dtypes = metadata.types;
-            console.log(metadata);
+            // console.log(metadata);
             var dsl = {
                 container: "main-vis",
                 viewport: [800, 450],
-                // padding: {left: 50, right: 40, top: 40, bottom: 40},
                 data: data
             };
-
+            var selectedExample = window.location.href.split("#")[1] || null;
             program = P4GL(dsl);
             $.getJSON('examples/examples.json', function(examples){
                 examples.forEach(function(ex, ei){
                     var div = $('<div/>').addClass('sidebar-module'),
-                        h4 = $('<h4/>').text(ex.category),
+                        h4 = $('<h5/>').text(ex.category),
                         ul = $('<ul/>').addClass('list-unstyled example-list');
 
                         if(ex.hasOwnProperty('views')) {
                             program.view(ex.views);
                         }
                     ex.examples.forEach(function(item, ii){
-
-
-                        var itemLink = $('<a/>').attr('href', '#').text(item.name);
+                        var itemTag = item.file.split('.')[0];
+                        var itemLink = $('<a/>').attr('href', '#'+itemTag).text(item.name);
                         ul.append($('<li/>').append(itemLink));
                         itemLink.click(function(){
                             editor.setValue("");
@@ -105,12 +95,16 @@ define(function(require){
                                 }
                                 editor.session.insert({row:0, column: 0}, json);
                                 program.runSpec(spec.operations || spec.pipeline);
+                                editor.getSession().foldAll(2, 17);
                             })
                         })
 
-                        if(ei === 0 && ii === 0) {
+                        if(selectedExample !== null) {
+                            if(selectedExample == itemTag) {
+                                itemLink.addClass('active');
+                            }
+                        } else if(ei === 0 && ii === 0) {
                             itemLink.addClass('active');
-
                         }
                     })
 
@@ -120,31 +114,12 @@ define(function(require){
                 })
                 $('.example-list .active').trigger('click');
             })
-
-
         })
-
-        // var data = genData({
-        //     size: 100000,
-        //     props: dataProps
-        // });
-        //
-        //
-        // var dsl = {
-        //     container: "main-vis",
-        //     viewport: [800, 560],
-        //     padding: {left: 80, right: 80, top: 30, bottom: 100},
-        //     data: data
-        // };
-
-
-
 
         $('#run-spec').click(function(){
             var spec = JSON.parse(editor.getValue());
             if(spec.hasOwnProperty('views')) program.view(spec.views);
             program.runSpec(spec.operations || spec.pipeline);
-
         })
     };
 

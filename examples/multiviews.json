@@ -37,7 +37,7 @@
                 "id": "c1",
                 "mark": "circle",
                 "size": 8,
-                "color": "red",
+                "color": "orange",
                 "opacity": "auto",
                 "x": "MotherWeight",
                 "y": "BabyWeight"
@@ -67,7 +67,7 @@
                 "from": "c1",
                 "response" : {
                     "c1": {
-                        "unselected": {"color": "#777777"}
+                        "unselected": {"color": "gray"}
                     },
                     "c2": {
                         "selected": {"color": "orange"}

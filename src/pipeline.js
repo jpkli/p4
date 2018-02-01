@@ -15,8 +15,7 @@ define(function(require) {
             registers = {},
             profiles  = [],
             operation = {},
-            optID = 0,
-            rerun = false;
+            optID = 0;
 
         var $p = config(options);
 
@@ -26,7 +25,7 @@ define(function(require) {
         $p.getResult = function() {};
 
         function addToPipeline(opt, arg) {
-            if(!rerun || !$p._update) {
+            if( !$p._update) {
                 var spec = {};
                 spec[opt] = arg;
                 $p.pipeline.push(spec);
@@ -88,8 +87,6 @@ define(function(require) {
                     aDataItemId: $p.attribute.aDataItemId.data
                 }
             }
-
-            // console.log(">>>>>>>>>registered ", tag, registers[tag]);
             return pipeline;
         }
 
@@ -142,11 +139,11 @@ define(function(require) {
                 binAttr,
                 binCount;
 
-            if (typeof spec.$bin == 'object') {
-                binAttr = Object.keys(spec.$bin)[0];
-                binCount = spec.$bin[binAttr];
+            if (typeof spec == 'object') {
+                binAttr = Object.keys(spec)[0];
+                binCount = spec[binAttr];
             } else {
-                binAttr = spec.$bin;
+                binAttr = spec;
                 //Apply Sturges' formula for determining the number of bins
                 binCount = Math.ceil(Math.log2($p.dataSize)) + 1;
             }
@@ -177,7 +174,7 @@ define(function(require) {
 
         pipeline.aggregate = function(spec) {
             if(spec.$bin) {
-                spec.$group = pipeline.bin(spec);
+                spec.$group = pipeline.bin(spec.$bin);
                 delete spec.$bin;
             }
 
@@ -193,8 +190,8 @@ define(function(require) {
         pipeline.filter = function(spec) {
             addToPipeline('filter', spec);
 
-            operation.select.execute(spec);
-            $p.getResult = operation.select.result;
+            operation.match.execute(spec);
+            $p.getResult = operation.match.result;
             // console.log($p.getResult());
 
 
@@ -219,7 +216,6 @@ define(function(require) {
 
         pipeline.cache = function(tag) {
             operation.cache.execute(tag);
-            // console.log(cache.result());
             return pipeline;
         }
 
@@ -262,7 +258,7 @@ define(function(require) {
                 pipeline[opt](p[opt]);
             })
             $p._update = false;
-            $p.uniform.uFilterLevel.data = 0.1;
+            $p.uniform.uFilterLevel.data -= 0.1;
             return pipeline;
         }
 
@@ -270,11 +266,8 @@ define(function(require) {
 
         pipeline.update = function() {
             $p._update = true;
-            $p.uniform.uFilterLevel.data = 0.2;
+            $p.uniform.uFilterLevel.data += 0.1;
             pipeline.resume('__init__');
-
-            // pipeline.filter($p.crossfilters);
-            // pipeline.register('__init__');
             return pipeline;
         }
 
@@ -335,15 +328,13 @@ define(function(require) {
         }
 
         pipeline.visualize = function(vmap) {
-
             var optID = addToPipeline('visualize', vmap);
             var viewIndex = 0,
                 filters = {};
-
             if(typeof vmap.id == 'string') {
                 viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
                 if(viewIndex == -1) {
-                    //find next available view slot in all views
+                    //find the next available view slot in all views
                     for(var vi = 0; vi < $p.views.length; vi++){
                         if(!$p.views[vi].id) {
                             viewIndex = vi;
@@ -381,9 +372,7 @@ define(function(require) {
                     view: $p.views.filter(v=>v.id == interaction.from)[0],
                     callback: function(selection) {
                         $p.response = interaction.response;
-                        if(!rerun) {
-                            // $p._update = true;
-                            rerun = true;
+                        if(!$p._update) {
                             if(typeof selection == 'object') {
                                 Object.keys(selection).forEach(function(k) {
                                     if(selection[k].length < 2) {
@@ -398,17 +387,6 @@ define(function(require) {
                                     }
                                     $p.crossfilters[k] = selection[k];
                                 });
-
-                                // var operations = $p.pipeline.slice(0, optID);
-                                // for (var i = 0, l = $p.pipeline.length; i < l; i++) {
-                                //     var p = $p.pipeline[i];
-                                //     if(['filter', 'match', 'select'].indexOf(Object.keys(p)[0]) !== -1) {
-                                //         Object.keys(selection).forEach(function(k) {
-                                //             p.filter[k] = selection[k];
-                                //         });
-                                //         break;
-                                //     }
-                                // }
                             }
                             pipeline.update();
                             $p._responseType = 'unselected';
@@ -420,8 +398,6 @@ define(function(require) {
                             $p._responseType = 'selected';
                             pipeline.run();
                             $p.uniform.uVisLevel.data = 0.1;
-                            rerun = false;
-                            // console.log('**interactive latency:', performance.now() - start);
                         }
                     }
                 })

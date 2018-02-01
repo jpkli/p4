@@ -96,7 +96,7 @@ define(function(require){
             // viewSetting.fields = $p.fields;
             viewSetting.isHistogram = true;
             // viewSetting.domain = {};
-            viewSetting.domainX= new Array(histBin).fill(histMin).map(function(h, i) { return h + i*histIntv});
+            viewSetting.domainX = new Array(histBin).fill(histMin).map(function(h, i) { return h + i*histIntv});
 
         }
 
