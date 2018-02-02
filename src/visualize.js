@@ -230,6 +230,7 @@ define(function(require){
                     response[viewId] = vmap[action];
                     $p.interactions.push({
                         event: action,
+                        condition: vmap[action].condition,
                         from: viewId,
                         response: response
                     })

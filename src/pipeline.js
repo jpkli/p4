@@ -370,6 +370,7 @@ define(function(require) {
                 interact($p, {
                     actions: [interaction.event],
                     view: $p.views.filter(v=>v.id == interaction.from)[0],
+                    condition: interaction.condition,
                     callback: function(selection) {
                         $p.response = interaction.response;
                         if(!$p._update) {

@@ -3,10 +3,10 @@ define(function(require){
     return function($p, options) {
         var vis = options.vis || options.view || $p.views[0],
             actions = options.actions || options.events || [],
+            condition = options.condition || {},
             callback = options.callback || function() {};
 
         if($p._update) return;
-
         var vmap = vis.vmap,
             p = vis.padding || $p.padding,
             w = vis.width - p.left - p.right,
@@ -46,15 +46,23 @@ define(function(require){
                     width: w,
                     height: h
                 };
+
                 if(!Array.isArray(vmap.x) && !Array.isArray(vmap.y)) {
+                    if(!condition.x && !condition.y) {
+                        condition.x = condition.y = true;
+                    }
                     brushOptions.brush = function(d) {
                         var spec = {};
-                        if(vmap.x) spec[vmap.x] = d.x;
-                        if(vmap.y) spec[vmap.y] = d.y.reverse();
+                        if(vmap.x && d.x) spec[vmap.x] = d.x;
+                        if(vmap.y && d.y) spec[vmap.y] = d.y.reverse();
                         callback(spec);
                     }
-                    brushOptions.x = vis.chart.x.invert;
-                    brushOptions.y = vis.chart.y.invert
+                    if(condition.x && typeof(vis.chart.x.invert) == 'function')
+                        brushOptions.x = vis.chart.x.invert;
+
+                    if(condition.y && typeof(vis.chart.y.invert) == 'function')
+                        brushOptions.y = vis.chart.y.invert
+
                     new Brush(brushOptions);
                 }
 
