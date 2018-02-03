@@ -86,7 +86,9 @@
     width: 50%;
 }
 
-
+#main-vis {
+    padding-left: 2em;
+}
 #editor {
     border-bottom: 1px solid #CCC;
 }
@@ -99,4 +101,8 @@ svg text {
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
+}
+
+.btn.btn-square {
+  border-radius: 2;
 }

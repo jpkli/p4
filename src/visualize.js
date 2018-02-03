@@ -86,12 +86,12 @@ define(function(require){
                 padding = $p.views[viewIndex].padding || chartPadding,
                 offset = $p.views[viewIndex].offset || [0, 0];
 
-
+            if(!$p._update){
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
                 if(vmap.zero && (f == vmap.height || f == vmap.width ) && visDomain[f][0]>0) visDomain[f][0] = 0;
             });
-
+            }
             var dimSetting = encode($p, vmap, colorManager);
 
             var gl = $p.program($p.renderMode);
@@ -126,9 +126,8 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemVal1.location, 1);
             }
 
-            if(typeof data == 'string')
-                $p.uniform.uDataInput = $p.framebuffer[data].texture;
-
+            // if(typeof data == 'string')
+            //     $p.uniform.uDataInput = $p.framebuffer[data].texture;
             var viewSetting = {
                 domain: visDomain,
                 width: width,
@@ -181,7 +180,6 @@ define(function(require){
                 var pv = $p.views[viewIndex];
                 pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
                 $p.uniform.uVisDomains = pv.domains;
-
                 if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function')
                     pv.chart.svg.remove();
                 pv.chart = vis.addLayer(viewSetting);
@@ -194,6 +192,9 @@ define(function(require){
                     })
                 }
             }
+
+            console.log($p.uniform.uVisDomains.data);
+
             // console.log( $p.views[viewIndex].domains);
             var primitive = gl.POINTS;
             if(['rect', 'bar'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;

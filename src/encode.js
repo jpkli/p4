@@ -7,15 +7,15 @@ define(function(require){
         visualEncodings.forEach(function(code, codeIndex){
             vmapIndex[codeIndex] = $p.fields.indexOf(vmap[code]);
         })
-        $p.uniform.uVisualEncodings = vmapIndex;
-        $p.uniform.uDefaultAlpha = 1.0;
+        $p.uniform.uVisualEncodings.data = vmapIndex;
+        $p.uniform.uDefaultAlpha.data = 1.0;
         if(vmapIndex[2] === -1) {
             if (typeof(vmap.color) === 'string'){
                 if(vmap.color === 'auto') {
                     $p.revealDensity = true;
                     $p.uniform.uRevealMode.data = 1;
                 } else {
-                    $p.uniform.uDefaultColor = colorManager.rgb(vmap.color);
+                    $p.uniform.uDefaultColor.data = colorManager.rgb(vmap.color);
                 }
             } else {
                 if(typeof(vmap.size) == 'number') {
@@ -25,7 +25,7 @@ define(function(require){
         }
 
         if(typeof(opacity) === 'number') {
-            $p.uniform.uDefaultAlpha = opacity;
+            $p.uniform.uDefaultAlpha.data = opacity;
         } else if(vmapIndex[3] === -1 &&
             typeof(opacity) == 'string' &&
             opacity == 'auto'
@@ -96,21 +96,20 @@ define(function(require){
             // viewSetting.fields = $p.fields;
             viewSetting.isHistogram = true;
             // viewSetting.domain = {};
-            viewSetting.domainX = new Array(histBin).fill(histMin).map(function(h, i) { return h + i*histIntv});
-
+            viewSetting.domainX = new Array(histBin).fill(histMin).map(function(h, i) {return h + i*histIntv});
         }
 
         if(!$p._update) {
             if(!vmap.width && vmap.x) {
-                $p.uniform.uDefaultWidth = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] );
+                $p.uniform.uDefaultWidth.data = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] );
             } else if(vmapIndex[4] === -1 && typeof(vmap.width) == 'number') {
-                $p.uniform.uDefaultWidth = vmap.width / width;
+                $p.uniform.uDefaultWidth.data = vmap.width / width;
             }
 
             if(!vmap.height && vmap.y) {
-                $p.uniform.uDefaultHeight = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] );
+                $p.uniform.uDefaultHeight.data = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] );
             } else if(vmapIndex[5] === -1 && typeof(vmap.width) == 'number') {
-                $p.uniform.uDefaultHeight = vmap.height / height;
+                $p.uniform.uDefaultHeight.data = vmap.height / height;
             }
         }
         return viewSetting;

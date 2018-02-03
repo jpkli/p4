@@ -62,7 +62,7 @@
             },
             {
                 "name": "Correlating Bar Charts",
-                "file": "clickbar.json"
+                "file": "hoverbars.json"
             },
             {
                 "name": "Bushing and Linking",

@@ -251,25 +251,7 @@ define(function(require) {
             branchID++;
         }
 
-        pipeline.run = function(opts) {
-            var operations = opts || $p.pipeline;
-            operations.forEach(function(p, i){
-                var opt = Object.keys(p)[0];
-                pipeline[opt](p[opt]);
-            })
-            $p._update = false;
-            $p.uniform.uFilterLevel.data -= 0.1;
-            return pipeline;
-        }
-
         $p.readResult = pipeline.result;
-
-        pipeline.update = function() {
-            $p._update = true;
-            $p.uniform.uFilterLevel.data += 0.1;
-            pipeline.resume('__init__');
-            return pipeline;
-        }
 
         pipeline.getResult = function (d) {
             return $p.getResult(d);
@@ -327,6 +309,16 @@ define(function(require) {
             return pipeline;
         }
 
+        pipeline.run = function(opts) {
+            var operations = opts || $p.pipeline;
+            operations.forEach(function(p, i){
+                var opt = Object.keys(p)[0];
+                pipeline[opt](p[opt]);
+            })
+
+            return pipeline;
+        }
+
         pipeline.visualize = function(vmap) {
             var optID = addToPipeline('visualize', vmap);
             var viewIndex = 0,
@@ -368,12 +360,13 @@ define(function(require) {
             if(typeof(spec) != 'undefined') $p.interactions.push(spec);
             $p.interactions.forEach(function(interaction){
                 interact($p, {
-                    actions: [interaction.event],
-                    view: $p.views.filter(v=>v.id == interaction.from)[0],
+                    actions: interaction.event,
+                    view: interaction.from,
                     condition: interaction.condition,
                     callback: function(selection) {
                         $p.response = interaction.response;
                         if(!$p._update) {
+                            $p.crossfilters = {};
                             if(typeof selection == 'object') {
                                 Object.keys(selection).forEach(function(k) {
                                     if(selection[k].length < 2) {
@@ -389,15 +382,18 @@ define(function(require) {
                                     $p.crossfilters[k] = selection[k];
                                 });
                             }
-                            pipeline.update();
+
+                            $p._update = true;
                             $p._responseType = 'unselected';
-                            pipeline.run();
-                            $p.uniform.uVisLevel.data = 0.2;
-                            pipeline.update();
-                            pipeline.filter($p.crossfilters);
-                            $p.crossfilters= {};
+                            $p.uniform.uFilterLevel.data = 0.2;
+                            pipeline.head().run();
                             $p._responseType = 'selected';
-                            pipeline.run();
+                            $p.uniform.uVisLevel.data = 0.2;
+                            pipeline.head().filter({}).run();
+                            // pipeline.filter($p.crossfilters);
+                            // $p.crossfilters= {};
+                            $p._update = false;
+                            $p.uniform.uFilterLevel.data = 0.1;
                             $p.uniform.uVisLevel.data = 0.1;
                         }
                     }
