@@ -102,24 +102,45 @@ define(function(require){
         return colorTable;
     }
 
+    function mapColorRGB($int_fieldId, $float_value) {
+        var d = new Vec2();
+        var colorRGB = new Vec3();
+        var intValue = new Int();
+        if(fieldId == -1) {
+            colorRGB = this.uDefaultColor;
+        } else {
+            if(this.uColorMode == 0) {
+                colorRGB = texture2D(this.tColorGraident, vec2(value, 1.0)).rgb;
+            } else {
+                d = this.uVisDomains[fieldId];
+                intValue = int(value * (d.y - d.x) + d.x);
+                colorRGB = this.uColorTable[intValue];
+            }
+        }
+        return colorRGB;
+    }
+
     var gradient = setColorScheme(colorSchemes["viridis"]),
     // var gradient = setColorScheme(["#EE0000", "steelblue"]),
         table = setColorTable(defaultColors);
 
-    return function(fxgl) {
+    return function($p) {
         var colorManager = {};
-        fxgl.texture("tColorGraident",  "float", gradient,  [colorResolution, 1], "rgba")
+        $p.texture("tColorGraident",  "float", gradient,  [colorResolution, 1], "rgba")
             .uniform("uColorTable",     "vec3",  table)
-            .uniform("uColorCount",     "int",  20);
+            .uniform("uColorCount",     "int",  20)
+            .uniform("uColorMode",      "int",  0); // 0=numeric, 1=categorical
+
+        $p.subroutine('mapColorRGB', 'vec3', mapColorRGB);
 
         colorManager.updateScheme = function(colors) {
             if(typeof colors == "string")
                 colors = colorSchemes[colors].reverse()
-            fxgl.texture.tColorGraident = setColorScheme(colors);
+            $p.texture.tColorGraident = setColorScheme(colors);
         }
 
         colorManager.updateTable = function(colors) {
-            fxgl.uniform.uColorTable = setColorTable(colors);
+            $p.uniform.uColorTable = setColorTable(colors);
         }
 
         colorManager.colorTable = defaultColors.map(function(t){
@@ -134,7 +155,5 @@ define(function(require){
         colorManager.rgba = rgba;
 
         return colorManager;
-
     }
-
 });
