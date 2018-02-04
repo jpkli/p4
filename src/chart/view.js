@@ -69,7 +69,7 @@ define(function(require){
                 format: format(".3s"),
             };
 
-            if(scaleX == 'ordinal') {
+            if(scaleX == 'ordinal' || scaleX == 'categorical') {
                 xAxisOption.ticks = domainX.length;
                 while(width / xAxisOption.ticks < 20) {
                     xAxisOption.ticks *= 0.5;
@@ -84,7 +84,7 @@ define(function(require){
                 }
             }
 
-            if(scaleY == 'ordinal') {
+            if(scaleY == 'ordinal' || scaleY == 'categorical') {
                 yAxisOption.ticks = domainY.length;
                 while(width / yAxisOption.ticks < 20) {
                     yAxisOption.ticks *= 0.5;

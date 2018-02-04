@@ -36,9 +36,10 @@ define(function(){
         i = (this.aDataIdx+0.5) / this.uDataDim.x;
         j = (this.aDataIdy+0.5) / this.uDataDim.y;
 
-        this.vResult = this.uVisLevel;
         if(this.uFilterFlag == 1) {
             this.vResult = texture2D(this.fFilterResults, vec2(i, j)).a;
+        } else {
+            this.vResult = this.uVisLevel;
         }
 
         posX = this.visMap(this.uVisualEncodings[0], i, j, this.aDataValx, this.aDataValy, 0.0, 0.0);

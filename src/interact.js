@@ -141,12 +141,12 @@ define(function(require){
                 } else if(action == 'pan') {
                     svg.style.cursor = 'move';
                     svg.onmousedown = function(e) {
-                        sx = e.clientX - box.left;
-                        sy = e.clientY - box.top;
+                        sx = e.clientX;
+                        sy = e.clientY;
                         svg.style.cursor = 'move';
 
                         svg.onmousemove = function(e) {
-                            tx += (e.clientX - sx);
+                            tx += (e.clientX - sx) / dy;
                             ty += (e.clientY - sy);
 
                             callback();

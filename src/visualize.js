@@ -32,7 +32,7 @@ define(function(require){
             .uniform('uViewDim',        'vec2',  $p.viewport)
             .uniform('uVisShape',       'int',   1)
             .uniform('uInterleaveX',    'int',   0)
-            .uniform('uVisDomains',     'vec2',  $p.fieldDomains)
+            .uniform('uVisDomains',     'vec2',  $p.fieldDomains.map(d=>d.slice()))
             .uniform('uVisScale',       'vec2', [1.0, 1.0])
             .uniform('uPosOffset',      'vec2', [0.0, 0.0])
             .uniform('uFeatureCount',   'int',   0)
@@ -87,10 +87,10 @@ define(function(require){
                 offset = $p.views[viewIndex].offset || [0, 0];
 
             if(!$p._update){
-            $p.fields.forEach(function(f, i){
-                visDomain[f] = $p.fieldDomains[i].slice();
-                if(vmap.zero && (f == vmap.height || f == vmap.width ) && visDomain[f][0]>0) visDomain[f][0] = 0;
-            });
+                $p.fields.forEach(function(f, i){
+                    visDomain[f] = $p.fieldDomains[i].slice();
+                    if(vmap.zero && (f == vmap.height || f == vmap.width ) && visDomain[f][0]>0) visDomain[f][0] = 0;
+                });
             }
             var dimSetting = encode($p, vmap, colorManager);
 
@@ -178,12 +178,16 @@ define(function(require){
             //TODO: Maybe just save the needed data domains instead of copying all
             if(!$p._update) {
                 var pv = $p.views[viewIndex];
+
                 pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
                 $p.uniform.uVisDomains = pv.domains;
-                if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function')
+                if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function') {
                     pv.chart.svg.remove();
+                }
                 pv.chart = vis.addLayer(viewSetting);
             } else {
+                // console.log($p._responseType, $p.views[viewIndex].domains);
+
                 $p.uniform.uVisDomains = $p.views[viewIndex].domains;
                 if(mark == 'stack'){
                     var result = $p.readResult('row');
@@ -192,10 +196,7 @@ define(function(require){
                     })
                 }
             }
-
-            console.log($p.uniform.uVisDomains.data);
-
-            // console.log( $p.views[viewIndex].domains);
+            console.log( $p.uniform.uVisDomains.data[8]);
             var primitive = gl.POINTS;
             if(['rect', 'bar'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
             else if(mark == 'line') primitive = gl.LINE_STRIP;

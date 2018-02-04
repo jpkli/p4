@@ -109,12 +109,16 @@ define(function(require){
         if(fieldId == -1) {
             colorRGB = this.uDefaultColor;
         } else {
-            if(this.uColorMode == 0) {
+            if(this.uColorMode == 1) {
                 colorRGB = texture2D(this.tColorGraident, vec2(value, 1.0)).rgb;
             } else {
                 d = this.uVisDomains[fieldId];
                 intValue = int(value * (d.y - d.x) + d.x);
-                colorRGB = this.uColorTable[intValue];
+                if(intValue >= this.uColorCount) {
+                    colorRGB = vec3(0.0, 0.0, 0.0);
+                } else {
+                    colorRGB = this.uColorTable[intValue];
+                }
             }
         }
         return colorRGB;
@@ -127,9 +131,9 @@ define(function(require){
     return function($p) {
         var colorManager = {};
         $p.texture("tColorGraident",  "float", gradient,  [colorResolution, 1], "rgba")
-            .uniform("uColorTable",     "vec3",  table)
-            .uniform("uColorCount",     "int",  20)
-            .uniform("uColorMode",      "int",  0); // 0=numeric, 1=categorical
+            .uniform("uColorTable",   "vec3",  table)
+            .uniform("uColorCount",   "int",   colorCountMax)
+            .uniform("uColorMode",    "int",   0); // 0=categorical, 1=numeric
 
         $p.subroutine('mapColorRGB', 'vec3', mapColorRGB);
 

@@ -21,6 +21,7 @@ define(function(require) {
 
         $p.interactions = [];
         $p.response = {};
+        $p._responseType = 'unselected';
 
         $p.getResult = function() {};
 
@@ -192,6 +193,8 @@ define(function(require) {
 
             operation.match.execute(spec);
             $p.getResult = operation.match.result;
+
+
             // console.log($p.getResult());
 
 
@@ -366,6 +369,10 @@ define(function(require) {
                     callback: function(selection) {
                         $p.response = interaction.response;
                         if(!$p._update) {
+                            $p._update = true;
+                            $p._responseType = 'unselected';
+                            $p.uniform.uFilterLevel.data = 0.2;
+                            pipeline.head().run();
                             $p.crossfilters = {};
                             if(typeof selection == 'object') {
                                 Object.keys(selection).forEach(function(k) {
@@ -383,15 +390,10 @@ define(function(require) {
                                 });
                             }
 
-                            $p._update = true;
-                            $p._responseType = 'unselected';
-                            $p.uniform.uFilterLevel.data = 0.2;
-                            pipeline.head().run();
                             $p._responseType = 'selected';
                             $p.uniform.uVisLevel.data = 0.2;
                             pipeline.head().filter({}).run();
-                            // pipeline.filter($p.crossfilters);
-                            // $p.crossfilters= {};
+                            $p._responseType = 'unselected';
                             $p._update = false;
                             $p.uniform.uFilterLevel.data = 0.1;
                             $p.uniform.uVisLevel.data = 0.1;

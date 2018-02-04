@@ -22,6 +22,12 @@ define(function(require){
                     $p.uniform.uMarkSize = vmap.size;
                 }
             }
+        } else {
+            if($p.categoryLookup.hasOwnProperty(vmap.color)) {
+                $p.uniform.uColorMode = 0;
+            } else {
+                $p.uniform.uColorMode = 1;
+            }
         }
 
         if(typeof(opacity) === 'number') {
@@ -51,40 +57,43 @@ define(function(require){
         }
 
         var viewSetting = {};
-        if (['rect', 'bar'].indexOf(vmap.mark) !== -1) {
-            var markSpace = [0, 0];
-            if(vmapIndex[0] > -1) {
-                var len = $p.fieldWidths[vmapIndex[0]],
-                    ext = $p.fieldDomains[vmapIndex[0]];
-                viewSetting.scaleX = 'ordinal';
-                if($p.categoryLookup.hasOwnProperty(vmap.x)){
-                     viewSetting.domainX = new Array(len).fill(0).map(
-                         (d,i)=>$p.categoryLookup[vmap.x][i]
-                     );
-                 } else {
-                     viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
-                 }
-                 markSpace[0] = 0.02;
-            }
-            if(vmapIndex[1] > -1) {
-                var len = $p.fieldWidths[vmapIndex[1]],
-                    ext = $p.fieldDomains[vmapIndex[1]];
-                viewSetting.scaleY = 'ordinal';
-                if($p.categoryLookup.hasOwnProperty(vmap.y)){
-                     viewSetting.domainY = new Array(len).fill(0).map(
-                         (d,i)=>$p.categoryLookup[vmap.y][i]
-                     ).reverse();
-                } else {
-                    viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
-                }
-                markSpace[1] = 0.02;
-            }
-
-            if(vmapIndex[0] > -1 && vmapIndex[1] > -1)
-                markSpace = [0, 0];
-
-            $p.uniform.uMarkSpace = markSpace;
+        var isRect = (['rect', 'bar'].indexOf(vmap.mark) !== -1);
+        var markSpace = [0, 0];
+        if(vmapIndex[0] > -1) {
+            var len = $p.fieldWidths[vmapIndex[0]],
+                ext = $p.fieldDomains[vmapIndex[0]];
+            if($p.categoryLookup.hasOwnProperty(vmap.x)){
+                viewSetting.scaleX = 'categorical';
+                 viewSetting.domainX = new Array(len).fill(0).map(
+                     (d,i)=>$p.categoryLookup[vmap.x][i]
+                 );
+             } else if (isRect) {
+                 viewSetting.scaleX = 'ordinal';
+                 viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
+             }
+             markSpace[0] = 0.02;
         }
+        if(vmapIndex[1] > -1) {
+            var len = $p.fieldWidths[vmapIndex[1]],
+                ext = $p.fieldDomains[vmapIndex[1]];
+
+            if($p.categoryLookup.hasOwnProperty(vmap.y)){
+                 viewSetting.scaleY = 'categorical';
+                 viewSetting.domainY = new Array(len).fill(0).map(
+                     (d,i)=>$p.categoryLookup[vmap.y][i]
+                 ).reverse();
+            } else if (isRect) {
+                viewSetting.scaleY = 'ordinal';
+                viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
+            }
+            markSpace[1] = 0.02;
+        }
+
+        if(vmapIndex[0] > -1 && vmapIndex[1] > -1) {
+            markSpace = [0, 0];
+        }
+
+        $p.uniform.uMarkSpace = markSpace;
 
         if($p.intervals.hasOwnProperty(vmap.x) || $p.intervals.hasOwnProperty(vmap.y)) {
             var histDim = vmap.x || vmap.y,

@@ -23,7 +23,7 @@ function vertexShaderFilter(){
     if(filter < 0) {
         this.vResult = 0.0;
     } else {
-        this.vResult = (sel < 0) ? this.uFilterLevel - 0.1 : this.uFilterLevel;
+        this.vResult = (sel < 0) ? this.uFilterLevel-0.1 : this.uFilterLevel;
     }
     var x = i * 2.0 - 1.0;
     var y = j * 2.0 - 1.0;
@@ -131,7 +131,7 @@ function match($p) {
                 filterRanges[fieldId] = [Math.min.apply(null, inSelections), Math.max.apply(null, inSelections)];
             })
         }
-
+        // console.log($p._responseType, spec);
         var filterSelections = Object.keys(spec).filter(function(s){
             return !spec[s].hasOwnProperty('$in') && !spec[s].hasOwnProperty('$vis');
         });
@@ -167,6 +167,8 @@ function match($p) {
                 filterControls[fieldId] = 2;
                 filterRanges[fieldId] = spec[k].$vis;
             });
+
+            console.log('filterRanges::::::::::', filterRanges[8], $p._responseType);
             $p.uniform.uFilterControls = filterControls;
             $p.uniform.uFilterRanges= filterRanges;
             gl = $p.program("filter");
@@ -189,9 +191,11 @@ function match($p) {
 
         var filterSpec = spec;
 
+        if($p._responseType == 'selected') {
             Object.keys($p.crossfilters).forEach(function(c){
                 filterSpec[c] = {$vis: $p.crossfilters[c]};
             });
+        }
 
         Object.keys(filterSpec).forEach(function(k, i) {
             if($p.categoryIndex.hasOwnProperty(k) && !spec[k].$in) {

@@ -118,6 +118,7 @@ function Brush(arg){
                 if(selectY) {
                     selection.y = [y(selectorBox.top - box.top), y(selectorBox.bottom - box.top)];
                 }
+                console.log(selection);
                 brush.call(this, selection);
             }
         };

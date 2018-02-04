@@ -32,6 +32,12 @@
         }
     ],
     "operations": [
+                {
+            "$select": {
+                "BabyWeight": [0, 15],
+                "MotherWeight": [270, 370]
+            }
+        },
         {
             "$visualize": {
                 "id": "c1",
