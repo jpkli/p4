@@ -65,13 +65,13 @@ define(function(){
             if (dist > 0.5) discard;
             var delta = 0.15;
             var alpha = this.vColorRGBA.a - smoothstep(0.5-delta, 0.5, dist);
-            if(valid) {
+            if( this.vResult <= this.uVisLevel + 0.01 && this.vResult >= this.uVisLevel - 0.01) {
                 gl_FragColor = vec4(this.vColorRGBA.rgb*alpha, alpha);
             } else {
                 discard;
             }
         } else {
-            if(valid) {
+            if( this.vResult <= this.uVisLevel + 0.01 && this.vResult >= this.uVisLevel - 0.01) {
                 gl_FragColor = vec4(this.vColorRGBA.rgb * this.vColorRGBA.a,  this.vColorRGBA.a);
             } else {
                 discard;

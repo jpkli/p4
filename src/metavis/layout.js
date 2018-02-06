@@ -1,21 +1,19 @@
 define(function(require){
-    var Class = require("./class"),
-        Svg = require('./svg'),
-        scale = require('./scale');
+    var Svg = require('./svg'),
+        chart = require('./chart');;
 
     function assign(object, source) {
         Object.keys(source).forEach(function(key) {
-            object["$"+key] = source[key];
+            object[key] = source[key];
         });
     }
-
     var defaultProperties = {
         width: 400,
         height: 300,
         padding: {left: 0, right: 0, top: 0, bottom: 0},
     }
 
-    return Class.create(function Viz(arg){
+    return function Viz(arg){
         "use strict";
 
         /* Private */
@@ -25,8 +23,8 @@ define(function(require){
             style = option.style || null,
             layers = [];
 
-        this.$width = container.clientWidth || 400;
-        this.$height = container.clientHeight || 300;
+        this.width = container.clientWidth || 400;
+        this.height = container.clientHeight || 300;
 
         if(typeof container == 'string') container = document.getElementById(container);
         assign(viz, defaultProperties);
@@ -34,22 +32,10 @@ define(function(require){
 
         this.vmap = option.vmap;
 
-        this.$width -= (this.$padding.left + this.$padding.right);
-        this.$height -= (this.$padding.top + this.$padding.bottom);
+        this.width -= (this.padding.left + this.padding.right);
+        this.height -= (this.padding.top + this.padding.bottom);
 
-        this.$svg = function(arg) {
-            var arg = arg || {},
-                width = arg.width || this.$width,
-                height = arg.height || this.$height,
-                padding = arg.padding || this.$padding;
 
-            return new Svg({
-                width: width,
-                height: height,
-                padding: padding,
-                style: {position: 'absolute'}
-            });
-        }
         /* Public */
         this.data = option.data || [];
         this.div = document.createElement("div");
@@ -66,16 +52,41 @@ define(function(require){
             this.div.className = option.className || "i2v-viz";
             this.div.style.position = 'relative';
             this.resize(
-                this.$width + this.$padding.left + this.$padding.right,
-                this.$height + this.$padding.top + this.$padding.bottom
+                this.width + this.padding.left + this.padding.right,
+                this.height + this.padding.top + this.padding.bottom
             );
 
             if(option.style) this.css(option.style);
 
             container.appendChild(this.div);
+            this.viz();
             return viz;
         };
 
+        this.createSVG = function(arg) {
+            var arg = arg || {},
+                width = arg.width || this.width,
+                height = arg.height || this.height,
+                padding = arg.padding || this.padding;
+
+            return new Svg({
+                width: width,
+                height: height,
+                padding: padding,
+                style: {position: 'absolute'}
+            });
+        }
+
+
+        var canvas = option.canvas,
+            svg = this.createSVG(),
+            vmap = option.vmap,
+            chartPadding = this.padding || {left: 0, right: 0, top: 0, bottom: 0},
+            domain = option.domain || {x: [0, 1000], y: [0, 1]},
+            scales = option.scales || {x: 'linear', y: 'linear'};
+
+        this.svg.push(svg);
+        this.canvas.push(canvas);
         this.set = function(props) {
             assign(viz, props);
         };
@@ -130,10 +141,6 @@ define(function(require){
             div = null;
         };
 
-        this.encode = function(attr, feature, scale) {
-
-        };
-
         this.hide = function() {
             this.div.style.display = 'none';
         }
@@ -143,13 +150,18 @@ define(function(require){
         }
 
         this.innerWidth = function() {
-            return this.$width;
+            return this.width;
         }
 
         this.innerHeight = function() {
-            return this.$height;
+            return this.height;
         }
 
+        this.addChart = function(options) {
+            return chart(svg, options)
+        };
+
+
         return viz.init();
-    });
+    };
 })

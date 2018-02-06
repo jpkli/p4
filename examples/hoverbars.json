@@ -1,0 +1,89 @@
+{
+    "data" : {
+        "source": "data/NatalityUSA2015Dec.csv",
+        "format": "csv",
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float"
+        }
+    },
+    "views": [
+        {
+            "id": "c1",
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 120, "right": 10, "top": 10, "bottom":40},
+            "offset": [0, 0]
+        },
+        {
+            "id": "c2",
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 120, "right": 10, "top": 10, "bottom":40},
+            "offset": [380, 0]
+        }
+    ],
+    "operations": [
+        {
+            "$aggregate" : {
+                "$group": "MotherEdu",
+                "$reduce" : {
+                    "Babies": { "$count": "*"},
+                    "AvgWeight": { "$avg": "BabyWeight"}
+                }
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c1",
+                "mark": "bar",
+                "color": "darkred",
+                "y": "MotherEdu",
+                "width": "Babies"
+            }
+        },
+        {
+            "$head": true
+        },
+        {
+            "$aggregate" : {
+                "$group": "FatherEdu",
+                "$reduce" : {
+                    "Babies": { "$count": "*"},
+                    "AvgWeight": { "$avg": "BabyWeight"}
+                }
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c2",
+                "mark": "bar",
+                "color": "steelblue",
+                "y": "FatherEdu",
+                "width": "Babies"
+            }
+        },
+        {
+            "$interact": {
+                "event": "hover",
+                "from": ["c1", "c2"],
+                "response" : {
+                    "c1": {
+                        "unselected": {"color": "gray"}
+                    },
+                    "c2": {
+                        "unselected": {"color": "gray"}
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -1,4 +1,4 @@
-define(function(require){
+define(function(require) {
     const utils = require('./utils');
     const vecId = ['x', 'y', 'z'];
     const aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
@@ -8,22 +8,22 @@ define(function(require){
         $p.uniform('uGroupGetStat', 'float', 0.0)
             .uniform('uAggrOpt', 'int', 2);
 
-        function vertexShader(){
+        function vertexShader() {
             gl_PointSize = 1.0;
 
             var i, j, k;
             var x, groupKeyValue;
 
-            i = (this.aDataIdx+0.5) / this.uDataDim.x;
-            j = (this.aDataIdy+0.5) / this.uDataDim.y;
+            i = (this.aDataIdx + 0.5) / this.uDataDim.x;
+            j = (this.aDataIdy + 0.5) / this.uDataDim.y;
             this.vResult = this.getData(this.uFieldId, i, j);
 
-            if(this.aDataIdy * this.uDataDim.x + this.aDataIdx >= this.uDataSize) {
+            if (this.aDataIdy * this.uDataDim.x + this.aDataIdx >= this.uDataSize) {
                 this.vResult = 0.0;
             }
 
-            if(this.uFilterFlag == 1) {
-                if(texture2D(this.fFilterResults, vec2(i, j)).a < this.uVisLevel-0.01)
+            if (this.uFilterFlag == 1) {
+                if (texture2D(this.fFilterResults, vec2(i, j)).a < this.uVisLevel - 0.01)
                     this.vResult = 0.0;
             }
 
@@ -31,19 +31,19 @@ define(function(require){
             for (var ii = 0; ii < 2; ii++) {
                 var gid = new Int();
                 gid = this.uGroupFields[ii];
-                if(gid != -1) {
-                    if(this.uIndexCount > 0) {
-                        if(gid == 0) {
+                if (gid != -1) {
+                    if (this.uIndexCount > 0) {
+                        if (gid == 0) {
                             groupKeyValue = i;
-                        } else if(gid == 1) {
+                        } else if (gid == 1) {
                             groupKeyValue = j;
                         }
                     }
-                    if(this.uIndexCount == 0 || gid > 1) {
+                    if (this.uIndexCount == 0 || gid > 1) {
                         var d = new Vec2();
                         d = this.getFieldDomain(gid);
-                        groupKeyValue = (this.getData(gid, i, j) - d.x) / (d.y - d.x) * (this.getFieldWidth(gid)) / (this.getFieldWidth(gid)+1.);
-                        groupKeyValue += 0.5/this.getFieldWidth(gid);
+                        groupKeyValue = (this.getData(gid, i, j) - d.x) / (d.y - d.x) * (this.getFieldWidth(gid)) / (this.getFieldWidth(gid) + 1.);
+                        groupKeyValue += 0.5 / this.getFieldWidth(gid);
                     }
                     pos[ii] = groupKeyValue * 2.0 - 1.0;
                 } else {
@@ -55,9 +55,9 @@ define(function(require){
         }
 
         function fragmentShader() {
-            if(this.vResult == 0.0) discard;
+            if (this.vResult == 0.0) discard;
 
-            if(this.uAggrOpt == 2)
+            if (this.uAggrOpt == 2)
                 gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
             else
                 gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
@@ -69,17 +69,17 @@ define(function(require){
         $p.program("group", vs, fs);
 
         var vs2 = $p.shader.vertex(function main() {
-             gl_Position = vec4(this._square, 0, 1);
+            gl_Position = vec4(this._square, 0, 1);
         });
 
-        var fs2 = $p.shader.fragment(function () {
+        var fs2 = $p.shader.fragment(function() {
             var x, y, res;
             $vec4(value);
             x = (gl_FragCoord.x) / this.uResultDim.x;
             y = (gl_FragCoord.y) / this.uResultDim.y;
             y = (float(this.uFieldId - this.uIndexCount) + y) / float(this.uFieldCount);
             value = texture2D(this.uDataInput, vec2(x, y));
-            if(this.uAggrOpt > 3)
+            if (this.uAggrOpt > 3)
                 res = value.a / value.b;
             else
                 res = value.a;
@@ -106,12 +106,12 @@ define(function(require){
             gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
 
             $p.uniform.uGroupFields = groupFieldIds;
-            gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
-            gl.enable( gl.BLEND );
-            gl.blendFunc( gl.ONE, gl.ONE );
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.ONE, gl.ONE);
             gl.blendEquation(gl.FUNC_ADD);
             $p.uniform.uGroupGetStat = 0.0;
             var resultDomains = new Array(resultFieldIds.length);
@@ -119,12 +119,12 @@ define(function(require){
 
             secondPass = false;
             thirdPass = false;
-            resultFieldIds.forEach(function(f, i){
+            resultFieldIds.forEach(function(f, i) {
                 var opt = aggrOpts.indexOf(opts[i]);
-                if(opt == -1) throw Error("unknow operator for aggreation: " + opts[i]);
-                gl.viewport(0, i*$p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
-                if(opt == 0) gl.blendEquation(gl.MIN_EXT);
-                else if(opt == 1) gl.blendEquation(gl.MAX_EXT);
+                if (opt == -1) throw Error("unknow operator for aggreation: " + opts[i]);
+                gl.viewport(0, i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
+                if (opt == 0) gl.blendEquation(gl.MIN_EXT);
+                else if (opt == 1) gl.blendEquation(gl.MAX_EXT);
                 else gl.blendEquation(gl.FUNC_ADD);
                 $p.uniform.uFieldId = f;
                 $p.uniform.uAggrOpt = opt;
@@ -133,13 +133,13 @@ define(function(require){
                     $p.dataDimension[0],
                     $p.dataDimension[1]
                 );
-                if(opt > 3) {
+                if (opt > 3) {
                     secondPass = true;
-                    if(opt > 4) thirdPass = true;
+                    if (opt > 4) thirdPass = true;
                 }
             });
 
-            if(secondPass) {
+            if (secondPass) {
                 // console.log('*** Second Pass for Aggregation');
                 var fieldCount = $p.uniform.uFieldCount.data,
                     preAggrData = $p.uniform.uDataInput.data;
@@ -147,7 +147,7 @@ define(function(require){
                 $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
                 $p.uniform.uFieldCount.data = resultFieldIds.length;
 
-                if(thirdPass){
+                if (thirdPass) {
                     $p.framebuffer(
                         "fAggrStats",
                         "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
@@ -156,19 +156,18 @@ define(function(require){
                 } else {
                     $p.framebuffer(
                         "fGroupResults",
-                        "float",
-                        [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
+                        "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
                     );
                     $p.bindFramebuffer("fGroupResults");
                 }
 
                 gl = $p.program("group2");
-                gl.disable( gl.BLEND );
-                resultFieldIds.forEach(function(f, i){
+                gl.disable(gl.BLEND);
+                resultFieldIds.forEach(function(f, i) {
                     var opt = aggrOpts.indexOf(opts[i]);
                     $p.uniform.uAggrOpt = opt;
                     $p.uniform.uFieldId = i;
-                    gl.viewport(0, i*$p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
+                    gl.viewport(0, i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
                     gl.drawArrays(gl.TRIANGLES, 0, 6);
                 })
 
@@ -180,9 +179,9 @@ define(function(require){
         aggregate.execute = function(spec) {
             var groupFields = spec.$by || spec.$group,
                 groupFieldIds = [-1, -1].
-                resultDim = [1, 1];
+            resultDim = [1, 1];
 
-            if(!Array.isArray(groupFields)) groupFields = [groupFields];
+            if (!Array.isArray(groupFields)) groupFields = [groupFields];
             if (groupFields.length == 2) {
                 groupFieldIds[0] = $p.fields.indexOf(groupFields[0]);
                 groupFieldIds[1] = $p.fields.indexOf(groupFields[1]);
@@ -204,7 +203,7 @@ define(function(require){
 
             var newFieldSpec = spec.$calculate || spec.$reduce || spec.$out || null;
 
-            if(newFieldSpec === null) {
+            if (newFieldSpec === null) {
                 newFieldSpec = {};
                 Object.keys(spec).filter(function(d) {
                     return d != '$by' && d != '$group';
@@ -224,7 +223,7 @@ define(function(require){
                     return Object.keys(newFieldSpec[newFieldNames[i]])[0];
                 });
 
-            if(!$p._update) {
+            if (!$p._update) {
                 $p.framebuffer(
                     "fGroupResults",
                     "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFields.length]
@@ -233,10 +232,7 @@ define(function(require){
             _execute(operators, groupFieldIds, resultFieldIds);
 
             $p.getResult = aggregate.result;
-            console.log($p.getResult());
-
             $p.indexes = groupFields;
-
             $p.dataDimension = $p.resultDimension;
 
             var newFieldIds = groupFieldIds.filter(function(f) {
@@ -245,7 +241,7 @@ define(function(require){
 
             $p.fields = groupFields
                 .map(function(gf) {
-                    return (gf.substring(0,4) == 'bin@')? gf.slice(4) : gf;
+                    return (gf.substring(0, 4) == 'bin@') ? gf.slice(4) : gf;
                 })
                 .concat(newFieldNames);
 
@@ -269,13 +265,16 @@ define(function(require){
             $p.dataSize = $p.resultDimension[0] * $p.resultDimension[1];
             $p.uniform.uDataSize.data = $p.dataSize;
 
-
             $p.indexes.forEach(function(d, i) {
                 // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
-                $p.attribute['aDataId' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {return i;});
-                $p.attribute['aDataVal' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {return i;});
-                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId'+ vecId[i]].location, i);
-                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal'+ vecId[i]].location, i);
+                $p.attribute['aDataId' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {
+                    return i;
+                });
+                $p.attribute['aDataVal' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {
+                    return i;
+                });
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
+                $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal' + vecId[i]].location, i);
             });
 
             if ($p.indexes.length == 1) {
@@ -284,7 +283,7 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
             }
-            if(!$p._update) {
+            if (!$p._update) {
                 resultDomains = $p.opt.extent(resultFieldIds, $p.dataDimension);
             }
             for (var ii = $p.indexes.length; ii < $p.indexes.length + resultFieldIds.length; ii++) {
@@ -296,13 +295,11 @@ define(function(require){
             $p.uniform.uFieldWidths.data = $p.fieldWidths;
             $p.uniform.uFilterFlag.data = 0;
 
-            // $p.ctx.finish();
-            // const vecId = ['x', 'y', 'z'];
             $p.indexes.forEach(function(d, i) {
                 // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
                 var interval = 1;
 
-                if($p.intervals.hasOwnProperty(d))
+                if ($p.intervals.hasOwnProperty(d))
                     interval = $p.intervals[d].interval;
 
                 $p.attribute['aDataVal' + vecId[i]] = utils.seqFloat(
@@ -313,16 +310,14 @@ define(function(require){
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
                 $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal' + vecId[i]].location, i);
             });
-
-            console.log($p.fields, $p.fieldDomains, $p.fieldWidths);
         }
 
         aggregate.result = function(arg) {
             var options = arg || {},
                 offset = options.offset || [0, 0],
-                resultSize = options.size || $p.resultDimension[0]* $p.resultDimension[1],
+                resultSize = options.size || $p.resultDimension[0] * $p.resultDimension[1],
                 rowTotal = Math.min(resultSize, $p.resultDimension[0]),
-                colTotal = Math.ceil(resultSize/$p.resultDimension[0]);
+                colTotal = Math.ceil(resultSize / $p.resultDimension[0]);
 
             $p.bindFramebuffer("fGroupResults");
             var gl = $p.program("group"),
@@ -331,7 +326,9 @@ define(function(require){
             gl.readPixels(offset[0], offset[1], rowTotal, colTotal * resultFieldCount, gl.RGBA, gl.FLOAT, result);
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-            return result.filter(function(d, i){ return i%4===3;} );
+            return result.filter(function(d, i) {
+                return i % 4 === 3;
+            });
         }
 
         return aggregate;

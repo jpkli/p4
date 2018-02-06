@@ -4,26 +4,34 @@ function vertexShaderFilter(){
     var i, j, k, value;
     var filter = new Int(0);
     var sel = new Int(0);
+    var visSelect = new Bool(false);
     i = (this.aDataIdx+0.5) / this.uDataDim.x;
     j = (this.aDataIdy+0.5) / this.uDataDim.y;
 
     for(var f = 0; f < $(fieldCount)+$(indexCount); f++) {
-        if(this.uFilterControls[f] > 0) {
+        if(this.uFilterControls[f] == 1 || this.uVisControls[f] == 1) {
             value = this.getData(f, i, j);
-            if(value < this.uFilterRanges[f].x || value >= this.uFilterRanges[f].y) {
-                if(this.uFilterControls[f] == 1) {
+
+            if(this.uFilterControls[f] == 1) {
+                if(value < this.uFilterRanges[f].x || value >= this.uFilterRanges[f].y) {
                     filter -= 1;
                 }
-                if(this.uFilterControls[f] == 2) {
+            }
+            if(this.uVisControls[f] == 1) {
+                if(value < this.uVisRanges[f].x || value >= this.uVisRanges[f].y) {
                     sel -= 1;
                 }
+                visSelect = true;
             }
+
         }
     }
+    this.vResult = 0.1;
     if(filter < 0) {
         this.vResult = 0.0;
     } else {
-        this.vResult = (sel < 0) ? this.uFilterLevel-0.1 : this.uFilterLevel;
+        if(visSelect)
+            this.vResult = (sel < 0) ? 0.1 : 0.2;
     }
     var x = i * 2.0 - 1.0;
     var y = j * 2.0 - 1.0;
@@ -37,7 +45,7 @@ function vertexShaderSelect(){
     j = (this.aDataIdy+0.5) / this.uDataDim.y;
     this.vResult = this.uFilterLevel - 0.1;
     value = this.getData(this.uFieldId, i, j);
-    for(var l = 0; l < 500; l++){
+    for(var l = 0; l < 100; l++){
         if(l < this.uSelectCount) {
             if(value == this.uInSelections[l]) {
                 this.vResult = this.uFilterLevel;
@@ -55,16 +63,20 @@ function fragmentShader() {
 }
 
 function match($p) {
-    const SELECT_MAX = 500;
+    const SELECT_MAX = 100;
     var match = {},
         dataDimension = $p.uniform.uDataDim.data,
         fieldCount = $p.fields.length,
         filterControls = new Array(fieldCount).fill(0),
         filterRanges = $p.fieldDomains,
+        visControls = new Array(fieldCount).fill(0),
+        visRanges = $p.fieldDomains,
         inSelections = new Array(SELECT_MAX);
 
     $p.uniform("uFilterControls","int", filterControls)
+        .uniform("uVisControls","int", filterControls)
         .uniform("uFilterRanges","vec2", filterRanges)
+        .uniform("uVisRanges","vec2", filterRanges)
         .uniform("uInSelections", "float", Float32Array.from(inSelections))
         .uniform("uSelectMax", "int", SELECT_MAX)
         .uniform("uSelectCount", "int", 0);
@@ -83,7 +95,7 @@ function match($p) {
     $p.program("match", sel.vs, sel.fs);
 
     match.control = function(ctrl) {
-        filterControls = ctrl;
+        // filterControls = ctrl;
     }
 
     function _execute(spec){
@@ -91,7 +103,11 @@ function match($p) {
         var gl;
         var matchFields = Object.keys(spec).filter(function(s){
             return spec[s].hasOwnProperty('$in');
-        });
+        })
+        .concat(Object.keys($p.crossfilters).filter(function(s){
+            return $p.crossfilters[s].hasOwnProperty('$in');
+        }))
+
 
         $p.bindFramebuffer("fFilterResults");
         $p.framebuffer.enableRead("fDerivedValues");
@@ -112,7 +128,7 @@ function match($p) {
 
             matchFields.forEach(function(k){
                 var fieldId = fields.indexOf(k);
-                var inSelections = spec[k].$in.hasOwnProperty('$vis') ? spec[k].$in.$vis : spec[k].$in;
+                var inSelections = (spec.hasOwnProperty(k)) ? spec[k].$in :  $p.crossfilters[k].$in;
                 if($p.categoryIndex.hasOwnProperty(k)) {
                     inSelections = inSelections
                         .slice(0, SELECT_MAX)
@@ -120,7 +136,6 @@ function match($p) {
                 } else {
                     inSelections = inSelections.slice(0, SELECT_MAX);
                 }
-
                 $p.uniform.uSelectCount = inSelections.length;
                 $p.uniform.uInSelections = Float32Array.from(inSelections);
                 $p.uniform.uFieldId = fieldId;
@@ -133,12 +148,12 @@ function match($p) {
         }
         // console.log($p._responseType, spec);
         var filterSelections = Object.keys(spec).filter(function(s){
-            return !spec[s].hasOwnProperty('$in') && !spec[s].hasOwnProperty('$vis');
+            return !spec[s].hasOwnProperty('$in');
         });
 
-        var viewSelections = Object.keys(spec).filter(function(s){
-            return spec[s].hasOwnProperty('$vis');
-        });
+        var viewSelections = Object.keys($p.crossfilters).filter(function(s){
+            return !$p.crossfilters[s].hasOwnProperty('$in');
+        });;
 
         if(filterSelections.length || viewSelections.length){
             filterControls = new Array(fieldCount).fill(0);
@@ -163,14 +178,16 @@ function match($p) {
                     console.log('Skipped: Matching on invalid data field ' + k);
                     return;
                 }
-                if(spec[k].$vis.length < 2) spec[k].$vis[1] = spec[k].$vis[0];
-                filterControls[fieldId] = 2;
-                filterRanges[fieldId] = spec[k].$vis;
+                if($p.crossfilters[k].length < 2) $p.crossfilters[k][1] = $p.crossfilters[k][0];
+                visControls[fieldId] = 1;
+                visRanges[fieldId] = $p.crossfilters[k];
             });
 
-            console.log('filterRanges::::::::::', filterRanges[8], $p._responseType);
-            $p.uniform.uFilterControls = filterControls;
-            $p.uniform.uFilterRanges= filterRanges;
+            $p.uniform.uFilterControls.data = filterControls;
+            $p.uniform.uFilterRanges.data = filterRanges;
+            $p.uniform.uVisControls.data = visControls;
+            $p.uniform.uVisRanges.data = visRanges;
+
             gl = $p.program("filter");
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
@@ -188,14 +205,17 @@ function match($p) {
     }
 
     match.execute = function(spec) {
-
+        filterControls = new Array(fieldCount).fill(0);
+        visControls = new Array(fieldCount).fill(0);
         var filterSpec = spec;
 
-        if($p._responseType == 'selected') {
-            Object.keys($p.crossfilters).forEach(function(c){
-                filterSpec[c] = {$vis: $p.crossfilters[c]};
-            });
-        }
+
+        Object.keys($p.crossfilters).forEach(function(k, i) {
+            if($p.categoryIndex.hasOwnProperty(k) && !$p.crossfilters[k].$in) {
+                $p.crossfilters[k] = {$in: $p.crossfilters[k]};
+            }
+        });
+
 
         Object.keys(filterSpec).forEach(function(k, i) {
             if($p.categoryIndex.hasOwnProperty(k) && !spec[k].$in) {
@@ -204,7 +224,10 @@ function match($p) {
         });
 
         $p.uniform.uFilterFlag = 1;
-        filterRanges = $p.fieldDomains.slice();
+        if(!$p._update) {
+            filterRanges = $p.fieldDomains.slice();
+            visRanges = $p.fieldDomains.slice();
+        }
         var newDomains = _execute(spec);
 
         if(!$p._update){

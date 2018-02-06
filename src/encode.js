@@ -93,7 +93,7 @@ define(function(require){
             markSpace = [0, 0];
         }
 
-        $p.uniform.uMarkSpace = markSpace;
+        $p.uniform.uMarkSpace.data = markSpace;
 
         if($p.intervals.hasOwnProperty(vmap.x) || $p.intervals.hasOwnProperty(vmap.y)) {
             var histDim = vmap.x || vmap.y,

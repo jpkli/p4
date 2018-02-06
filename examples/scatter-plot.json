@@ -1,6 +1,6 @@
 {
     "data" : {
-        "url": "data/NatalityUSA2015Dec.csv",
+        "source": "data/NatalityUSA2015Dec.csv",
         "format": "csv",
         "schema": {
             "BirthMonth"   : "int",
@@ -17,7 +17,7 @@
     },
     "operations": [
         {
-            "$select": {
+            "$match": {
                 "BabyWeight": [0, 15],
                 "MotherWeight": [70, 370]
             }

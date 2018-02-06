@@ -18,24 +18,17 @@
     "views": [
         {
             "id": "c1",
-            "width": 280,
-            "height": 250,
-            "padding": {"left": 60, "right": 10, "top": 10, "bottom": 50},
-            "offset": [300, 0]
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
+            "offset": [380, 0]
         },
         {
             "id": "c2",
-            "width": 280,
-            "height": 250,
-            "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 120, "right": 10, "top": 10, "bottom": 50},
             "offset": [0, 0]
-        },
-        {
-            "id": "c3",
-            "width": 600,
-            "height": 200,
-            "padding": {"left": 50, "right": 30, "top": 30, "bottom": 10},
-            "offset": [0, 250]
         }
     ],
     "operations": [
@@ -51,24 +44,11 @@
             }
         },
         {
-            "$visualize": {
-                "id": "c3",
-                "mark": "line",
-                "color": "steelblue",
-                "opacity": "auto",
-                "y": [
-                    "BabyWeight",
-                    "MotherWeight",
-                    "MotherWgtGain",
-                    "MotherHeight"
-                ]
-            }
-        },
-        {
             "$aggregate" : {
-                "$group": "MotherAge",
+                "$group": "MotherEdu",
                 "$reduce" : {
-                    "Babies": { "$count": "*"}
+                    "Babies": { "$count": "*"},
+                    "AvgWeight": { "$avg": "BabyWeight"}
                 }
             }
         },
@@ -77,31 +57,20 @@
                 "id": "c2",
                 "mark": "bar",
                 "color": "steelblue",
-                "x": "MotherAge",
-                "height": "Babies",
-                "brush": {
-                    "condition": {"x": "true"},
-                    "selected": {
-                        "color": "orange"
-                    }
-                }
+                "y": "MotherEdu",
+                "width": "Babies"
             }
         },
         {
             "$interact": {
                 "event": "brush",
-                "from": ["c1", "c3"],
+                "from": "c1",
                 "response" : {
                     "c1": {
                         "unselected": {"color": "gray"}
                     },
                     "c2": {
                         "selected": {"color": "orange"}
-                    },
-                    "c3": {
-                        "unselected": {
-                            "opacity": 0
-                        }
                     }
                 }
             }

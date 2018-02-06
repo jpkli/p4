@@ -1,5 +1,5 @@
 define(function(require){
-    const Brush = require('./chart/brush');
+    const Brush = require('./metavis/brush');
     return function($p, options) {
         var viewTags = options.view || [$p.views[0].id];
 

@@ -1,6 +1,6 @@
 {
     "data" : {
-        "url": "data/NatalityUSA2015Dec.csv",
+        "source": "data/NatalityUSA2015Dec.csv",
         "format": "csv",
         "schema": {
             "BirthMonth"   : "int",

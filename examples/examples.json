@@ -57,16 +57,16 @@
         "category": "Mulitple Views",
         "examples": [
             {
+                "name": "Bushing and Linking",
+                "file": "brush-link.json"
+            },
+            {
                 "name": "Coordinated Views",
                 "file": "multiviews.json"
             },
             {
                 "name": "Correlating Bar Charts",
                 "file": "hoverbars.json"
-            },
-            {
-                "name": "Bushing and Linking",
-                "file": "crossfiltering.json"
             }
         ]
     }

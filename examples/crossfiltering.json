@@ -1,6 +1,6 @@
 {
     "data" : {
-        "url": "data/synthetic",
+        "source": "data/synthetic",
         "format": "typedArray",
         "schema": {
             "BirthMonth"   : "int",

@@ -1,15 +1,15 @@
+const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
+const userActions = ['click', 'hover', 'brush', 'zoom', 'pan'];
+
 define(function(require){
     const colors = require('./color');
     const ctypes = require('./ctypes');
     const render = require('./render');
     const reveal = require('./reveal');
-    const encode =require('./encode');
+    const encode = require('./encode');
     const interact = require('./interact');
 
-    const Chart = require('./chart/view');
-
-    const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
-    const userActions = ['click', 'hover', 'brush', 'zoom', 'pan']
+    const Chart = require('./metavis/layout');
 
     return function ($p) {
 
@@ -178,13 +178,12 @@ define(function(require){
             //TODO: Maybe just save the needed data domains instead of copying all
             if(!$p._update) {
                 var pv = $p.views[viewIndex];
-
                 pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
                 $p.uniform.uVisDomains = pv.domains;
                 if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function') {
                     pv.chart.svg.remove();
                 }
-                pv.chart = vis.addLayer(viewSetting);
+                pv.chart = vis.addChart(viewSetting);
             } else {
                 // console.log($p._responseType, $p.views[viewIndex].domains);
 
@@ -196,7 +195,6 @@ define(function(require){
                     })
                 }
             }
-            console.log( $p.uniform.uVisDomains.data[8]);
             var primitive = gl.POINTS;
             if(['rect', 'bar'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
             else if(mark == 'line') primitive = gl.LINE_STRIP;
