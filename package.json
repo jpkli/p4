@@ -32,5 +32,9 @@
   "homepage": "https://github.com/jpkli/p4-gl#readme",
   "devDependencies": {
     "requirejs": "^2.3.5"
+  },
+  "dependencies": {
+    "amdefine": "^1.0.1",
+    "deamdify": "^0.3.0"
   }
 }

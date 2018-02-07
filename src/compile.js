@@ -1,32 +1,27 @@
-define(function(require){
+import derive from './derive';
+import reveal from './reveal';
+import aggregate : './aggregate';
+import cache  from './cache';
+import match from './match';
+import extent from './extent';
+import visualize from './visualize';
 
-    return function(fxgl, fields, spec) {
-        var kernels = {
-            derive    : require('./derive'),
-            reveal    : require('./reveal'),
-            aggregate : require('./aggregate'),
-            cache     : require('./cache'),
-            match    : require('./match'),
-            extent    : require('./extent'),
-            visualize : require('./visualize'),
-        };
 
-        var operations = {
-            aggregate : kernels.aggregate(fxgl),
-            cache     : kernels.cache(fxgl),
-            match    : kernels.match(fxgl, fields),
-            extent    : kernels.extent(fxgl),
-            visualize : kernels.visualize(fxgl),
-            // perceive  : kernels.reveal(fxgl)
-        }
-
-        // if(spec.hasOwnProperty('perceptual'))
-        //     operations.perceptual = kernels.perceptual(fxgl);
-        //
-        // if(spec.hasOwnProperty('derive'))
-        //     operations.derive = kernels.derive(fxgl, spec.derive);
-
-        return operations;
+export default function(fxgl, fields, spec) {
+    var operations = {
+        aggregate : aggregate(fxgl),
+        cache     : cache(fxgl),
+        match     : match(fxgl, fields),
+        extent    : extent(fxgl),
+        visualize : visualize(fxgl),
+        // perceive  : kernels.reveal(fxgl)
     }
 
-});
+    // if(spec.hasOwnProperty('perceptual'))
+    //     operations.perceptual = kernels.perceptual(fxgl);
+    //
+    // if(spec.hasOwnProperty('derive'))
+    //     operations.derive = kernels.derive(fxgl, spec.derive);
+
+    return operations;
+}

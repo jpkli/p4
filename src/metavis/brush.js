@@ -1,11 +1,9 @@
-if(typeof(define) === "function") define(function(require){ return Brush; })
-
-function Brush(arg){
-    "use restrict";
+export default function brush(arg){
+    
     var option = arg || {},
         container = option.container || this.svg[0],
-        width = option.width || this.$width,
-        height = option.height || this.$height,
+        width = option.width || this.width,
+        height = option.height || this.height,
         x = function(s) {return s},
         y = function(s) {return s},
         base = option.base || null,
@@ -25,12 +23,12 @@ function Brush(arg){
         y = selectY;
         selectY = true;
     }
-
     if(base === null){
         base = container.append("g").attr("class", "selector");
     } else {
         base = container;
     };
+
     base.append("rect")
         .attr("x", 0)
         .attr("y", 0)
