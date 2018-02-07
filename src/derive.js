@@ -6,7 +6,7 @@ export default function derive($p, spec) {
         deriveMax = $p.uniform.uDeriveCount.data,
         derivedFields = Object.keys(spec);
 
-    fields = $p.fields;
+    var fields = $p.fields;
 
     var marco = "\t";
 
@@ -144,9 +144,6 @@ export default function derive($p, spec) {
                 $p.fieldDomains[fieldId] = d;
                 $p.fieldWidths[fieldId] = d[1] - d[0] + 1;
             });
-
-            getResult = derive.result;
-            // console.log($p.deriveDomains, fields);
 
             $p.uniform.uFieldDomains.data = $p.fieldDomains;
             $p.uniform.uFieldWidths.data = $p.fieldWidths;
