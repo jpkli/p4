@@ -1,5 +1,5 @@
-import {graidents as colorSchemes} from './gradients';
-import colorhex from './colorhex';
+import {gradients as colorSchemes} from './gradients';
+import {colorhex} from './colorhex';
 
 const colorResolution = 1024;
 const colorCountMax = 32;

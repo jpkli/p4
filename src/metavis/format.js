@@ -1,13 +1,12 @@
-import * from '../arrays';
+import {seq} from '../arrays';
 
 export default function printformat(spec) {
-
     return function(value){
         if(typeof value !== "number") return value;
         var ret,
             convert,
             numericSymbols = ['y', 'z', 'a', 'f', 'p', 'n', 'µ', 'm', '', 'k', 'M','G', 'T', 'P', 'E', 'Z', 'Y'],
-            n = arrays.seq(-24,24,3),
+            n = seq(-24,24,3),
             i = numericSymbols.length-1,
             parts,
             precision = spec.match(/\d+/)[0] || 3,

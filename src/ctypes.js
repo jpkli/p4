@@ -1,12 +1,12 @@
-export default const ctypes = {
-    int     : Int32Array,
-    short   : Int16Array,
-    float   : Float32Array,
-    double  : Float64Array,
-    string  : Uint16Array,
-    time    : Float64Array,
-    temporal: Float64Array,
-    integer : Int32Array,
-    numeric : Float32Array,
-    nominal : Uint16Array
-}
+const int     = Int32Array;
+const short   = Int16Array;
+const float   = Float32Array;
+const double  = Float64Array;
+const string  = Uint16Array;
+const time    = Float64Array;
+const temporal= Float64Array;
+const integer = Int32Array;
+const numeric = Float32Array;
+const nominal = Uint16Array;
+
+export {int, short, float, double, string, time, temporal, integer, numeric, nominal};

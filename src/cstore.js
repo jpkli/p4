@@ -1,4 +1,4 @@
-import ctypes = from './ctypes';
+import * as ctypes from './ctypes';
 export default function ColumnStore(option){
     var cstore   = (this instanceof ColumnStore) ? this : {},
         columns  = [],                  // column-based binary data
@@ -198,6 +198,6 @@ export default function ColumnStore(option){
     }
 
     cstore.size = size;
-    
+
     return initCStore();
 }

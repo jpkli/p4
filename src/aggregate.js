@@ -1,4 +1,4 @@
-import utils from './utils';
+import {seqFloat} from './utils';
 
 const vecId = ['x', 'y', 'z'];
 const aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];3
@@ -262,12 +262,12 @@ export default function aggregate($p) {
 
         $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
 
-        $p.attribute.aDataItemId = utils.seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
+        $p.attribute.aDataItemId = seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
         $p.dataSize = $p.resultDimension[0] * $p.resultDimension[1];
         $p.uniform.uDataSize.data = $p.dataSize;
 
         $p.indexes.forEach(function(d, i) {
-            // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
+            // $p.attribute['aDataId' + vecId[i]] = seqFloat(0, $p.resultDimension[i]-1);
             $p.attribute['aDataId' + vecId[i]] = new Float32Array($p.resultDimension[i]).map(function(d, i) {
                 return i;
             });
@@ -297,13 +297,13 @@ export default function aggregate($p) {
         $p.uniform.uFilterFlag.data = 0;
 
         $p.indexes.forEach(function(d, i) {
-            // $p.attribute['aDataId' + vecId[i]] = utils.seqFloat(0, $p.resultDimension[i]-1);
+            // $p.attribute['aDataId' + vecId[i]] = seqFloat(0, $p.resultDimension[i]-1);
             var interval = 1;
 
             if ($p.intervals.hasOwnProperty(d))
                 interval = $p.intervals[d].interval;
 
-            $p.attribute['aDataVal' + vecId[i]] = utils.seqFloat(
+            $p.attribute['aDataVal' + vecId[i]] = seqFloat(
                 $p.fieldDomains[i][0],
                 $p.fieldDomains[i][1],
                 interval

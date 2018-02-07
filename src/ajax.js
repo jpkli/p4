@@ -1,6 +1,4 @@
-var ajax = {};
-
-ajax.request = function(arg) {
+export function request(arg) {
     var url = arg.url || arg,
         method = arg.method || "GET",
         dataType = arg.dataType || "json",
@@ -38,9 +36,9 @@ ajax.request = function(arg) {
     });
 };
 
-ajax.get = ajax.request;
+export let get = request;
 
-ajax.getAll = function(options) {
+export function getAll(options) {
     var promises = [];
     options.forEach(function(option){
         promises.push(
@@ -56,9 +54,7 @@ ajax.getAll = function(options) {
     return Promise.all(promises);
 }
 
-ajax.post = function(arg) {
+export function post(arg) {
     arg.method = "POST";
     return ajax.request(arg);
 };
-
-export default ajax;

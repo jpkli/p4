@@ -1,4 +1,4 @@
-export default const colorhex = {
+export const colorhex = {
     "aliceblue": "#f0f8ff",
     "antiquewhite": "#faebd7",
     "aqua": "#00ffff",

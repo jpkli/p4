@@ -4,6 +4,6 @@ module.exports = {
   entry: './build.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'p4.0.2.0.js'
+    filename: 'p4.test.js'
   }
 };

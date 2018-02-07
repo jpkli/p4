@@ -5,13 +5,13 @@ requirejs.config({
      }
 })
 
+
 define(function(require){
     const ace = require('ace/ace');
-    const P4GL = require('../../src/pipeline');
-    const ajax = require('../../src/ajax');
-    const genData = require('benchmark/src/gen-binary');
-    const parse = require('../../src/parse');
-    const cstore = require('../../src/cstore');
+    // const P4GL = require('../../src/pipeline');
+    // const ajax = require('../../src/ajax');
+    // const genData = require('benchmark/src/gen-binary');
+    const parse = p4.parse;
 
     return function() {
         var program;
@@ -30,11 +30,11 @@ define(function(require){
         });
         editor.$blockScrolling = Infinity;
 
-        ajax.get({
+        p4.ajax.get({
             url: 'data/Nat2015result-200k.csv',
             dataType: 'text'
         }).then(function(text){
-            var rows = parse(text, ','),
+            var rows = p4.parse(text, ','),
                 header = rows.shift();
 
             var schema = header.reduce(function(obj,value){
@@ -43,7 +43,7 @@ define(function(require){
                 return obj;
             }, {});
 
-            var db = cstore({
+            var db = p4.cstore({
                 size: rows.length,
                 struct: schema
             });
@@ -64,7 +64,7 @@ define(function(require){
                 data: data
             };
             var selectedExample = window.location.href.split("#")[1] || null;
-            program = P4GL(dsl);
+            program = p4(dsl);
             $.getJSON('examples/examples.json', function(examples){
                 examples.forEach(function(ex, ei){
                     var div = $('<div/>').addClass('sidebar-module'),

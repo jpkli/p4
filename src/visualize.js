@@ -52,7 +52,7 @@ export default function visualize($p) {
     // $p.framebuffer.enableRead('offScreenFBO');
     $p.renderMode = 'instancedXY';
 
-    var renderer = require('./render')($p);
+    var renderer = render($p);
 
     function updateInstancedAttribute(vm) {
         if(Array.isArray(vm)){

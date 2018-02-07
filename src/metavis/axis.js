@@ -1,4 +1,4 @@
-import scale from './scale';
+import Scale from './scale';
 
 export default function axis(arg) {
 
@@ -145,7 +145,7 @@ export default function axis(arg) {
             scaleOptions.exponent = exponent;
         }
 
-        metric = scale(scaleOptions)
+        metric = Scale(scaleOptions)
     } else {
         domain = metric.domain();
     }

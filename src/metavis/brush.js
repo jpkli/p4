@@ -1,5 +1,5 @@
 export default function brush(arg){
-    
+
     var option = arg || {},
         container = option.container || this.svg[0],
         width = option.width || this.width,
@@ -64,6 +64,7 @@ export default function brush(arg){
 
         var sp = selector.svg.getBoundingClientRect();
         var box = base.svg.getBoundingClientRect();
+        var x0, y0, nw, nh;
 
         if(sx>sp.left && sy>sp.top && sx<sp.left+sp.width && sy<sp.top+sp.height) {
             drag = true;
@@ -85,7 +86,7 @@ export default function brush(arg){
                 dy = evt.clientY - sy;
                 var selectorBox = selector.svg.getBoundingClientRect();
                 if(drag){
-                    var x0, y0, nw, nh;
+
                     var nx = bx + dx-box.left,
                         ny = by + dy-box.top;
 

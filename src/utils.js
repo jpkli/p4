@@ -1,8 +1,6 @@
-import ctypes from './ctypes';
+import * as ctypes from './ctypes';
 
-var utils = {};
-
-function seq(dtype, start, end, interval) {
+export function seq(dtype, start, end, interval) {
     var step = interval || 1,
         size = (end - start) / step + 1,
         buf;
@@ -14,8 +12,5 @@ function seq(dtype, start, end, interval) {
     return buf;
 }
 
-utils.seq = seq;
-utils.seqInt = seq.bind(null, "int");
-utils.seqFloat = seq.bind(null, "float");
-
-export default utils;
+export let seqInt = seq.bind(null, "int");
+export let seqFloat = seq.bind(null, "float");

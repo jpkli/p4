@@ -1,5 +1,4 @@
-
-const utils = require('./utils');
+import {seqFloat} from './utils';
 const vecId = ['x', 'y', 'z'];
 export default function($p, dataProps) {
     var data = dataProps || [];
@@ -75,10 +74,10 @@ export default function($p, dataProps) {
     $p.deriveFieldCount = 0;
 
     if ($p.indexes.length === 0) {
-        $p.attribute("aDataIdx", "float", utils.seqFloat(0, $p.dataDimension[0] - 1));
-        $p.attribute("aDataIdy", "float", utils.seqFloat(0, $p.dataDimension[1] - 1));
-        $p.attribute("aDataValx", "float", utils.seqFloat(0, $p.dataDimension[0] - 1));
-        $p.attribute("aDataValy", "float", utils.seqFloat(0, $p.dataDimension[1] - 1));
+        $p.attribute("aDataIdx", "float", seqFloat(0, $p.dataDimension[0] - 1));
+        $p.attribute("aDataIdy", "float", seqFloat(0, $p.dataDimension[1] - 1));
+        $p.attribute("aDataValx", "float", seqFloat(0, $p.dataDimension[0] - 1));
+        $p.attribute("aDataValy", "float", seqFloat(0, $p.dataDimension[1] - 1));
     } else {
 
         $p.indexes.forEach(function(id, i) {
@@ -86,7 +85,7 @@ export default function($p, dataProps) {
                 return a - b;
             });
             $p.attribute("aDataVal" + vecId[i], "float", new Float32Array(indexAttrData));
-            $p.attribute("aDataId" + vecId[i], "float", utils.seqFloat(0, indexAttrData.length - 1));
+            $p.attribute("aDataId" + vecId[i], "float", seqFloat(0, indexAttrData.length - 1));
             $p.fieldWidths[i] = indexAttrData.length;
             $p.dataDimension[i] = indexAttrData.length;
         });
