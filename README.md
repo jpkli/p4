@@ -1,1 +1,1 @@
-# p4-gl - Portable Parallel Processing Pipelines via WebGL
+# P6 - Portable and Productive Parallel Processing Pipelines
