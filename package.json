@@ -1,6 +1,6 @@
 {
   "name": "p4-gl",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "Portable parallel processing pipleines via WebGL",
   "main": "index.js",
   "directories": {
@@ -9,12 +9,13 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "build": "npx webpack --config webpack.config.js",
+    "test": "node examples/dev-server",
+    "start": "node examples/dev-server"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jpkli/p4-gl.git"
+    "url": "git+https://github.com/jpkli/p6.git"
   },
   "keywords": [
     "parallel",
@@ -31,6 +32,9 @@
   },
   "homepage": "https://github.com/jpkli/p4-gl#readme",
   "devDependencies": {
-    "requirejs": "^2.3.5"
+    "babel-minify-webpack-plugin": "^0.3.0",
+    "uglifyjs-webpack-plugin": "^1.1.8",
+    "webpack": "^3.10.0",
+    "webpack-closure-compiler": "^2.1.6"
   }
 }

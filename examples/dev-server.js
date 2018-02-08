@@ -6,7 +6,6 @@ const port = process.argv[2] || 8100;
 
 http.createServer(function (req, res) {
   // console.log(`${req.method} ${req.url}`);
-
   // parse URL
   const parsedUrl = url.parse(req.url);
   // extract URL path
@@ -28,8 +27,6 @@ http.createServer(function (req, res) {
     '.pdf': 'application/pdf',
     '.doc': 'application/msword'
   };
-
-  pathname = pathname.replace('/npm/', '/node_modules/');
 
   fs.exists(pathname, function (exist) {
     if(!exist) {
@@ -54,7 +51,6 @@ http.createServer(function (req, res) {
       }
     });
   });
-
 
 }).listen(parseInt(port));
 

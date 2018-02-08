@@ -1,11 +1,9 @@
-if(typeof(define) === "function") define(function(require){ return Brush; })
+export default function brush(arg){
 
-function Brush(arg){
-    "use restrict";
     var option = arg || {},
         container = option.container || this.svg[0],
-        width = option.width || this.$width,
-        height = option.height || this.$height,
+        width = option.width || this.width,
+        height = option.height || this.height,
         x = function(s) {return s},
         y = function(s) {return s},
         base = option.base || null,
@@ -25,12 +23,12 @@ function Brush(arg){
         y = selectY;
         selectY = true;
     }
-
     if(base === null){
         base = container.append("g").attr("class", "selector");
     } else {
         base = container;
     };
+
     base.append("rect")
         .attr("x", 0)
         .attr("y", 0)
@@ -66,6 +64,7 @@ function Brush(arg){
 
         var sp = selector.svg.getBoundingClientRect();
         var box = base.svg.getBoundingClientRect();
+        var x0, y0, nw, nh;
 
         if(sx>sp.left && sy>sp.top && sx<sp.left+sp.width && sy<sp.top+sp.height) {
             drag = true;
@@ -87,7 +86,7 @@ function Brush(arg){
                 dy = evt.clientY - sy;
                 var selectorBox = selector.svg.getBoundingClientRect();
                 if(drag){
-                    var x0, y0, nw, nh;
+
                     var nx = bx + dx-box.left,
                         ny = by + dy-box.top;
 

@@ -1,6 +1,4 @@
-define(function(require){ return parse; });
-
-function parse(text, delimiter) {
+export default function parse(text, delimiter) {
     "use strict";
     var size = text.length,
         accum = 0,

@@ -1,12 +1,4 @@
-define(function(require){
-    return {
-        gather: gather,
-        fitler: filter
-    }
-})
-
-
-function gather($int_fieldId, $float_addrX, $float_addrY) {
+export function gather($int_fieldId, $float_addrX, $float_addrY) {
     var offsetY, value;
     if (fieldId >= this.uFieldCount + this.uIndexCount) {
         offsetY = (float(fieldId - this.uFieldCount - this.uIndexCount) + addrY) /
@@ -19,7 +11,7 @@ function gather($int_fieldId, $float_addrX, $float_addrY) {
     return value;
 }
 
-function filter($float_value) {
+export function filter($float_value) {
 
     var i, j;
     i = (this.aDataIdx+0.5) / this.uDataDim.x;

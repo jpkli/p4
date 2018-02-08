@@ -1,5 +1,3 @@
-if(typeof define == "function") define(function(){ return match; })
-
 function vertexShaderFilter(){
     var i, j, k, value;
     var filter = new Int(0);
@@ -62,7 +60,7 @@ function fragmentShader() {
     gl_FragColor = vec4(0., 0., 0., this.vResult);
 }
 
-function match($p) {
+export default function match($p) {
     const SELECT_MAX = 100;
     var match = {},
         dataDimension = $p.uniform.uDataDim.data,
