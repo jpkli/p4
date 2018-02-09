@@ -2,59 +2,52 @@ import {gradients as colorSchemes} from './gradients';
 import {colorhex} from './colorhex';
 
 const colorResolution = 256;
-const colorCountMax = 32;
-
-const defaultColors = [
-    [255,187,120],
-    [255,127,14],
-    [174,199,232],
-    [44,160,44],
-    [31,119,180],
-    [255,152,150],
-    [214,39,40],
-    [197,176,213],
-    [152,223,138],
-    [148,103,189],
-    [247,182,210],
-    [227,119,194],
-    [196,156,148],
-    [140,86,75],
-    [127,127,127],
-    [219,219,141],
-    [199,199,199],
-    [188,189,34],
-    [158,218,229],
-    [23,190,207]
+const colorSetMax = 32;
+const defaultColorScheme = colorSchemes["viridis"];
+const defaultColorSet = [
+    [255,187,120], [255,127, 14], [174,199,232], [ 44,160, 44],
+    [ 31,119,180], [255,152,150], [214, 39, 40], [197,176,213],
+    [152,223,138], [148,103,189], [247,182,210], [227,119,194],
+    [196,156,148], [140, 86, 75], [127,127,127], [219,219,141],
+    [199,199,199], [188,189, 34], [158,218,229], [ 23,190,207]
 ];
 
-var gradient = setColorScheme(colorSchemes["viridis"]),
-    table = setColorTable(defaultColors);
+var gradient = setColorScheme(defaultColorScheme),
+    colorset = setColorTable(defaultColorSet);
 
 export default function color($p) {
     var colorManager = {};
-    $p.texture("tColorGraident",  "float", gradient,  [colorResolution, 1], "rgba")
-        .uniform("uColorTable",   "vec3",  table)
-        .uniform("uColorCount",   "int",   colorCountMax)
-        .uniform("uColorMode",    "int",   0); // 0=categorical, 1=numeric
 
-    $p.subroutine('mapColorRGB', 'vec3', mapColorRGB);
+    $p.uniform("uColorSet",     "vec3",  colorset)
+        .uniform("uColorCount",   "int",   colorSetMax)
+        .uniform("uColorMode",    "int",   0) // 0=categorical, 1=numeric
+        .texture("tColorGraident",  "float", gradient,  [colorResolution, 1], "rgba")
+        .subroutine('mapColorRGB', 'vec3', mapColorRGB);
 
-    colorManager.updateScheme = function(colors) {
-        if(typeof colors == "string")
-            colors = colorSchemes[colors].reverse()
+    colorManager.updateScheme = function(newColors) {
+        if(typeof newColors == "string" && colorSchemes.hasOwnProperty(newColors)) {
+            gradient = colorSchemes[newColors];
+        } else if(Array.isArray(newColors)) {
+            gradient = newColors;
+        }
         $p.texture.tColorGraident = setColorScheme(colors);
     }
 
     colorManager.updateTable = function(colors) {
-        $p.uniform.uColorTable = setColorTable(colors);
+        colorset = colors;
+        $p.uniform.uColorSet = setColorTable(colors);
     }
 
-    colorManager.colorTable = defaultColors.map(function(t){
+    colorManager.colorTable = defaultColorSet.map(function(t){
         return rgba2hex(t);
     });
 
-    colorManager.colorSchemes = function() {
-        return colorSchemes["viridis"];
+    colorManager.colors = function() {
+        if($p.uniform.uColorMode == 0) {
+            return colorset;
+        } else {
+            return gradient;
+        }
     }
 
     colorManager.rgb = rgb;
@@ -106,7 +99,6 @@ function setColorScheme(colors) {
         step = (cc >= 0) ? colorResolution / (cc+1) : 1,
         colorGradient = new Float32Array(colorResolution * 4);
 
-
     colors.push(colors[cc]);
     for(var i = 0; i < cc+1; i++) {
         var c0 = rgba(colors[i]),
@@ -125,7 +117,7 @@ function setColorScheme(colors) {
 }
 
 function setColorTable(colors) {
-    var colorTable = new Float32Array(colorCountMax * 3),
+    var colorTable = new Float32Array(colorSetMax * 3),
         isRgb = false;
 
     if(colors[0].length == 3) isRgb = true;
@@ -155,7 +147,7 @@ function mapColorRGB($int_fieldId, $float_value) {
             if(intValue >= this.uColorCount) {
                 colorRGB = vec3(0.0, 0.0, 0.0);
             } else {
-                colorRGB = this.uColorTable[intValue];
+                colorRGB = this.uColorSet[intValue];
             }
         }
     }
