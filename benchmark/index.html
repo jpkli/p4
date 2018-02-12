@@ -121,7 +121,7 @@
         </div>
       </div>
     </div>
-    <script src="/npm/requirejs/require.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script>
     <script>
 
     requirejs.config({
@@ -212,13 +212,13 @@
                     vmap: {color: 'gpu', x: 'dataSize', y: 'latency'},
                     yMax: d3.max(data, function(d) { return d.latency; })
                 };
-                plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
+                plotOptions.margin = {top: 50, right: 10, bottom: 60, left: 40};
                 if(pi == dopts.length - 1) {
 
                     plotOptions.legend = true;
                 }
                 if(pi == 0) {
-                    plotOptions.margin = {top: 50, right: 20, bottom: 60, left: 40};
+                    plotOptions.margin = {top: 50, right: 10, bottom: 60, left: 40};
                     // plotOptions.yLabel = true;
                 }
                 // plotOptions.yLabel = true;
