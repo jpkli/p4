@@ -1,5 +1,5 @@
 {
-  "name": "p4-gl",
+  "name": "p6",
   "version": "0.4.0",
   "description": "Portable parallel processing pipleines via WebGL",
   "main": "index.js",
@@ -11,6 +11,7 @@
   "scripts": {
     "build": "npx webpack --config webpack.config.js",
     "test": "node examples/dev-server",
+    "watch": "webpack --watch",
     "start": "node examples/dev-server"
   },
   "repository": {
@@ -28,9 +29,9 @@
   "author": "Kelvin Li",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/jpkli/p4-gl/issues"
+    "url": "https://github.com/jpkli/p6/issues"
   },
-  "homepage": "https://github.com/jpkli/p4-gl#readme",
+  "homepage": "https://github.com/jpkli/p6#readme",
   "devDependencies": {
     "babel-minify-webpack-plugin": "^0.3.0",
     "uglifyjs-webpack-plugin": "^1.1.8",
