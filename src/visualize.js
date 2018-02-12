@@ -4,7 +4,8 @@ import render from './render';
 import reveal from './reveal';
 import encode from './encode';
 import interact from './interact';
-import Chart from './metavis/layout';
+
+import Layout from './metavis/layout';
 
 const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
 const userActions = ['click', 'hover', 'brush', 'zoom', 'pan'];
@@ -18,7 +19,7 @@ export default function visualize($p) {
             $p.viewport[1],
         ];
 
-    var vis = new Chart({
+    var vis = new Layout({
         container: $p.container,
         width: viewport[0] + chartPadding.left + chartPadding.right,
         height: viewport[1] + chartPadding.top + chartPadding.bottom,
@@ -42,7 +43,7 @@ export default function visualize($p) {
         .uniform('uMaxRGBA',        'vec4',  [0, 0, 0, 0])
         .uniform('uDefaultColor',   'vec3',  [0.8, 0, 0])
         .uniform('uColorMode',      'int',   1)
-        .varying('vColorRGBA',      'vec4'   )
+        .varying('vColorRGBA',      'vec4'   );
 
     var enhance = reveal($p);
 
@@ -84,13 +85,15 @@ export default function visualize($p) {
             padding = $p.views[viewIndex].padding || chartPadding,
             offset = $p.views[viewIndex].offset || [0, 0];
 
+
+        var dimSetting = encode($p, vmap, colorManager);
+
         if(!$p._update){
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
                 if(vmap.zero && (f == vmap.height || f == vmap.width ) && visDomain[f][0]>0) visDomain[f][0] = 0;
             });
         }
-        var dimSetting = encode($p, vmap, colorManager);
 
         var gl = $p.program($p.renderMode);
         $p.framebuffer.enableRead('fFilterResults');
@@ -130,12 +133,15 @@ export default function visualize($p) {
             domain: visDomain,
             width: width,
             height: height,
+            fields: $p.fields,
             vmap: vmap,
             onclick: interaction,
             categories: $p.categoryLookup,
             padding: padding,
             left: offset[0],
-            top: viewport[1] - height - offset[1]
+            top: viewport[1] - height - offset[1],
+            colors: colorManager.getColors(),
+            showLegend: $p.views[viewIndex].legend
         };
 
         viewSetting = Object.assign(viewSetting, dimSetting);
@@ -183,8 +189,6 @@ export default function visualize($p) {
             }
             pv.chart = vis.addChart(viewSetting);
         } else {
-            // console.log($p._responseType, $p.views[viewIndex].domains);
-
             $p.uniform.uVisDomains = $p.views[viewIndex].domains;
             if(mark == 'stack'){
                 var result = $p.readResult('row');
@@ -235,7 +239,6 @@ export default function visualize($p) {
             })
         }
     }
-
     viz.chart = vis;
     return viz;
 }

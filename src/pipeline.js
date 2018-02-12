@@ -13,9 +13,10 @@ export default function pipeline(options) {
         optID = 0;
 
     var $p = config(options);
-
+    $p.views = [];
     $p.interactions = [];
     $p.response = {};
+    $p.deriveMax = options.deriveMax || 4;
     $p._responseType = 'unselected';
     $p._update = false;
 

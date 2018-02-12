@@ -14,7 +14,6 @@ export default function config(options) {
             offset: [0, 0]
         }
     ];
-
     if ($p === null) {
         $p = new FlexGL({
             container: container,
@@ -22,17 +21,10 @@ export default function config(options) {
             height: viewport[1],
             padding: padding
         });
-        $p.container = container;
         $p.padding = padding;
         $p.viewport = viewport;
     }
-
     $p.container = container;
     $p.views = options.views || defaultLayout;
-
-    $p.deriveMax = options.deriveMax || 4;
-
-    $p.interaction = options.interaction || 'auto';
-
     return $p;
 }

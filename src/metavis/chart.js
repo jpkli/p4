@@ -1,6 +1,7 @@
 import axis from './axis';
 import format from './format';
 import scale from './scale';
+import legend from './legend';
 
 export default function chart(svg, arg) {
     var options = arg || {},
@@ -17,9 +18,11 @@ export default function chart(svg, arg) {
         labels = plot.append('g'),
         onclick = options.onclick || null,
         onhover = options.onhover || null,
+        showLegend = options.legend || false,
         tickOffset = options.axisOffset || [0, 0],
         padding = options.padding || {left: 0, right: 0, top: 0, bottom: 0},
-        marks = [];
+        marks = [],
+        colors = options.colors;
 
     var scaleX = options.scaleX || 'linear',
         domainX = options.domainX || domain[vmap.x] || domain[vmap.width],
@@ -54,6 +57,18 @@ export default function chart(svg, arg) {
         // grid: 1,
         format: format(".3s"),
     };
+
+    if(showLegend && features.indexOf(vmap.color) !== -1){
+        legend({
+            container: plot,
+            width: 20,
+            height: 180,
+            dim: "y",
+            domain: domain[vmap.color],
+            pos: [width, 0],
+            colors: colors
+        });
+    }
 
     if(scaleX == 'ordinal' || scaleX == 'categorical') {
         xAxisOption.ticks = domainX.length;
@@ -125,7 +140,6 @@ export default function chart(svg, arg) {
                 yAxisOption.tickAlign = 'outer';
                 yAxisOption.domain = categories[d].reverse();
             }
-
             if(i == vmap.y.length-1) {
                 yAxisOption.tickPosition = [5, 0];
                 yAxisOption.tickLabelAlign = "start";
@@ -135,8 +149,7 @@ export default function chart(svg, arg) {
             y = axis(yAxisOption);
             yAxes[i] = y;
 
-            labels
-            .append("text")
+            labels.append("text")
               .attr("y", -padding.top + 10)
               .attr("x", i * axisDist)
               .attr("dy", "1em")
@@ -188,8 +201,7 @@ export default function chart(svg, arg) {
                 .css("font-weight", "bold")
                 .css(" text-transform", "capitalize")
                 .text(yAxisTitle);
-            }
-
+        }
     }
     // plot.append("line")
     //     .attr('x1', 0)

@@ -3,7 +3,7 @@ import {colorhex} from './colorhex';
 
 const colorResolution = 256;
 const colorSetMax = 32;
-const defaultColorScheme = colorSchemes["viridis"];
+const defaultColorScheme = colorSchemes['viridis'];
 const defaultColorSet = [
     [255,187,120], [255,127, 14], [174,199,232], [ 44,160, 44],
     [ 31,119,180], [255,152,150], [214, 39, 40], [197,176,213],
@@ -12,25 +12,25 @@ const defaultColorSet = [
     [199,199,199], [188,189, 34], [158,218,229], [ 23,190,207]
 ];
 
-var gradient = setColorScheme(defaultColorScheme),
-    colorset = setColorTable(defaultColorSet);
+var gradient = defaultColorScheme,
+    colorset = defaultColorSet;
 
 export default function color($p) {
     var colorManager = {};
 
-    $p.uniform("uColorSet",     "vec3",  colorset)
-        .uniform("uColorCount",   "int",   colorSetMax)
-        .uniform("uColorMode",    "int",   0) // 0=categorical, 1=numeric
-        .texture("tColorGraident",  "float", gradient,  [colorResolution, 1], "rgba")
-        .subroutine('mapColorRGB', 'vec3', mapColorRGB);
+    $p.uniform('uColorMode',       'int',   0) // 0=categorical, 1=numeric
+        .uniform('uColorCount',    'int',   colorSetMax)
+        .uniform('uColorSet',      'vec3',  setColorTable(colorset))
+        .texture('tColorGraident', 'float', setColorScheme(gradient),  [colorResolution, 1], 'rgba')
+        .subroutine('mapColorRGB', 'vec3',  mapColorRGB);
 
     colorManager.updateScheme = function(newColors) {
-        if(typeof newColors == "string" && colorSchemes.hasOwnProperty(newColors)) {
+        if(typeof newColors == 'string' && colorSchemes.hasOwnProperty(newColors)) {
             gradient = colorSchemes[newColors];
         } else if(Array.isArray(newColors)) {
             gradient = newColors;
         }
-        $p.texture.tColorGraident = setColorScheme(colors);
+        $p.texture.tColorGraident = setColorScheme(gradient);
     }
 
     colorManager.updateTable = function(colors) {
@@ -42,7 +42,7 @@ export default function color($p) {
         return rgba2hex(t);
     });
 
-    colorManager.colors = function() {
+    colorManager.getColors = function() {
         if($p.uniform.uColorMode == 0) {
             return colorset;
         } else {
@@ -66,7 +66,7 @@ function colorStrToHex(colorStr) {
 function rgb(hexStr) {
     var hex, r, g, b;
 
-    if(hexStr.slice(0,1) == "#")
+    if(hexStr.slice(0,1) == '#')
         hex = hexStr.slice(1);
     else
         hex = colorStrToHex(hexStr).slice(1);
@@ -90,7 +90,7 @@ function rgba2hex(c) {
         b = c[2],
         a = 1;
     if (r > 255 || g > 255 || b > 255 || a > 255)
-        throw "Invalid color component";
+        throw 'Invalid color component';
     return (256 + r).toString(16).substr(1) +((1 << 24) + (g << 16) | (b << 8) | a).toString(16).substr(1);
 }
 
@@ -107,12 +107,13 @@ function setColorScheme(colors) {
 
         for(var x = 0; x < step; x++) {
             var xi = x / (step);
-            colorGradient[offset+x*4] = c0[0] + (c1[0] - c0[0]) * xi;
+            colorGradient[offset+x*4]   = c0[0] + (c1[0] - c0[0]) * xi;
             colorGradient[offset+x*4+1] = c0[1] + (c1[1] - c0[1]) * xi;
             colorGradient[offset+x*4+2] = c0[2] + (c1[2] - c0[2]) * xi;
             colorGradient[offset+x*4+3] = c0[3] + (c1[3] - c0[3]) * xi;
         }
     }
+    colors.pop();
     return colorGradient;
 }
 
