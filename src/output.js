@@ -12,8 +12,8 @@ export default function output($p) {
         }
 
         if ($p.resultDimension[1] > 1) {
-            bx = $p.attribute.aDataValx.data;
-            by = $p.attribute.aDataValy.data;
+            var bx = $p.attribute.aDataValx.data;
+            var by = $p.attribute.aDataValy.data;
             var ax = new Array($p.resultDimension[0] * $p.resultDimension[1]),
                 ay = new Array($p.resultDimension[0] * $p.resultDimension[1]);
 

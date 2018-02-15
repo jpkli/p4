@@ -18,7 +18,7 @@ export default function chart(svg, arg) {
         labels = plot.append('g'),
         onclick = options.onclick || null,
         onhover = options.onhover || null,
-        showLegend = options.legend || false,
+        showLegend = options.legend || true,
         tickOffset = options.axisOffset || [0, 0],
         padding = options.padding || {left: 0, right: 0, top: 0, bottom: 0},
         marks = [],
@@ -65,7 +65,7 @@ export default function chart(svg, arg) {
             height: 180,
             dim: "y",
             domain: domain[vmap.color],
-            pos: [width, 0],
+            pos: [width + padding.right/2, 0],
             colors: colors
         });
     }
