@@ -105,6 +105,7 @@ export default function($p, dataProps) {
         1.0, -1.0,
         1.0, 1.0
     ]));
+    $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 1);
 
     //setup all attribute, uniform, texture, varying needed by all the shaders
     $p.uniform("uDataSize",    "float", $p.dataSize);

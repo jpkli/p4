@@ -159,10 +159,7 @@ export default function aggregate($p) {
 
             gl = $p.program("group2");
             $p.framebuffer.enableRead("fGroupResults");
-            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
-            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
-            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
-            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
 
             gl.disable(gl.BLEND);
             resultFieldIds.forEach(function(f, i) {
