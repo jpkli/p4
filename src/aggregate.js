@@ -1,7 +1,7 @@
 import {seqFloat} from './utils';
 
 const vecId = ['x', 'y', 'z'];
-const aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];3
+const aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
 
 export default function aggregate($p) {
     var aggregate = {};
@@ -90,8 +90,8 @@ export default function aggregate($p) {
     $p.program("group2", vs2, fs2);
 
     var resultFieldCount,
-        secondPass = false,
-        thirdPass = false,
+        getAvgValues = false,
+        getVarStd = false,
         resultDomains;
 
     function _execute(opts, groupFieldIds, resultFieldIds) {
@@ -118,8 +118,8 @@ export default function aggregate($p) {
         var resultDomains = new Array(resultFieldIds.length);
         $p.uniform.uResultDim = $p.resultDimension;
 
-        secondPass = false;
-        thirdPass = false;
+        getAvgValues = false;
+        getVarStd = false;
         resultFieldIds.forEach(function(f, i) {
             var opt = aggrOpts.indexOf(opts[i]);
             if (opt == -1) throw Error("unknow operator for aggreation: " + opts[i]);
@@ -135,12 +135,12 @@ export default function aggregate($p) {
                 $p.dataDimension[1]
             );
             if (opt > 3) {
-                secondPass = true;
-                if (opt > 4) thirdPass = true;
+                getAvgValues = true;
+                if (opt > 4) getVarStd = true;
             }
         });
 
-        if (secondPass) {
+        if (getAvgValues) {
             // console.log('*** Second Pass for Aggregation');
             var fieldCount = $p.uniform.uFieldCount.data,
                 preAggrData = $p.uniform.uDataInput.data;
@@ -148,21 +148,22 @@ export default function aggregate($p) {
             $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
             $p.uniform.uFieldCount.data = resultFieldIds.length;
 
-            if (thirdPass) {
+
                 $p.framebuffer(
                     "fAggrStats",
                     "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
                 );
                 $p.bindFramebuffer("fAggrStats");
-            } else {
-                $p.framebuffer(
-                    "fGroupResults",
-                    "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
-                );
-                $p.bindFramebuffer("fGroupResults");
-            }
+
+
 
             gl = $p.program("group2");
+            $p.framebuffer.enableRead("fGroupResults");
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
+
             gl.disable(gl.BLEND);
             resultFieldIds.forEach(function(f, i) {
                 var opt = aggrOpts.indexOf(opts[i]);
@@ -171,6 +172,10 @@ export default function aggregate($p) {
                 gl.viewport(0, i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
             })
+            $p.uniform.uDataInput.data = $p.framebuffer.fAggrStats.texture;
+
+        } else {
+            $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
 
         }
 
@@ -260,7 +265,7 @@ export default function aggregate($p) {
             return $p.fieldWidths[f];
         });
 
-        $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
+        // $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
 
         $p.attribute.aDataItemId = seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
         $p.dataSize = $p.resultDimension[0] * $p.resultDimension[1];
