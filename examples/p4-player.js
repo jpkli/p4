@@ -56,7 +56,7 @@ $('#data-size').on('change', function(){
 })
 
 p4.ajax.get({
-    url: 'http://jpkli.github.io/vis-examples/data/NatUSA/Nat2015result-200k.csv',
+    url: 'https://jpkli.github.io/vis-examples/data/NatUSA/Nat2015result-200k.csv',
     dataType: 'text'
 }).then(function(text){
     rows = p4.parse(text, ',');
