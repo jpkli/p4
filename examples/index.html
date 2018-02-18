@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,11 +9,10 @@
     <meta name="author" content="">
     <!-- <link rel="icon" href="../../favicon.ico"> -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="examples/style.css">
-    <title>P4.GL Examples</title>
+    <link rel="stylesheet" href="examples/p4-player.css">
+    <title>P4 Examples</title>
 </head>
 <body>
-
     <nav class="navbar navbar-default navbar-top page-header" id="page-header">
         <div class="container-fluid">
             <div class="row">
@@ -29,8 +27,9 @@
             </div>
             <div class="navbar-collapse collapse">
               <ul class="nav navbar-nav navbar-right" >
-                <li ><a href="/"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-                <li><a href="/#document"><span class="glyphicon glyphicon-info-sign"></span> Doc</a></li>
+                <li ><a href="../"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                <li><a href="../#document"><span class="glyphicon glyphicon-info-sign"></span> Doc</a></li>
+                <li><a href="https://github.com/jpkli/p4.gl">Github</a></li>
               </ul>
             </div>
         </div>
@@ -38,27 +37,40 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class=" column sidebar" id="list-examples">
+            <div class="column sidebar" id="list-examples">
+                <br />
+                <label>Data Size: </label>
+                <select id="data-size">
+                    <option value="25000">25K</option>
+                    <option selected="selected" value="50000">50K</option>
+                    <option value="100000">100K</option>
+                    <option value="200000">200K</option>
+                </select>
             </div>
-            <div class=" editor column">
+            <div class="editor column">
                 <div id="editor"></div>
             </div>
             <div class=" main column">
                 <div style="border-bottom: 1px solid #CCC; padding: 10px;">
                     <button type="button" id="run-spec" class="btn btn-success btn-square" > Update <span class="glyphicon glyphicon-flash"></span></button>
+                    <!-- <button type="button" id="save-spec" class="btn btn-primary btn-square" > Save <span class="glyphicon glyphicon-save"></span></button> -->
+                    <button type="button" id="reload-page" class="btn btn-danger btn-square" > Reset <span class="glyphicon glyphicon-refresh"></span></button>
                 </div>
                 <div id="main-vis"></div>
             </div>
         </div>
     </div>
 
+    <script src="../dist/p4.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="/npm/requirejs/require.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js"></script>
+    <script src="examples/p4-player.js"></script>
     <script>
-        require(['examples/app.js'], function(app){ app(); });
+        $('#reload-page').click(function() {
+            window.location.reload();
+        });
     </script>
-
 </body>
 
 </html>

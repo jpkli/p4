@@ -4,7 +4,6 @@
     padding: 0.5em;
     margin: 0;
     font-size: 1.28em;
-    text-align: center;
 }
 
 .sidebar {
@@ -25,7 +24,7 @@
 
 
 .example-list {
-    margin-left: 0.2em;
+    margin: 0.3em;
 }
 
 .example-list .active {

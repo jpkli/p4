@@ -1,6 +1,6 @@
 {
     "data" : {
-        "source": "data/NatalityUSA2015Dec.csv",
+        "source": "data/NatalityUSA2015.csv",
         "format": "csv",
         "schema": {
             "BirthMonth"   : "int",
@@ -25,10 +25,15 @@
     ],
     "operations": [
         {
+            "$match": {
+                "MotherAge": [20, 30]
+            }
+        },
+        {
             "$visualize": {
                 "mark": "line",
-                "color": "darkblue",
-                "opacity": "auto",
+                "color": "steelblue",
+                "opacity": 0.15,
                 "y": [
                     "BabyWeight",
                     "MotherWeight",
@@ -36,7 +41,7 @@
                     "MotherHeight"
                 ], "brush": {
                     "unselected": {
-                        "opacity": 0
+                        "color": "lightgrey"
                     }
                 }
             }
