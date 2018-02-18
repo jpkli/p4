@@ -72,7 +72,7 @@ p4.ajax.get({
 
     loadData();
 
-    $.getJSON('../p4/examples.json', function(examples){
+    $.getJSON('examples.json', function(examples){
         examples.forEach(function(ex, ei){
             var div = $('<div/>').addClass('sidebar-module'),
                 // h4 = $('<h5/>').text(ex.category),
@@ -91,7 +91,7 @@ p4.ajax.get({
                     $('.example-list .active').removeClass('active');
                     $(this).addClass('active');
                     $.ajax({
-                        url: '../p4/' + item.file,
+                        url: item.file,
                         dataType: 'text',
                     })
                     .done(function(json){
