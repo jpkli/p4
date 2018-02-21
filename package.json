@@ -35,7 +35,6 @@
   "devDependencies": {
     "babel-minify-webpack-plugin": "^0.3.0",
     "uglifyjs-webpack-plugin": "^1.1.8",
-    "webpack": "^3.10.0",
-    "webpack-closure-compiler": "^2.1.6"
+    "webpack": "^3.10.0"
   }
 }
