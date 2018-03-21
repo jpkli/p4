@@ -43,12 +43,11 @@ export default function layout(arg){
             viz.div.style[prop] = style[prop];
         })
     }
-    this.svg = [];
-    this.canvas = [];
+
     this.init = function(){
         // container = (containerId == "body") ? document.body : document.getElementById(containerId);
 
-        this.div.className = option.className || "i2v-viz";
+        this.div.className = option.className || "p6-viz";
         this.div.style.position = 'relative';
         this.resize(
             this.width + this.padding.left + this.padding.right,
@@ -76,7 +75,6 @@ export default function layout(arg){
         });
     }
 
-
     var canvas = option.canvas,
         svg = this.createSVG(),
         vmap = option.vmap,
@@ -84,8 +82,9 @@ export default function layout(arg){
         domain = option.domain || {x: [0, 1000], y: [0, 1]},
         scales = option.scales || {x: 'linear', y: 'linear'};
 
-    this.svg.push(svg);
-    this.canvas.push(canvas);
+    var backSVG = this.createSVG(),
+        frontSVG = this.createSVG();
+
     this.set = function(props) {
         assign(viz, props);
     };
@@ -95,19 +94,11 @@ export default function layout(arg){
         return obj;
     }
 
-    this.addLayer = function(layer) {
-        if(layer.tagName == 'canvas') viz.canvas.push(layer);
-        else viz.svg.push(layer);
-    };
-
-    this.viz = function(layer) {
-        if(typeof layer !== 'undefined') this.addLayer(layer);
-        viz.canvas.forEach(function(layer){
-            viz.div.appendChild(layer);
-        });
-        viz.svg.forEach(function(g){
-            viz.div.appendChild(g.svg);
-        });
+    this.viz = function() {
+        viz.div.appendChild(backSVG.svg);
+        viz.div.appendChild(canvas);
+        viz.div.appendChild(frontSVG.svg);
+        return viz;
     };
 
     this.render = this.viz;
@@ -122,16 +113,6 @@ export default function layout(arg){
     this.resize = function(w,h){
         this.div.style.width = w + "px";
         this.div.style.height = h + "px";
-    };
-
-    this.append = function(m) {
-        if(m.tagName == "svg") this.svg.push(m);
-        if(m.tagName == "canvas") this.webgl.push(m);
-    };
-
-    this.prepend = function(m) {
-        if(m.tagName == "svg") this.svg = [m].concat(this.svg);
-        if(m.tagName == "canvas") this.webgl = [m].concat(this.webgl);
     };
 
     this.destroy = function() {
@@ -157,8 +138,47 @@ export default function layout(arg){
     }
 
     this.addChart = function(options) {
-        return chart(svg, options)
+        return chart(frontSVG, options)
     };
+
+    this.exportImage = function(beforeExport) {
+        var imageCanvas = document.createElement("canvas");
+        imageCanvas.width = this.width;
+        imageCanvas.height = this.height;
+        return new Promise(function(resolve, reject) {
+
+            var ctx = imageCanvas.getContext("2d");
+            var svgString = new XMLSerializer().serializeToString(frontSVG.svg);
+
+            var DOMURL = self.URL || self.webkitURL || self;
+            var svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+            var svgURL = DOMURL.createObjectURL(svgBlob);
+
+            var canvasLayer = new Image();
+            var svgLayer = new Image();
+            canvasLayer.onload = function() {
+                ctx.drawImage(canvasLayer, 0, 0);
+                svgLayer.src = svgURL;
+                svgLayer.onload = function() {
+                    ctx.drawImage(svgLayer, 0, 0);
+                    var png = imageCanvas.toDataURL("image/png");
+                    DOMURL.revokeObjectURL(png);
+                    resolve(png);
+                };
+            };
+
+            canvasLayer.onerror = function() {
+                reject(Error("Canvas Output Error!"));
+            }
+
+            svgLayer.onerror = function() {
+                reject(Error("SVG Output Error!"));
+            }
+            beforeExport();
+            canvasLayer.src = canvas.toDataURL("image/png");
+        });
+
+    }
 
     return viz.init();
 };

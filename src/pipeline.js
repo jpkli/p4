@@ -16,6 +16,7 @@ export default function pipeline(options) {
     $p.views = [];
     $p.interactions = [];
     $p.response = {};
+    $p.visualization = null;
     $p.deriveMax = options.deriveMax || 4;
     $p._responseType = 'unselected';
     $p._update = false;
@@ -346,6 +347,7 @@ export default function pipeline(options) {
                 viewIndex: viewIndex
             });
             pipeline.interact();
+
         }
         return pipeline;
     }
@@ -392,6 +394,15 @@ export default function pipeline(options) {
                 }
             })
         })
+    }
+
+    pipeline.exportImage = function(beforeExport) {
+        var beforeExport = beforeExport || function() { pipeline.head().run() };
+        if(typeof operation.visualize.chart.exportImage === 'function') {
+            return operation.visualize.chart.exportImage(beforeExport);
+        } else {
+            return pipeline;
+        }
     }
 
     if(options.hasOwnProperty('data')) {

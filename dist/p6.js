@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 12);
+/******/ 	return __webpack_require__(__webpack_require__.s = 8);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -902,7 +902,7 @@ function reveal($p) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = interact;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__metavis_brush__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__metavis_brush__ = __webpack_require__(32);
 
 
 function interact($p, options) {
@@ -1093,560 +1093,11 @@ function interact($p, options) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = Svg;
-function setAttr(elem, attr) {
-    for( var key in attr ){
-        var value = attr[key],
-            c = key.match(/[A-Z]/);
-        if(c !== null) key = key.replace(c[0], "-"+c[0].toLowerCase())
-        elem.setAttribute(key, value);
-    }
-}
-
-function setStyle(elem, style) {
-    for( var key in style ){
-        var value = style[key],
-            c = key.match(/[A-Z]/);
-        if(c !== null) key = key.replace(c[0], "-"+c[0].toLowerCase())
-        elem.style[key] = value;
-    }
-}
-
-function Svg(arg){
-    'use strict';
-    var self = (this instanceof Svg) ? this: {},
-        option = arg || {},
-        type = option.type || 'svg',
-        svgNS = 'http://www.w3.org/2000/svg',
-        svg = document.createElementNS(svgNS, type),
-        width = option.width || 400,
-        height = option.height || 300,
-        parent = option.parent || option.container || this.parent,
-        attr = option.attr || {},
-        style = option.style || {},
-        padding = option.padding || {left: 0, right: 0, top: 0, bottom: 0};
-
-    if(type === 'svg') {
-        var defaultAttr = {
-            width   : width + padding.left + padding.right,
-            height  : height + padding.top + padding.bottom,
-            viewBox : [0, 0, width + padding.left + padding.right , height + padding.top + padding.bottom].join(' '),
-            preserveAspectRatio: 'none'
-        };
-        setAttr(svg, defaultAttr);
-    }
-
-    self.innerWidth = function() {
-        return width;
-    }
-
-    self.innerHeight = function() {
-        return height;
-    }
-
-    self.padding = function() {
-        return padding;
-    }
-
-    if(style) setStyle(svg, style);
-    if(attr) setAttr(svg, attr);
-
-    if(parent) {
-        parent = (typeof parent == "string") ? document.getElementById(parent) : parent;
-        parent.appendChild(svg);
-    }
-
-    self.svg = svg;
-    self.parent = parent;
-
-    if(self instanceof Svg)
-        publicMethods(Svg.prototype);
-    else
-        publicMethods(self);
-
-    return self;
-};
-
-function publicMethods(context) {
-    context.append = function(type, attr, style) {
-        var options = {};
-        options.parent = this.svg;
-        options.type = type;
-        options.attr = attr;
-        options.style = style;
-        return new Svg(options);
-    };
-
-    context.remove = function() {
-        this.parent.removeChild(this.svg);
-    };
-
-    context.attr = function(a, v) {
-        if(typeof(a) == "object")
-            setAttr(this.svg, a);
-        else
-            this.svg.setAttribute(a, v);
-
-        return this;
-    }
-
-    context.Attr =  function(a, v) {
-        setAttr(this.svg, a);
-        return this;
-    }
-
-    context.Style =  function(a, v) {
-        setStyle(this.svg, a);
-        return this;
-    }
-
-    context.style = function(a, v) {
-        if(typeof(a) == "object")
-            setStyle(this.svg, a);
-        else
-            this.svg.style[a] = v;
-
-        return this;
-    }
-
-    context.css = context.style;
-
-    context.text = function(str){
-        this.svg.appendChild(document.createTextNode(str));
-        return this;
-    };
-
-    context.translate = function(x, y) {
-        var p = this.svg.getAttribute("transform") || "";
-        this.svg.setAttribute("transform", p + "translate(" + [x,y].join(",") + ") ");
-        return this;
-    };
-
-    context.on = function(event, callback) {
-        this.svg.addEventListner(event, callback);
-        return this;
-    }
-
-    return context;
-}
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = axis;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scale__ = __webpack_require__(10);
-
-
-function axis(arg) {
-
-    var option      = arg || {},
-        svg         = option.container || option.parent,
-        dim         = option.dim || "x",
-        color       = option.color || "#000",
-        position    = option.position || 0,
-        align       = option.align || "",
-        scale       = option.scale || "linear",
-        exponent    = option.exponent || 1,
-        metric      = option.metric || null,
-        domain      = option.domain || [0,1],
-        width       = option.width || svg.innerWidth(),
-        height      = option.height || svg.innerHeight(),
-        padding     = option.padding || svg.padding() || {left: 0, right: 0, top: 0, bottom: 0},
-        range       = option.range || (dim == "x") ? [0, width] : [height, 0],
-        styles      = {stroke: color, 'stroke-width': 1},
-        ticks       = option.ticks,
-        tickLength  = option.tickLength || 6,
-        tickPosition = option.tickPosition || false,
-        tickInterval= option.tickInterval || "auto",
-        tickAlign = option.tickAlign || "center",
-        skipLast = option.skipLast || false,
-        tickFormat  = option.tickFormat || null,
-        grid        = option.grid,
-        format      = option.format || function(_){return _;},
-        visable    = option.visable || true,
-        domainIntervals,
-        labelPos    = null,
-        labelAngle  = option.labelAngle || 0,
-        X = [],
-        Y = [];
-
-    if(typeof(ticks) != "number") {
-        ticks = (dim == "x") ? Math.ceil(width/50) : Math.ceil(height/50);
-    }
-    var tickLabelAlign = option.tickLabelAlign || "end";
-    switch (align) {
-        case "left" || "center":
-            labelPos = option.labelPos || {x: -tickLength/2, y: -5};
-            tickLabelAlign =  option.tickLabelAlign ||"end";
-            break;
-        case "right":
-            labelPos = {x: tickLength, y: -5};
-            tickLabelAlign = option.tickLabelAlign || "start";
-            if(!tickPosition) tickPosition = [ tickLength/2, 0];
-            break;
-        case "top":
-            labelPos = {x: 0, y: 0};
-            tickLabelAlign = "middle";
-            if(!tickPosition) tickPosition = [0, -tickLength];
-            break;
-        case "bottom" || "middle":
-            labelPos = option.labelPos || {x: 0, y: -tickLength*3};
-            tickLabelAlign =  option.tickLabelAlign || "middle";
-            break;
-        default:
-            labelPos = option.labelPos || option.labelPosition || {x: 0, y: 0};
-            break;
-    }
-    if(!tickPosition) tickPosition = [0,0];
-
-    function getTickInterval(){
-        var vDomain = Math.abs(domain[1] - domain[0]),
-            intv = vDomain / ticks,
-            pow = Math.ceil(Math.log10(intv)),
-            intv = intv / Math.pow(10, pow);
-
-        if(intv > 0.2 && intv <= 0.25){
-            intv = 0.25;
-        } else if(intv > 0.7 && intv <= 0.75) {
-            intv = 0.75;
-        } else {
-            intv = Math.ceil(intv * 10) / 10;
-        }
-        return intv * Math.pow(10, pow);
-    }
-
-
-    if (scale == "categorical" || scale == "ordinal") {
-        domainIntervals = function() {
-            var len = domain.length,
-                step = Math.ceil(len / ticks),
-                intervals = [],
-                i;
-            for(i = 0; i < len; i += step) {
-                intervals.push(domain[i])
-            }
-            // if(intervals[i] != domain[len-1]) intervals.push(domain[len-1]);
-
-            return intervals;
-        };
-    } else {
-        var intv;
-
-        if(tickInterval == "auto"){
-            intv = getTickInterval();
-
-        } else {
-            if(typeof(tickInterval) == "number") {
-                intv = tickInterval;
-            } else {
-                // intv = Math.abs(domain[1] - domain[0]) / ticks;
-                intv = getTickInterval();
-                domain[0] = intv * Math.floor(domain[0]/intv);
-                domain[1] = intv * Math.ceil(domain[1]/intv);
-            }
-        }
-
-        domainIntervals = function() {
-            var di = [];
-
-            if(domain[0] > domain[1]) {
-                domain[0] += intv;
-                for(var i = domain[0]; i > domain[1]; i=i-intv)
-                    di.push(i);
-            } else {
-                for(var i = domain[0]; i < domain[1]; i=i+intv)
-                    di.push(i);
-            }
-
-            if(di[di.length-1]!=domain[1] && !isNaN(domain[1]) && !skipLast){
-
-                if((domain[1] - di[di.length-1]) < 0.4 * intv)
-                    di[di.length-1] = domain[1];
-                else
-                    di.push(domain[1]);
-            }
-            return di;
-        }
-    }
-
-    if (metric === null) {
-
-        var scaleOptions = {
-            align: tickAlign,
-            type: scale,
-            domain: domain,
-            range: range
-        };
-
-        if(scale == "power") {
-            scaleOptions.exponent = exponent;
-        }
-
-        metric = Object(__WEBPACK_IMPORTED_MODULE_0__scale__["a" /* default */])(scaleOptions)
-    } else {
-        domain = metric.domain();
-    }
-
-    var axis = svg.append("g");
-
-    if(dim == 'x') {
-        if(!position && align) {
-            position = [0,height/2,height];
-            position = position[["top", "middle", "bottom"].indexOf(align)];
-        }
-        Y[0] = Y[1] = position;
-        X[0] = 0;
-        X[1] = Math.abs(range[1] - range[0]);
-    } else {
-        if(!position && align) {
-            position = [0, width/2, width];
-            position = position[["left", "center", "right"].indexOf(align)];
-        }
-        X[0] = X[1] = position;
-        Y[0] = 0;
-        Y[1] = Math.abs(range[1] - range[0]);
-    }
-
-    metric.show = metric.axis = function() {
-        axis.append("g")
-            .append("line")
-            .Attr({x1: X[0], x2: X[1], y1: Y[0], y2: Y[1]})
-            .Style(styles);
-
-        var di = domainIntervals();
-
-        for(var i = 0; i < di.length; i++) {
-            var x1,x2,y1,y2;
-            if(dim == 'x'){
-                x1 = x2 = metric(di[i]) + tickPosition[0];
-                y1 = position + tickPosition[1] + tickLength;
-                y2 = y1 - tickLength;
-            } else {
-                if(scale == "categorical" || scale == "ordinal")
-                    y1 = y2 = height - metric(di[i]);
-                else
-                    y1 = y2 = metric(di[i]) + tickPosition[1];
-                x1 = position + tickPosition[0] ;
-                x2 = x1 - tickLength;
-            }
-
-            var svgTicks = axis.append("g");
-            svgTicks.append("line", {
-                x1: x1,
-                x2: x2,
-                y1: y1,
-                y2: y2,
-            }, styles);
-
-
-            // if (dim == 'x') tickLabelAlign = "middle";
-            // if (dim == 'x' && labelAngle) tickLabelAlign = "end";
-
-            var tickLabel = svgTicks.append("text")
-                .Attr({
-                    x: x2 + labelPos.x,
-                    y: y2 - labelPos.y,
-                    // class: "labels",
-                    class: "i2v-axis-label",
-                    "font-size": "0.9em",
-                    textAnchor: tickLabelAlign
-                });
-            if(labelAngle) tickLabel.attr("transform", "rotate(" + [labelAngle, (x2 + labelPos.x), (y2 - labelPos.y)].join(",")+")");
-
-            var labelText = (typeof(tickFormat) == "function") ? format(tickFormat(di[i])) : format(di[i]) ;
-            // tickLabel.appendChild( document.createTextNode(labelText) );
-            tickLabel.text(labelText);
-
-            if(grid) {
-                var gx1, gx2, gy1, gy2;
-                if(dim == 'x'){
-                    gx1 = gx2 = metric(di[i]);
-                    gy1 = 0;
-                    gy2 =height;
-                } else {
-                    gy1 = gy2 = metric(di[i]);
-                    gx1 = 0;
-                    gx2 = width;
-                }
-                axis.append("line",
-                    {
-                        x1: gx1,
-                        x2: gx2,
-                        y1: gy1,
-                        y2: gy2,
-                        class: "grid-lines"
-                    },
-                    {
-                        "stroke": color,
-                        // "stroke-width": 0.5,
-                        "stroke-opacity": 0.33
-                    });
-            }
-        }
-        axis.translate(padding.left, padding.top);
-        return axis;
-    };
-
-    metric.remove = function() {
-        axis.remove();
-    }
-
-    if(visable) {
-        metric.svg = metric.show();
-    }
-
-    return metric;
-};
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = Scale;
-function Scale(arg) {
-    var option = arg || {},
-        align = option.align || 'center',
-        type = option.type || 'linear',
-        domain = option.domain || [0,1],
-        margin = option.margin || 0,
-        exponent = option.exponent || 1,
-        range = option.range || [0,1];
-
-    function getInterpolateFunction() {
-        //intercepts and slopes for domain and range
-        var d0 = -domain[0] / (domain[1] - domain[0]),
-            d1 = 1 / (domain[1] - domain[0]),
-            r0 = range[0],
-            r1 = range[1] - range[0];
-
-        if(type == "linear") {
-            return function(v) { return r0 + (d0 + v * d1) * r1 };
-        } else if(type == "power") {
-            d0 = -Math.pow(-d0, exponent);
-            d1 = Math.pow(d1, exponent);
-            return function(v) { return r0 + (d0 + Math.pow(v, exponent) * d1) * r1 };
-        } else if (type == "log") {
-            exponent = option.exponent || 10;
-            d0 = -(Math.log(-d0) / Math.log(exponent));
-            d1 = (Math.log(d1) / Math.log(exponent));
-
-            return function(v) { return r0 + (d0 + Math.log(v) / Math.log(exponent) * d1) * r1 };
-
-        } else if(type == "ordinal" || type == "categorical") {
-            return function(v) {
-                if(align == 'outer')
-                    return r0 + (domain.indexOf(v)) / (domain.length-1) * r1;
-                else
-                    return r0 + (domain.indexOf(v)+0.5) / domain.length * r1;
-            };
-        } else {
-            return function(v) { return v };
-        }
-    }
-
-    var scale = getInterpolateFunction();
-
-    scale.interval = function(ticks) {
-        if (type == "ordinal" || type == "categorical") {
-            return (1 / domain.length * Math.abs(range[1] - range[0]));
-        } else {
-            var s = Math.pow(10, Math.floor(Math.log10(Math.abs(range[1] - range[0])))-1);
-            return Math.floor( Math.abs(range[1] - range[0]) / (ticks * s) )  * s;
-        }
-    };
-
-    scale.domainLength = function() {
-        if(type == "linear")
-            return Math.abs(domain[1] - domain[0]);
-        else if(type == "ordinal" || type == "categorical")
-            return domain.length;
-    };
-
-    scale.rangeLength = function() {
-        return Math.abs(range[1] - range[0]);
-    };
-
-    scale.invert = function(r) {
-        if(type == "linear") {
-            return domain[0] + (r - range[0]) / (range[1] - range[0]) * (domain[1] - domain[0]);
-        } else if(type == "ordinal" || type == "categorical") {
-            var intv = intv = r / scale.rangeLength();
-            return domain[Math.floor(intv * (domain.length))];
-        }
-    }
-
-    scale.domain = function() {
-        return domain;
-    }
-
-    return scale;
-};
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = printformat;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__arrays__ = __webpack_require__(39);
-
-
-function printformat(spec) {
-    return function(value){
-        if(typeof value !== "number") return value;
-        var ret,
-            convert,
-            numericSymbols = ['y', 'z', 'a', 'f', 'p', 'n', 'µ', 'm', '', 'k', 'M','G', 'T', 'P', 'E', 'Z', 'Y'],
-            n = Object(__WEBPACK_IMPORTED_MODULE_0__arrays__["a" /* seq */])(-24,24,3),
-            i = numericSymbols.length-1,
-            parts,
-            precision = spec.match(/\d+/)[0] || 3,
-            number = Number(value),
-            exp,
-            suffix;
-
-        if(spec[spec.length-1] == 's')
-            precision--;
-
-        parts = number.toExponential(precision).toString().match(/^(-{0,1})(\d+)\.?(\d*)[eE]([+-]?\d+)$/);
-        exp = parseInt(parts[4]) || 0;
-
-        while (i--) {
-            if (exp >= n[i]) {
-                if(i==7 && (exp-n[i]) > 1) {
-                    // console.log(exp-n[i]);
-                    suffix = numericSymbols[i+1];
-                    exp -= n[i+1];
-                    break
-                } else {
-                    suffix = numericSymbols[i];
-                    exp -= n[i];
-                    break;
-                }
-            }
-        }
-        ret = parseFloat(parts[1] + parts[2] + '.' + (parts[3]||0) + 'e' + exp.toString());
-        return ret.toString() + suffix;
-    }
-}
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_pipeline__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_cstore__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ajax__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_parse__ = __webpack_require__(43);
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_pipeline__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_cstore__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ajax__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_parse__ = __webpack_require__(36);
 
 
 
@@ -1661,10 +1112,10 @@ root.p6.ajax = __WEBPACK_IMPORTED_MODULE_2__src_ajax__;
 root.p6.cstore = __WEBPACK_IMPORTED_MODULE_1__src_cstore__["a" /* default */];
 root.p6.parse = __WEBPACK_IMPORTED_MODULE_3__src_parse__["a" /* default */];
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(13)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(9)))
 
 /***/ }),
-/* 13 */
+/* 9 */
 /***/ (function(module, exports) {
 
 var g;
@@ -1691,15 +1142,15 @@ module.exports = g;
 
 
 /***/ }),
-/* 14 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = pipeline;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__config__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__config__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(7);
 
@@ -1720,6 +1171,7 @@ function pipeline(options) {
     $p.views = [];
     $p.interactions = [];
     $p.response = {};
+    $p.visualization = null;
     $p.deriveMax = options.deriveMax || 4;
     $p._responseType = 'unselected';
     $p._update = false;
@@ -2050,6 +1502,7 @@ function pipeline(options) {
                 viewIndex: viewIndex
             });
             pipeline.interact();
+
         }
         return pipeline;
     }
@@ -2098,6 +1551,15 @@ function pipeline(options) {
         })
     }
 
+    pipeline.exportImage = function(beforeExport) {
+        var beforeExport = beforeExport || function() { pipeline.head().run() };
+        if(typeof operation.visualize.chart.exportImage === 'function') {
+            return operation.visualize.chart.exportImage(beforeExport);
+        } else {
+            return pipeline;
+        }
+    }
+
     if(options.hasOwnProperty('data')) {
         pipeline.data(options.data);
     }
@@ -2107,7 +1569,7 @@ function pipeline(options) {
 
 
 /***/ }),
-/* 15 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2336,7 +1798,7 @@ const vecId = ['x', 'y', 'z'];
 
 
 /***/ }),
-/* 16 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2409,12 +1871,12 @@ function output($p) {
 
 
 /***/ }),
-/* 17 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = config;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(14);
 
 
 function config(options) {
@@ -2448,15 +1910,15 @@ function config(options) {
 
 
 /***/ }),
-/* 18 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = FlexGL;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__resource__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__program__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__resource__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__program__ = __webpack_require__(19);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shader__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__framebuffer__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__framebuffer__ = __webpack_require__(20);
 
 
 
@@ -2749,16 +2211,16 @@ function FlexGL(arg) {
 
 
 /***/ }),
-/* 19 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Resource;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__attribute__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__attribute__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__texture__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__varying__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subroutine__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__varying__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subroutine__ = __webpack_require__(18);
 
 
 
@@ -2816,7 +2278,7 @@ function Resource(glContext) {
 
 
 /***/ }),
-/* 20 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2876,7 +2338,7 @@ function Attribute(glContext) {
 
 
 /***/ }),
-/* 21 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2910,7 +2372,7 @@ function Varying(glContext) {
 
 
 /***/ }),
-/* 22 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2948,7 +2410,7 @@ function Subroutine() {
 
 
 /***/ }),
-/* 23 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3044,7 +2506,7 @@ function Program(glContext, resources) {
 
 
 /***/ }),
-/* 24 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3124,18 +2586,18 @@ function Framebuffer(glContext) {
 
 
 /***/ }),
-/* 25 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = compile;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__derive__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__reveal__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__aggregate__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__cache__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__match__ = __webpack_require__(28);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__extent__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__visualize__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__aggregate__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__cache__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__match__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__extent__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__visualize__ = __webpack_require__(26);
 
 
 
@@ -3164,7 +2626,7 @@ function compile(fxgl, fields, spec) {
 
 
 /***/ }),
-/* 26 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3511,7 +2973,7 @@ function aggregate($p) {
 
 
 /***/ }),
-/* 27 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3582,7 +3044,7 @@ function cache(fxgl) {
 
 
 /***/ }),
-/* 28 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3857,7 +3319,7 @@ function match($p) {
 
 
 /***/ }),
-/* 29 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3954,18 +3416,18 @@ function extent(fxgl) {
 
 
 /***/ }),
-/* 30 */
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = visualize;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__color__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__color__ = __webpack_require__(27);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ctypes__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__render__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__render__ = __webpack_require__(30);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__reveal__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__encode__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__encode__ = __webpack_require__(31);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__metavis_layout__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__metavis_layout__ = __webpack_require__(33);
 
 
 
@@ -4213,13 +3675,13 @@ function visualize($p) {
 
 
 /***/ }),
-/* 31 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = color;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gradients__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colorhex__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gradients__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colorhex__ = __webpack_require__(29);
 
 
 
@@ -4379,7 +3841,7 @@ function mapColorRGB($int_fieldId, $float_value) {
 
 
 /***/ }),
-/* 32 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4394,7 +3856,7 @@ const gradients = {
 
 
 /***/ }),
-/* 33 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4545,7 +4007,7 @@ const colorhex = {
 
 
 /***/ }),
-/* 34 */
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4749,7 +4211,7 @@ function render(fxgl) {
 
 
 /***/ }),
-/* 35 */
+/* 31 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4881,7 +4343,7 @@ function encode($p, vmap, colorManager) {
 
 
 /***/ }),
-/* 36 */
+/* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5026,13 +4488,13 @@ function brush(arg){
 
 
 /***/ }),
-/* 37 */
+/* 33 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = layout;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chart__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chart__ = __webpack_require__(41);
 
 
 
@@ -5078,12 +4540,11 @@ function layout(arg){
             viz.div.style[prop] = style[prop];
         })
     }
-    this.svg = [];
-    this.canvas = [];
+
     this.init = function(){
         // container = (containerId == "body") ? document.body : document.getElementById(containerId);
 
-        this.div.className = option.className || "i2v-viz";
+        this.div.className = option.className || "p6-viz";
         this.div.style.position = 'relative';
         this.resize(
             this.width + this.padding.left + this.padding.right,
@@ -5111,7 +4572,6 @@ function layout(arg){
         });
     }
 
-
     var canvas = option.canvas,
         svg = this.createSVG(),
         vmap = option.vmap,
@@ -5119,8 +4579,9 @@ function layout(arg){
         domain = option.domain || {x: [0, 1000], y: [0, 1]},
         scales = option.scales || {x: 'linear', y: 'linear'};
 
-    this.svg.push(svg);
-    this.canvas.push(canvas);
+    var backSVG = this.createSVG(),
+        frontSVG = this.createSVG();
+
     this.set = function(props) {
         assign(viz, props);
     };
@@ -5130,19 +4591,11 @@ function layout(arg){
         return obj;
     }
 
-    this.addLayer = function(layer) {
-        if(layer.tagName == 'canvas') viz.canvas.push(layer);
-        else viz.svg.push(layer);
-    };
-
-    this.viz = function(layer) {
-        if(typeof layer !== 'undefined') this.addLayer(layer);
-        viz.canvas.forEach(function(layer){
-            viz.div.appendChild(layer);
-        });
-        viz.svg.forEach(function(g){
-            viz.div.appendChild(g.svg);
-        });
+    this.viz = function() {
+        viz.div.appendChild(backSVG.svg);
+        viz.div.appendChild(canvas);
+        viz.div.appendChild(frontSVG.svg);
+        return viz;
     };
 
     this.render = this.viz;
@@ -5157,16 +4610,6 @@ function layout(arg){
     this.resize = function(w,h){
         this.div.style.width = w + "px";
         this.div.style.height = h + "px";
-    };
-
-    this.append = function(m) {
-        if(m.tagName == "svg") this.svg.push(m);
-        if(m.tagName == "canvas") this.webgl.push(m);
-    };
-
-    this.prepend = function(m) {
-        if(m.tagName == "svg") this.svg = [m].concat(this.svg);
-        if(m.tagName == "canvas") this.webgl = [m].concat(this.webgl);
     };
 
     this.destroy = function() {
@@ -5192,11 +4635,546 @@ function layout(arg){
     }
 
     this.addChart = function(options) {
-        return Object(__WEBPACK_IMPORTED_MODULE_1__chart__["a" /* default */])(svg, options)
+        return Object(__WEBPACK_IMPORTED_MODULE_1__chart__["a" /* default */])(frontSVG, options)
     };
+
+    this.exportImage = function(beforeExport) {
+        var imageCanvas = document.createElement("canvas");
+        imageCanvas.width = this.width;
+        imageCanvas.height = this.height;
+        return new Promise(function(resolve, reject) {
+
+            var ctx = imageCanvas.getContext("2d");
+            var svgString = new XMLSerializer().serializeToString(frontSVG.svg);
+
+            var DOMURL = self.URL || self.webkitURL || self;
+            var svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+            var svgURL = DOMURL.createObjectURL(svgBlob);
+
+            var canvasLayer = new Image();
+            var svgLayer = new Image();
+            canvasLayer.onload = function() {
+                ctx.drawImage(canvasLayer, 0, 0);
+                svgLayer.src = svgURL;
+                svgLayer.onload = function() {
+                    ctx.drawImage(svgLayer, 0, 0);
+                    var png = imageCanvas.toDataURL("image/png");
+                    DOMURL.revokeObjectURL(png);
+                    resolve(png);
+                };
+            };
+
+            canvasLayer.onerror = function() {
+                reject(Error("Canvas Output Error!"));
+            }
+
+            svgLayer.onerror = function() {
+                reject(Error("SVG Output Error!"));
+            }
+            beforeExport();
+            canvasLayer.src = canvas.toDataURL("image/png");
+        });
+
+    }
 
     return viz.init();
 };
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = ColumnStore;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(0);
+
+function ColumnStore(option){
+    var cstore   = (this instanceof ColumnStore) ? this : {},
+        columns  = [],                  // column-based binary data
+        size     = option.size  || 0,   // max size
+        count    = option.count || 0,   // number of entries stored
+        types    = option.types || [],  // types of the columns
+        attributes = option.attributes || option.keys || option.names || [],  // column attributes
+        struct   = option.struct|| option.schema || {},
+        CAMs     = option.CAMs  || {},  // content access memory
+        TLBs     = option.TLBs  || {},  // table lookaside buffer
+        colStats = {},
+        colAlloc = {},
+        colRead  = {},                  // functions for reading values
+        skip     = option.skip  || 0;
+
+    if(option.struct) initStruct(option.struct);
+
+    function initCStore() {
+        if(size && types.length === attributes.length && types.length > 0) {
+            attributes.forEach(function(c, i){
+                configureColumn(i);
+                columns[i] = new colAlloc[c](size);
+                if(!columns.hasOwnProperty(c))
+                    Object.defineProperty(columns, c, {
+                        get: function() { return columns[i]; }
+                    });
+            });
+            columns.attributes = attributes;
+            columns.keys = attributes;
+            columns.types = types;
+            columns.struct = struct;
+            columns.TLBs = TLBs;
+            columns.CAMs = CAMs;
+            columns.size = size;
+            columns.get = function(c) {
+                var index = attributes.indexOf(c);
+                if(index < 0 ) throw new Error("Error: No column named " + c);
+                return columns[index];
+            }
+        }
+        return cstore;
+    }
+
+    function initStruct(s) {
+        struct = s;
+        if(Array.isArray(struct)) {
+            struct.forEach(function(s){
+                attributes.push(s.name);
+                types.push(s.type);
+            })
+        } else {
+            for(var k in struct){
+                attributes.push(k);
+                types.push(struct[k]);
+            }
+        }
+        return initCStore();
+    }
+
+    function configureColumn(cid) {
+        if(typeof(cid) == "string") cid = attributes.indexOf(cid);
+        var f = attributes[cid];
+        colAlloc[f] = __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]];
+
+        if(colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["string"]){
+            TLBs[f] = [];
+            CAMs[f] = {};
+            colRead[f] = function(value) {
+                if(!CAMs[f].hasOwnProperty(value)){
+                    CAMs[f][value] = TLBs[f].length;
+                    TLBs[f].push(value);
+                }
+                return CAMs[f][value];
+            };
+        } else if(
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["int"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["short"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["integer"]
+        ) {
+            colRead[f] = function(value) {  return parseInt(value) || 0; };
+        } else if(
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["float"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["double"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["numeric"]
+        ){
+            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
+        } else if(
+                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["time"] ||
+                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["temporal"]
+        ) {
+            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
+        } else {
+            throw new Error("Invalid data type for TypedArray data!")
+        }
+    }
+
+    cstore.addRows = function(rowArray) {
+        if(count === 0 && skip > 0) {
+            for(var j = 0; j<skip; j++)
+                rowArray.shift();
+        }
+        rowArray.forEach(function(row, i){
+            row.forEach(function(v,j){
+                columns[j][count] = colRead[attributes[j]](v);
+            });
+            count++;
+        });
+        return count;
+    }
+
+    cstore.addColumn = function(arg) {
+        var props = arg || {},
+            columnData = props.data || props.array,
+            columnName = props.name,
+            columnType = props.dtype,
+            values = props.values || [];
+
+        var cid = attributes.indexOf(columnName);
+        if( cid < 0) {
+            attributes.push(columnName);
+            types.push(columnType);
+            configureColumn(columnName);
+            cid = types.length - 1;
+            Object.defineProperty(columns, columnName, {
+                get: function() { return columns[cid]; }
+            });
+        }
+
+        if(columnData instanceof __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]]) {
+            columns[cid] = columnData;
+            if(values.length) {
+                TLBs[columnName] = values;
+                CAMs[columnName] = {};
+                values.forEach(function(value, vi){
+                    CAMs[columnName][value] = vi;
+                })
+            }
+        } else if(ArrayBuffer.isView(columnData)){
+            columns[cid] = new colAlloc[columnName](size);
+            for(var di = 0; di < size; di++) {
+                columns[cid][di] = colRead[columnName](columnData[di]);
+            }
+        } else {
+            throw new Error("Error: Invalid data type for columnArray!");
+        }
+        size = count = columnData.length;
+    }
+
+    cstore.metadata = cstore.info = function() {
+        return {
+            size: size,
+            count: count,
+            attributes: attributes,
+            types: types,
+            TLBs: TLBs,
+            CAMs: CAMs,
+            stats: cstore.stats()
+        }
+    }
+
+    cstore.data = cstore.columns = function() {
+        return columns;
+    }
+
+    cstore.stats = function(col){
+        var col = col || attributes;
+        col.forEach(function(name, c){
+            if(!colStats[c]){
+                var min, max, avg;
+                min = max = avg = columns[c][0];
+
+                for(var i = 1; i < columns[c].length; i++){
+                    var d = columns[c][i];
+                    if(d > max) max = d;
+                    else if(d < min) min = d;
+                    avg = avg - (avg-d) / i;
+                }
+                if(max == min) max += 0.000001;
+                colStats[name] = {min: min, max: max, avg: avg};
+            }
+        })
+        return colStats;
+    }
+
+    cstore.domains = function(col){
+        var col = col || attributes,
+            domains = [];
+
+        col.forEach(function(name, c){
+            domains[name] = [colStats[name].min, colStats[name].max];
+        })
+        return domains;
+    }
+
+    cstore.ctypes = function() {
+        return __WEBPACK_IMPORTED_MODULE_0__ctypes__;
+    }
+
+    cstore.size = size;
+
+    return initCStore();
+}
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (immutable) */ __webpack_exports__["request"] = request;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "get", function() { return get; });
+/* harmony export (immutable) */ __webpack_exports__["getAll"] = getAll;
+/* harmony export (immutable) */ __webpack_exports__["post"] = post;
+function request(arg) {
+    var url = arg.url || arg,
+        method = arg.method || "GET",
+        dataType = arg.dataType || "json",
+        data = arg.data || [],
+        query = [];  //arraybuffer, blob, document, json, text
+
+    for (var key in data) {
+        query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+    }
+
+    return new Promise(function(resolve, reject) {
+
+        var req = new XMLHttpRequest();
+        req.open(method, url);
+        req.responseType = dataType;
+
+        req.onload = function() {
+          if (req.status == 200) {
+            resolve(req.response);
+          }
+          else {
+            reject(Error(req.statusText));
+          }
+        };
+
+        req.onerror = function() {
+          reject(Error("Network Error"));
+        };
+
+        if (method == 'POST') {
+            req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        }
+
+        req.send(data);
+    });
+};
+
+let get = request;
+
+function getAll(options) {
+    var promises = [];
+    options.forEach(function(option){
+        promises.push(
+            ajax.get(option)
+            .then(function(result){
+                return new Promise(function(resolve, reject) {
+                    resolve(result);
+                });
+            })
+        );
+    });
+
+    return Promise.all(promises);
+}
+
+function post(arg) {
+    arg.method = "POST";
+    return ajax.request(arg);
+};
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = parse;
+function parse(text, delimiter) {
+    "use strict";
+    var size = text.length,
+        accum = 0,
+        i, //index for starting of a line
+        row,
+        rows = [],
+        fields = [],
+        lens = [],
+        EOL = false;
+
+    while(accum < size) {
+        i = accum, EOL = false;
+        row = loadLine(text, delimiter.charCodeAt(0), i);
+        rows.push(row.fields);
+        accum += row.size;
+    }
+    return rows;
+}
+
+function loadLine(text, delimiterCode, initPos) {
+    // if(typeof(initPos) === 'undefined') initPos = 0;
+    var EOL = false,
+        QUOTE = false,
+        c = initPos, //current pos
+        code, //code at c
+        f = initPos, // start pos of current field
+        q, //start pos of quote
+        fields = [],
+        L = text.length;
+
+    while(!EOL){
+        code = text.charCodeAt(c);
+        if(code === 10 || c>=L){
+            EOL = true;
+            // if(text.charCodeAt(c+1) === 13) ++c;
+            fields.push( text.slice(f, c) );
+        } else {
+            if(code === delimiterCode && !QUOTE) {
+                // console.log(f,c, text.slice(f, c));
+                var field = text.slice(f, c);
+                fields.push( field );
+                f = c+1;
+            } else if(code === 34){
+                if(QUOTE){
+                    if(text.charCodeAt(c+1) === delimiterCode){
+                        QUOTE = false;
+                        fields.push(text.slice(q, c));
+                        f = c+2;
+                        c++;
+                    }
+                } else {
+                    q = c+1;
+                    QUOTE = true;
+                }
+            }
+        }
+        c++;
+    }
+    return { fields: fields, size: c-initPos };
+}
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = Svg;
+function setAttr(elem, attr) {
+    for( var key in attr ){
+        var value = attr[key],
+            c = key.match(/[A-Z]/);
+        if(c !== null) key = key.replace(c[0], "-"+c[0].toLowerCase())
+        elem.setAttribute(key, value);
+    }
+}
+
+function setStyle(elem, style) {
+    for( var key in style ){
+        var value = style[key],
+            c = key.match(/[A-Z]/);
+        if(c !== null) key = key.replace(c[0], "-"+c[0].toLowerCase())
+        elem.style[key] = value;
+    }
+}
+
+function Svg(arg){
+    'use strict';
+    var self = (this instanceof Svg) ? this: {},
+        option = arg || {},
+        type = option.type || 'svg',
+        svgNS = 'http://www.w3.org/2000/svg',
+        svg = document.createElementNS(svgNS, type),
+        width = option.width || 400,
+        height = option.height || 300,
+        parent = option.parent || option.container || this.parent,
+        attr = option.attr || {},
+        style = option.style || {},
+        padding = option.padding || {left: 0, right: 0, top: 0, bottom: 0};
+
+    if(type === 'svg') {
+        var defaultAttr = {
+            width   : width + padding.left + padding.right,
+            height  : height + padding.top + padding.bottom,
+            viewBox : [0, 0, width + padding.left + padding.right , height + padding.top + padding.bottom].join(' '),
+            preserveAspectRatio: 'none'
+        };
+        setAttr(svg, defaultAttr);
+    }
+
+    self.innerWidth = function() {
+        return width;
+    }
+
+    self.innerHeight = function() {
+        return height;
+    }
+
+    self.padding = function() {
+        return padding;
+    }
+
+    if(style) setStyle(svg, style);
+    if(attr) setAttr(svg, attr);
+
+    if(parent) {
+        parent = (typeof parent == "string") ? document.getElementById(parent) : parent;
+        parent.appendChild(svg);
+    }
+
+    self.svg = svg;
+    self.parent = parent;
+
+    if(self instanceof Svg)
+        publicMethods(Svg.prototype);
+    else
+        publicMethods(self);
+
+    return self;
+};
+
+function publicMethods(context) {
+    context.append = function(type, attr, style) {
+        var options = {};
+        options.parent = this.svg;
+        options.type = type;
+        options.attr = attr;
+        options.style = style;
+        return new Svg(options);
+    };
+
+    context.remove = function() {
+        this.parent.removeChild(this.svg);
+    };
+
+    context.attr = function(a, v) {
+        if(typeof(a) == "object")
+            setAttr(this.svg, a);
+        else
+            this.svg.setAttribute(a, v);
+
+        return this;
+    }
+
+    context.Attr =  function(a, v) {
+        setAttr(this.svg, a);
+        return this;
+    }
+
+    context.Style =  function(a, v) {
+        setStyle(this.svg, a);
+        return this;
+    }
+
+    context.style = function(a, v) {
+        if(typeof(a) == "object")
+            setStyle(this.svg, a);
+        else
+            this.svg.style[a] = v;
+
+        return this;
+    }
+
+    context.css = context.style;
+
+    context.text = function(str){
+        this.svg.appendChild(document.createTextNode(str));
+        return this;
+    };
+
+    context.translate = function(x, y) {
+        var p = this.svg.getAttribute("transform") || "";
+        this.svg.setAttribute("transform", p + "translate(" + [x,y].join(",") + ") ");
+        return this;
+    };
+
+    context.on = function(event, callback) {
+        this.svg.addEventListner(event, callback);
+        return this;
+    }
+
+    return context;
+}
 
 
 /***/ }),
@@ -5204,11 +5182,417 @@ function layout(arg){
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = axis;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scale__ = __webpack_require__(39);
+
+
+function axis(arg) {
+
+    var option      = arg || {},
+        svg         = option.container || option.parent,
+        dim         = option.dim || "x",
+        color       = option.color || "#000",
+        position    = option.position || 0,
+        align       = option.align || "",
+        scale       = option.scale || "linear",
+        exponent    = option.exponent || 1,
+        metric      = option.metric || null,
+        domain      = option.domain || [0,1],
+        width       = option.width || svg.innerWidth(),
+        height      = option.height || svg.innerHeight(),
+        padding     = option.padding || svg.padding() || {left: 0, right: 0, top: 0, bottom: 0},
+        range       = option.range || (dim == "x") ? [0, width] : [height, 0],
+        styles      = {stroke: color, 'stroke-width': 1},
+        ticks       = option.ticks,
+        tickLength  = option.tickLength || 6,
+        tickPosition = option.tickPosition || false,
+        tickInterval= option.tickInterval || "auto",
+        tickAlign = option.tickAlign || "center",
+        skipLast = option.skipLast || false,
+        tickFormat  = option.tickFormat || null,
+        grid        = option.grid,
+        format      = option.format || function(_){return _;},
+        visable    = option.visable || true,
+        domainIntervals,
+        labelPos    = null,
+        labelAngle  = option.labelAngle || 0,
+        X = [],
+        Y = [];
+
+    if(typeof(ticks) != "number") {
+        ticks = (dim == "x") ? Math.ceil(width/50) : Math.ceil(height/50);
+    }
+    var tickLabelAlign = option.tickLabelAlign || "end";
+    switch (align) {
+        case "left" || "center":
+            labelPos = option.labelPos || {x: -tickLength/2, y: -5};
+            tickLabelAlign =  option.tickLabelAlign ||"end";
+            break;
+        case "right":
+            labelPos = {x: tickLength, y: -5};
+            tickLabelAlign = option.tickLabelAlign || "start";
+            if(!tickPosition) tickPosition = [ tickLength/2, 0];
+            break;
+        case "top":
+            labelPos = {x: 0, y: 0};
+            tickLabelAlign = "middle";
+            if(!tickPosition) tickPosition = [0, -tickLength];
+            break;
+        case "bottom" || "middle":
+            labelPos = option.labelPos || {x: 0, y: -tickLength*3};
+            tickLabelAlign =  option.tickLabelAlign || "middle";
+            break;
+        default:
+            labelPos = option.labelPos || option.labelPosition || {x: 0, y: 0};
+            break;
+    }
+    if(!tickPosition) tickPosition = [0,0];
+
+    function getTickInterval(){
+        var vDomain = Math.abs(domain[1] - domain[0]),
+            intv = vDomain / ticks,
+            pow = Math.ceil(Math.log10(intv)),
+            intv = intv / Math.pow(10, pow);
+
+        if(intv > 0.2 && intv <= 0.25){
+            intv = 0.25;
+        } else if(intv > 0.7 && intv <= 0.75) {
+            intv = 0.75;
+        } else {
+            intv = Math.ceil(intv * 10) / 10;
+        }
+        return intv * Math.pow(10, pow);
+    }
+
+
+    if (scale == "categorical" || scale == "ordinal") {
+        domainIntervals = function() {
+            var len = domain.length,
+                step = Math.ceil(len / ticks),
+                intervals = [],
+                i;
+            for(i = 0; i < len; i += step) {
+                intervals.push(domain[i])
+            }
+            // if(intervals[i] != domain[len-1]) intervals.push(domain[len-1]);
+
+            return intervals;
+        };
+    } else {
+        var intv;
+
+        if(tickInterval == "auto"){
+            intv = getTickInterval();
+
+        } else {
+            if(typeof(tickInterval) == "number") {
+                intv = tickInterval;
+            } else {
+                // intv = Math.abs(domain[1] - domain[0]) / ticks;
+                intv = getTickInterval();
+                domain[0] = intv * Math.floor(domain[0]/intv);
+                domain[1] = intv * Math.ceil(domain[1]/intv);
+            }
+        }
+
+        domainIntervals = function() {
+            var di = [];
+
+            if(domain[0] > domain[1]) {
+                domain[0] += intv;
+                for(var i = domain[0]; i > domain[1]; i=i-intv)
+                    di.push(i);
+            } else {
+                for(var i = domain[0]; i < domain[1]; i=i+intv)
+                    di.push(i);
+            }
+
+            if(di[di.length-1]!=domain[1] && !isNaN(domain[1]) && !skipLast){
+
+                if((domain[1] - di[di.length-1]) < 0.4 * intv)
+                    di[di.length-1] = domain[1];
+                else
+                    di.push(domain[1]);
+            }
+            return di;
+        }
+    }
+
+    if (metric === null) {
+
+        var scaleOptions = {
+            align: tickAlign,
+            type: scale,
+            domain: domain,
+            range: range
+        };
+
+        if(scale == "power") {
+            scaleOptions.exponent = exponent;
+        }
+
+        metric = Object(__WEBPACK_IMPORTED_MODULE_0__scale__["a" /* default */])(scaleOptions)
+    } else {
+        domain = metric.domain();
+    }
+
+    var axis = svg.append("g");
+
+    if(dim == 'x') {
+        if(!position && align) {
+            position = [0,height/2,height];
+            position = position[["top", "middle", "bottom"].indexOf(align)];
+        }
+        Y[0] = Y[1] = position;
+        X[0] = 0;
+        X[1] = Math.abs(range[1] - range[0]);
+    } else {
+        if(!position && align) {
+            position = [0, width/2, width];
+            position = position[["left", "center", "right"].indexOf(align)];
+        }
+        X[0] = X[1] = position;
+        Y[0] = 0;
+        Y[1] = Math.abs(range[1] - range[0]);
+    }
+
+    metric.show = metric.axis = function() {
+        axis.append("g")
+            .append("line")
+            .Attr({x1: X[0], x2: X[1], y1: Y[0], y2: Y[1]})
+            .Style(styles);
+
+        var di = domainIntervals();
+
+        for(var i = 0; i < di.length; i++) {
+            var x1,x2,y1,y2;
+            if(dim == 'x'){
+                x1 = x2 = metric(di[i]) + tickPosition[0];
+                y1 = position + tickPosition[1] + tickLength;
+                y2 = y1 - tickLength;
+            } else {
+                if(scale == "categorical" || scale == "ordinal")
+                    y1 = y2 = height - metric(di[i]);
+                else
+                    y1 = y2 = metric(di[i]) + tickPosition[1];
+                x1 = position + tickPosition[0] ;
+                x2 = x1 - tickLength;
+            }
+
+            var svgTicks = axis.append("g");
+            svgTicks.append("line", {
+                x1: x1,
+                x2: x2,
+                y1: y1,
+                y2: y2,
+            }, styles);
+
+
+            // if (dim == 'x') tickLabelAlign = "middle";
+            // if (dim == 'x' && labelAngle) tickLabelAlign = "end";
+
+            var tickLabel = svgTicks.append("text")
+                .Attr({
+                    x: x2 + labelPos.x,
+                    y: y2 - labelPos.y,
+                    // class: "labels",
+                    class: "i2v-axis-label",
+                    "font-size": "0.9em",
+                    textAnchor: tickLabelAlign
+                });
+            if(labelAngle) tickLabel.attr("transform", "rotate(" + [labelAngle, (x2 + labelPos.x), (y2 - labelPos.y)].join(",")+")");
+
+            var labelText = (typeof(tickFormat) == "function") ? format(tickFormat(di[i])) : format(di[i]) ;
+            // tickLabel.appendChild( document.createTextNode(labelText) );
+            tickLabel.text(labelText);
+
+            if(grid) {
+                var gx1, gx2, gy1, gy2;
+                if(dim == 'x'){
+                    gx1 = gx2 = metric(di[i]);
+                    gy1 = 0;
+                    gy2 =height;
+                } else {
+                    gy1 = gy2 = metric(di[i]);
+                    gx1 = 0;
+                    gx2 = width;
+                }
+                axis.append("line",
+                    {
+                        x1: gx1,
+                        x2: gx2,
+                        y1: gy1,
+                        y2: gy2,
+                        class: "grid-lines"
+                    },
+                    {
+                        "stroke": color,
+                        // "stroke-width": 0.5,
+                        "stroke-opacity": 0.33
+                    });
+            }
+        }
+        axis.translate(padding.left, padding.top);
+        return axis;
+    };
+
+    metric.remove = function() {
+        axis.remove();
+    }
+
+    if(visable) {
+        metric.svg = metric.show();
+    }
+
+    return metric;
+};
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = Scale;
+function Scale(arg) {
+    var option = arg || {},
+        align = option.align || 'center',
+        type = option.type || 'linear',
+        domain = option.domain || [0,1],
+        margin = option.margin || 0,
+        exponent = option.exponent || 1,
+        range = option.range || [0,1];
+
+    function getInterpolateFunction() {
+        //intercepts and slopes for domain and range
+        var d0 = -domain[0] / (domain[1] - domain[0]),
+            d1 = 1 / (domain[1] - domain[0]),
+            r0 = range[0],
+            r1 = range[1] - range[0];
+
+        if(type == "linear") {
+            return function(v) { return r0 + (d0 + v * d1) * r1 };
+        } else if(type == "power") {
+            d0 = -Math.pow(-d0, exponent);
+            d1 = Math.pow(d1, exponent);
+            return function(v) { return r0 + (d0 + Math.pow(v, exponent) * d1) * r1 };
+        } else if (type == "log") {
+            exponent = option.exponent || 10;
+            d0 = -(Math.log(-d0) / Math.log(exponent));
+            d1 = (Math.log(d1) / Math.log(exponent));
+
+            return function(v) { return r0 + (d0 + Math.log(v) / Math.log(exponent) * d1) * r1 };
+
+        } else if(type == "ordinal" || type == "categorical") {
+            return function(v) {
+                if(align == 'outer')
+                    return r0 + (domain.indexOf(v)) / (domain.length-1) * r1;
+                else
+                    return r0 + (domain.indexOf(v)+0.5) / domain.length * r1;
+            };
+        } else {
+            return function(v) { return v };
+        }
+    }
+
+    var scale = getInterpolateFunction();
+
+    scale.interval = function(ticks) {
+        if (type == "ordinal" || type == "categorical") {
+            return (1 / domain.length * Math.abs(range[1] - range[0]));
+        } else {
+            var s = Math.pow(10, Math.floor(Math.log10(Math.abs(range[1] - range[0])))-1);
+            return Math.floor( Math.abs(range[1] - range[0]) / (ticks * s) )  * s;
+        }
+    };
+
+    scale.domainLength = function() {
+        if(type == "linear")
+            return Math.abs(domain[1] - domain[0]);
+        else if(type == "ordinal" || type == "categorical")
+            return domain.length;
+    };
+
+    scale.rangeLength = function() {
+        return Math.abs(range[1] - range[0]);
+    };
+
+    scale.invert = function(r) {
+        if(type == "linear") {
+            return domain[0] + (r - range[0]) / (range[1] - range[0]) * (domain[1] - domain[0]);
+        } else if(type == "ordinal" || type == "categorical") {
+            var intv = intv = r / scale.rangeLength();
+            return domain[Math.floor(intv * (domain.length))];
+        }
+    }
+
+    scale.domain = function() {
+        return domain;
+    }
+
+    return scale;
+};
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = printformat;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__arrays__ = __webpack_require__(42);
+
+
+function printformat(spec) {
+    return function(value){
+        if(typeof value !== "number") return value;
+        var ret,
+            convert,
+            numericSymbols = ['y', 'z', 'a', 'f', 'p', 'n', 'µ', 'm', '', 'k', 'M','G', 'T', 'P', 'E', 'Z', 'Y'],
+            n = Object(__WEBPACK_IMPORTED_MODULE_0__arrays__["a" /* seq */])(-24,24,3),
+            i = numericSymbols.length-1,
+            parts,
+            precision = spec.match(/\d+/)[0] || 3,
+            number = Number(value),
+            exp,
+            suffix;
+
+        if(spec[spec.length-1] == 's')
+            precision--;
+
+        parts = number.toExponential(precision).toString().match(/^(-{0,1})(\d+)\.?(\d*)[eE]([+-]?\d+)$/);
+        exp = parseInt(parts[4]) || 0;
+
+        while (i--) {
+            if (exp >= n[i]) {
+                if(i==7 && (exp-n[i]) > 1) {
+                    // console.log(exp-n[i]);
+                    suffix = numericSymbols[i+1];
+                    exp -= n[i+1];
+                    break
+                } else {
+                    suffix = numericSymbols[i];
+                    exp -= n[i];
+                    break;
+                }
+            }
+        }
+        ret = parseFloat(parts[1] + parts[2] + '.' + (parts[3]||0) + 'e' + exp.toString());
+        return ret.toString() + suffix;
+    }
+}
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = chart;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__axis__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__format__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scale__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__legend__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__axis__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__format__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scale__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__legend__ = __webpack_require__(43);
 
 
 
@@ -5472,7 +5856,7 @@ function chart(svg, arg) {
 
 
 /***/ }),
-/* 39 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5728,14 +6112,14 @@ function vectorAvg(vectors) {
 
 
 /***/ }),
-/* 40 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = color;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__axis__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__format__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__axis__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__format__ = __webpack_require__(40);
 
 
 
@@ -5888,359 +6272,6 @@ function color(arg){
     // }
 
     return legend;
-}
-
-
-/***/ }),
-/* 41 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = ColumnStore;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(0);
-
-function ColumnStore(option){
-    var cstore   = (this instanceof ColumnStore) ? this : {},
-        columns  = [],                  // column-based binary data
-        size     = option.size  || 0,   // max size
-        count    = option.count || 0,   // number of entries stored
-        types    = option.types || [],  // types of the columns
-        attributes = option.attributes || option.keys || option.names || [],  // column attributes
-        struct   = option.struct|| option.schema || {},
-        CAMs     = option.CAMs  || {},  // content access memory
-        TLBs     = option.TLBs  || {},  // table lookaside buffer
-        colStats = {},
-        colAlloc = {},
-        colRead  = {},                  // functions for reading values
-        skip     = option.skip  || 0;
-
-    if(option.struct) initStruct(option.struct);
-
-    function initCStore() {
-        if(size && types.length === attributes.length && types.length > 0) {
-            attributes.forEach(function(c, i){
-                configureColumn(i);
-                columns[i] = new colAlloc[c](size);
-                if(!columns.hasOwnProperty(c))
-                    Object.defineProperty(columns, c, {
-                        get: function() { return columns[i]; }
-                    });
-            });
-            columns.attributes = attributes;
-            columns.keys = attributes;
-            columns.types = types;
-            columns.struct = struct;
-            columns.TLBs = TLBs;
-            columns.CAMs = CAMs;
-            columns.size = size;
-            columns.get = function(c) {
-                var index = attributes.indexOf(c);
-                if(index < 0 ) throw new Error("Error: No column named " + c);
-                return columns[index];
-            }
-        }
-        return cstore;
-    }
-
-    function initStruct(s) {
-        struct = s;
-        if(Array.isArray(struct)) {
-            struct.forEach(function(s){
-                attributes.push(s.name);
-                types.push(s.type);
-            })
-        } else {
-            for(var k in struct){
-                attributes.push(k);
-                types.push(struct[k]);
-            }
-        }
-        return initCStore();
-    }
-
-    function configureColumn(cid) {
-        if(typeof(cid) == "string") cid = attributes.indexOf(cid);
-        var f = attributes[cid];
-        colAlloc[f] = __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]];
-
-        if(colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["string"]){
-            TLBs[f] = [];
-            CAMs[f] = {};
-            colRead[f] = function(value) {
-                if(!CAMs[f].hasOwnProperty(value)){
-                    CAMs[f][value] = TLBs[f].length;
-                    TLBs[f].push(value);
-                }
-                return CAMs[f][value];
-            };
-        } else if(
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["int"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["short"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["integer"]
-        ) {
-            colRead[f] = function(value) {  return parseInt(value) || 0; };
-        } else if(
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["float"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["double"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["numeric"]
-        ){
-            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
-        } else if(
-                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["time"] ||
-                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["temporal"]
-        ) {
-            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
-        } else {
-            throw new Error("Invalid data type for TypedArray data!")
-        }
-    }
-
-    cstore.addRows = function(rowArray) {
-        if(count === 0 && skip > 0) {
-            for(var j = 0; j<skip; j++)
-                rowArray.shift();
-        }
-        rowArray.forEach(function(row, i){
-            row.forEach(function(v,j){
-                columns[j][count] = colRead[attributes[j]](v);
-            });
-            count++;
-        });
-        return count;
-    }
-
-    cstore.addColumn = function(arg) {
-        var props = arg || {},
-            columnData = props.data || props.array,
-            columnName = props.name,
-            columnType = props.dtype,
-            values = props.values || [];
-
-        var cid = attributes.indexOf(columnName);
-        if( cid < 0) {
-            attributes.push(columnName);
-            types.push(columnType);
-            configureColumn(columnName);
-            cid = types.length - 1;
-            Object.defineProperty(columns, columnName, {
-                get: function() { return columns[cid]; }
-            });
-        }
-
-        if(columnData instanceof __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]]) {
-            columns[cid] = columnData;
-            if(values.length) {
-                TLBs[columnName] = values;
-                CAMs[columnName] = {};
-                values.forEach(function(value, vi){
-                    CAMs[columnName][value] = vi;
-                })
-            }
-        } else if(ArrayBuffer.isView(columnData)){
-            columns[cid] = new colAlloc[columnName](size);
-            for(var di = 0; di < size; di++) {
-                columns[cid][di] = colRead[columnName](columnData[di]);
-            }
-        } else {
-            throw new Error("Error: Invalid data type for columnArray!");
-        }
-        size = count = columnData.length;
-    }
-
-    cstore.metadata = cstore.info = function() {
-        return {
-            size: size,
-            count: count,
-            attributes: attributes,
-            types: types,
-            TLBs: TLBs,
-            CAMs: CAMs,
-            stats: cstore.stats()
-        }
-    }
-
-    cstore.data = cstore.columns = function() {
-        return columns;
-    }
-
-    cstore.stats = function(col){
-        var col = col || attributes;
-        col.forEach(function(name, c){
-            if(!colStats[c]){
-                var min, max, avg;
-                min = max = avg = columns[c][0];
-
-                for(var i = 1; i < columns[c].length; i++){
-                    var d = columns[c][i];
-                    if(d > max) max = d;
-                    else if(d < min) min = d;
-                    avg = avg - (avg-d) / i;
-                }
-                if(max == min) max += 0.000001;
-                colStats[name] = {min: min, max: max, avg: avg};
-            }
-        })
-        return colStats;
-    }
-
-    cstore.domains = function(col){
-        var col = col || attributes,
-            domains = [];
-
-        col.forEach(function(name, c){
-            domains[name] = [colStats[name].min, colStats[name].max];
-        })
-        return domains;
-    }
-
-    cstore.ctypes = function() {
-        return __WEBPACK_IMPORTED_MODULE_0__ctypes__;
-    }
-
-    cstore.size = size;
-
-    return initCStore();
-}
-
-
-/***/ }),
-/* 42 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (immutable) */ __webpack_exports__["request"] = request;
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "get", function() { return get; });
-/* harmony export (immutable) */ __webpack_exports__["getAll"] = getAll;
-/* harmony export (immutable) */ __webpack_exports__["post"] = post;
-function request(arg) {
-    var url = arg.url || arg,
-        method = arg.method || "GET",
-        dataType = arg.dataType || "json",
-        data = arg.data || [],
-        query = [];  //arraybuffer, blob, document, json, text
-
-    for (var key in data) {
-        query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-    }
-
-    return new Promise(function(resolve, reject) {
-
-        var req = new XMLHttpRequest();
-        req.open(method, url);
-        req.responseType = dataType;
-
-        req.onload = function() {
-          if (req.status == 200) {
-            resolve(req.response);
-          }
-          else {
-            reject(Error(req.statusText));
-          }
-        };
-
-        req.onerror = function() {
-          reject(Error("Network Error"));
-        };
-
-        if (method == 'POST') {
-            req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        }
-
-        req.send(data);
-    });
-};
-
-let get = request;
-
-function getAll(options) {
-    var promises = [];
-    options.forEach(function(option){
-        promises.push(
-            ajax.get(option)
-            .then(function(result){
-                return new Promise(function(resolve, reject) {
-                    resolve(result);
-                });
-            })
-        );
-    });
-
-    return Promise.all(promises);
-}
-
-function post(arg) {
-    arg.method = "POST";
-    return ajax.request(arg);
-};
-
-
-/***/ }),
-/* 43 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = parse;
-function parse(text, delimiter) {
-    "use strict";
-    var size = text.length,
-        accum = 0,
-        i, //index for starting of a line
-        row,
-        rows = [],
-        fields = [],
-        lens = [],
-        EOL = false;
-
-    while(accum < size) {
-        i = accum, EOL = false;
-        row = loadLine(text, delimiter.charCodeAt(0), i);
-        rows.push(row.fields);
-        accum += row.size;
-    }
-    return rows;
-}
-
-function loadLine(text, delimiterCode, initPos) {
-    // if(typeof(initPos) === 'undefined') initPos = 0;
-    var EOL = false,
-        QUOTE = false,
-        c = initPos, //current pos
-        code, //code at c
-        f = initPos, // start pos of current field
-        q, //start pos of quote
-        fields = [],
-        L = text.length;
-
-    while(!EOL){
-        code = text.charCodeAt(c);
-        if(code === 10 || c>=L){
-            EOL = true;
-            // if(text.charCodeAt(c+1) === 13) ++c;
-            fields.push( text.slice(f, c) );
-        } else {
-            if(code === delimiterCode && !QUOTE) {
-                // console.log(f,c, text.slice(f, c));
-                var field = text.slice(f, c);
-                fields.push( field );
-                f = c+1;
-            } else if(code === 34){
-                if(QUOTE){
-                    if(text.charCodeAt(c+1) === delimiterCode){
-                        QUOTE = false;
-                        fields.push(text.slice(q, c));
-                        f = c+2;
-                        c++;
-                    }
-                } else {
-                    q = c+1;
-                    QUOTE = true;
-                }
-            }
-        }
-        c++;
-    }
-    return { fields: fields, size: c-initPos };
 }
 
 

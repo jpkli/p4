@@ -1,5 +1,5 @@
 const path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+// const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -11,10 +11,10 @@ module.exports = {
         path: path.resolve(__dirname, "dist"),
         filename: "[name].js"
     },
-    plugins: [
-        new UglifyJsPlugin({
-            include: /\.min\.js$/,
-            sourceMap: true
-        })
-    ]
+    // plugins: [
+    //     new UglifyJsPlugin({
+    //         include: /\.min\.js$/,
+    //         sourceMap: true
+    //     })
+    // ]
 };
