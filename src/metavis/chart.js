@@ -193,7 +193,7 @@ export default function chart(svg, arg) {
             labels.append("g")
               .append("text")
                 .attr("transform", "rotate(-90)")
-                .attr("y", -padding.left )
+                .attr("y", -padding.left/1.25 )
                 .attr("x", -height/2 )
                 .attr("dy", "1em")
                 .css("text-anchor", "middle")

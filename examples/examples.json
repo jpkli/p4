@@ -24,7 +24,7 @@
                 "width": 500,
                 "height": 450,
                 "offset": [0, 0],
-                "padding": {"left": 60, "right": 20, "top": 40, "bottom": 60}
+                "padding": {"left": 80, "right": 20, "top": 40, "bottom": 60}
             }
         ]
     },
