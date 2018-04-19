@@ -1,6 +1,6 @@
 import allocate  from './allocate';
 import output    from './output';
-import config    from './config';
+import init    from './init';
 import compile   from './compile';
 import optDerive from './derive';
 import interact  from './interact';
@@ -10,12 +10,13 @@ export default function pipeline(options) {
         registers = {},
         profiles  = [],
         operation = {},
+        response = {},
         optID = 0;
 
-    var $p = config(options);
+    var $p = init(options);
     $p.views = [];
     $p.interactions = [];
-    $p.response = {};
+    
     $p.visualization = null;
     $p.deriveMax = options.deriveMax || 4;
     $p._responseType = 'unselected';
@@ -39,8 +40,8 @@ export default function pipeline(options) {
         operation = compile($p);
         if(!$p.hasOwnProperty('fieldDomains')) {
             var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
-            // console.log(dd);
-            // $p.uniform.uFieldDomains.data = $p.fieldDomains;
+            console.log(dd);
+            $p.uniform.uFieldDomains.data = $p.fieldDomains;
         }
         $p.opt = operation;
         pipeline.ctx = $p.ctx;
@@ -182,7 +183,7 @@ export default function pipeline(options) {
             $p.uniform.uFilterFlag = 1;
 
         operation.aggregate.execute(spec);
-        // console.log(pipeline.result('row'));
+        // console.log(JSON.stringify(pipeline.result('row')));
         return pipeline;
     }
 
@@ -193,7 +194,6 @@ export default function pipeline(options) {
         return pipeline;
     }
 
-    pipeline.select = pipeline.filter;
     pipeline.match = pipeline.filter;
 
     pipeline.derive = function(spec) {
@@ -283,7 +283,7 @@ export default function pipeline(options) {
         pipeline.head();
         pipeline.clearViews();
         $p.interactions = [];
-        $p.response = {};
+        response = {};
         $p.pipeline = [];
         $p.crossfilters = [];
         $p.uniform.uFilterFlag.data = 0;
@@ -336,9 +336,9 @@ export default function pipeline(options) {
         var encoding = vmap,
             viewTag = $p.views[viewIndex].id;
 
-        if($p._update && $p.response.hasOwnProperty(viewTag)) {
-            if($p.response[viewTag].hasOwnProperty($p._responseType)) {
-                encoding = Object.assign({}, vmap, $p.response[viewTag][$p._responseType]);
+        if($p._update && response.hasOwnProperty(viewTag)) {
+            if(response[viewTag].hasOwnProperty($p._responseType)) {
+                encoding = Object.assign({}, vmap, response[viewTag][$p._responseType]);
             }
         }
         if(encoding.opacity != 0){
@@ -360,7 +360,7 @@ export default function pipeline(options) {
                 view: interaction.from,
                 condition: interaction.condition,
                 callback: function(selection) {
-                    $p.response = interaction.response;
+                    response = interaction.response;
                     if(!$p._update) {
                         $p._update = true;
                         $p.crossfilters = {};

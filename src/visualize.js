@@ -203,13 +203,17 @@ export default function visualize($p) {
 
         function draw() {
             if($p.renderMode == 'interleave') {
-                var count = $p.attribute.aDataFieldId.data.length / $p.attribute.aDataFieldId.size,
-                    primcount = $p.dataSize;
-                gl.ext.drawArraysInstancedANGLE(primitive, 0, count, primcount);
+                var count = $p.attribute.aDataFieldId.data.length / $p.attribute.aDataFieldId.size;
+                gl.ext.drawArraysInstancedANGLE(primitive, 0, count, $p.dataSize);
             } else if($p.renderMode == 'polygon'){
                 gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
             } else {
-                gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+                if(primitive == gl.LINE_STRIP) {
+                    console.log($p.dataDimension);
+                    gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+                } else {
+                    gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+                }
             }
         }
 

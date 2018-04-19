@@ -1,6 +1,6 @@
 import FlexGL from '../flexgl/src/flexgl';
 
-export default function config(options) {
+export default function init(options) {
     var $p = options.context || null,
         container = options.container || document.body,
         viewport = options.viewport || [800, 450],

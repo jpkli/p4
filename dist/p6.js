@@ -79,17 +79,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "integer", function() { return integer; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "numeric", function() { return numeric; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nominal", function() { return nominal; });
-
-const int     = Int32Array;
-const short   = Int16Array;
-const float   = Float32Array;
-const double  = Float64Array;
-const string  = Uint16Array;
-const time    = Float64Array;
-const temporal= Float64Array;
-const integer = Int32Array;
-const numeric = Float32Array;
-const nominal = Uint16Array;
+const int      = Int32Array;
+const short    = Int16Array;
+const float    = Float32Array;
+const double   = Float64Array;
+const string   = Uint16Array;
+const time     = Float64Array;
+const temporal = Float64Array;
+const integer  = Int32Array;
+const numeric  = Float32Array;
+const nominal  = Uint16Array;
 
 
 
@@ -1645,8 +1644,10 @@ function printformat(spec) {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_pipeline__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_cstore__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ajax__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_parse__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ctypes__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_ajax__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_parse__ = __webpack_require__(43);
+
 
 
 
@@ -1657,9 +1658,12 @@ var root = typeof self == 'object' && self.self === self && self ||
            this;
 
 root.p6 = __WEBPACK_IMPORTED_MODULE_0__src_pipeline__["a" /* default */];
-root.p6.ajax = __WEBPACK_IMPORTED_MODULE_2__src_ajax__;
+root.p6.ajax = __WEBPACK_IMPORTED_MODULE_3__src_ajax__;
 root.p6.cstore = __WEBPACK_IMPORTED_MODULE_1__src_cstore__["a" /* default */];
-root.p6.parse = __WEBPACK_IMPORTED_MODULE_3__src_parse__["a" /* default */];
+root.p6.ctypes = __WEBPACK_IMPORTED_MODULE_2__src_ctypes__;
+root.p6.parse = __WEBPACK_IMPORTED_MODULE_4__src_parse__["a" /* default */];
+
+
 
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(13)))
 
@@ -1698,7 +1702,7 @@ module.exports = g;
 /* harmony export (immutable) */ __webpack_exports__["a"] = pipeline;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__config__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__init__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(25);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(7);
@@ -1714,12 +1718,13 @@ function pipeline(options) {
         registers = {},
         profiles  = [],
         operation = {},
+        response = {},
         optID = 0;
 
-    var $p = Object(__WEBPACK_IMPORTED_MODULE_2__config__["a" /* default */])(options);
+    var $p = Object(__WEBPACK_IMPORTED_MODULE_2__init__["a" /* default */])(options);
     $p.views = [];
     $p.interactions = [];
-    $p.response = {};
+    
     $p.visualization = null;
     $p.deriveMax = options.deriveMax || 4;
     $p._responseType = 'unselected';
@@ -1743,8 +1748,8 @@ function pipeline(options) {
         operation = Object(__WEBPACK_IMPORTED_MODULE_3__compile__["a" /* default */])($p);
         if(!$p.hasOwnProperty('fieldDomains')) {
             var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
-            // console.log(dd);
-            // $p.uniform.uFieldDomains.data = $p.fieldDomains;
+            console.log(dd);
+            $p.uniform.uFieldDomains.data = $p.fieldDomains;
         }
         $p.opt = operation;
         pipeline.ctx = $p.ctx;
@@ -1886,7 +1891,7 @@ function pipeline(options) {
             $p.uniform.uFilterFlag = 1;
 
         operation.aggregate.execute(spec);
-        // console.log(pipeline.result('row'));
+        // console.log(JSON.stringify(pipeline.result('row')));
         return pipeline;
     }
 
@@ -1897,7 +1902,6 @@ function pipeline(options) {
         return pipeline;
     }
 
-    pipeline.select = pipeline.filter;
     pipeline.match = pipeline.filter;
 
     pipeline.derive = function(spec) {
@@ -1987,7 +1991,7 @@ function pipeline(options) {
         pipeline.head();
         pipeline.clearViews();
         $p.interactions = [];
-        $p.response = {};
+        response = {};
         $p.pipeline = [];
         $p.crossfilters = [];
         $p.uniform.uFilterFlag.data = 0;
@@ -2040,9 +2044,9 @@ function pipeline(options) {
         var encoding = vmap,
             viewTag = $p.views[viewIndex].id;
 
-        if($p._update && $p.response.hasOwnProperty(viewTag)) {
-            if($p.response[viewTag].hasOwnProperty($p._responseType)) {
-                encoding = Object.assign({}, vmap, $p.response[viewTag][$p._responseType]);
+        if($p._update && response.hasOwnProperty(viewTag)) {
+            if(response[viewTag].hasOwnProperty($p._responseType)) {
+                encoding = Object.assign({}, vmap, response[viewTag][$p._responseType]);
             }
         }
         if(encoding.opacity != 0){
@@ -2064,7 +2068,7 @@ function pipeline(options) {
                 view: interaction.from,
                 condition: interaction.condition,
                 callback: function(selection) {
-                    $p.response = interaction.response;
+                    response = interaction.response;
                     if(!$p._update) {
                         $p._update = true;
                         $p.crossfilters = {};
@@ -2424,11 +2428,11 @@ function output($p) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = config;
+/* harmony export (immutable) */ __webpack_exports__["a"] = init;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(18);
 
 
-function config(options) {
+function init(options) {
     var $p = options.context || null,
         container = options.container || document.body,
         viewport = options.viewport || [800, 450],
@@ -4182,13 +4186,17 @@ function visualize($p) {
 
         function draw() {
             if($p.renderMode == 'interleave') {
-                var count = $p.attribute.aDataFieldId.data.length / $p.attribute.aDataFieldId.size,
-                    primcount = $p.dataSize;
-                gl.ext.drawArraysInstancedANGLE(primitive, 0, count, primcount);
+                var count = $p.attribute.aDataFieldId.data.length / $p.attribute.aDataFieldId.size;
+                gl.ext.drawArraysInstancedANGLE(primitive, 0, count, $p.dataSize);
             } else if($p.renderMode == 'polygon'){
                 gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
             } else {
-                gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+                if(primitive == gl.LINE_STRIP) {
+                    console.log($p.dataDimension);
+                    gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+                } else {
+                    gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+                }
             }
         }
 

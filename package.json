@@ -33,7 +33,19 @@
   },
   "homepage": "https://github.com/jpkli/p6#readme",
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
     "babel-minify-webpack-plugin": "^0.3.0",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.1.2",
+    "jStat": "^1.7.1",
+    "karma": "^2.0.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-mocha": "^1.3.0",
+    "mocha": "^5.1.1",
+    "p6-solo": "^0.2.0",
     "uglifyjs-webpack-plugin": "^1.1.8",
     "webpack": "^3.10.0"
   }
