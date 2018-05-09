@@ -1,6 +1,6 @@
 {
   "name": "p6",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Portable parallel processing pipleines via WebGL",
   "main": "index.js",
   "directories": {
