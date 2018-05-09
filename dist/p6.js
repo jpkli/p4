@@ -1653,6 +1653,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
+/* harmony default export */ __webpack_exports__["default"] = (__WEBPACK_IMPORTED_MODULE_0__src_pipeline__["a" /* default */]);
+
 var root = typeof self == 'object' && self.self === self && self ||
            typeof global == 'object' && global.global === global && global ||
            this;
@@ -1702,7 +1704,7 @@ module.exports = g;
 /* harmony export (immutable) */ __webpack_exports__["a"] = pipeline;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__initialize__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__initialize__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(25);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(7);
@@ -2422,7 +2424,45 @@ function output($p) {
 
 
 /***/ }),
-/* 17 */,
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = init;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(18);
+
+
+function init(options) {
+    var $p = options.context || null,
+        container = options.container || document.body,
+        viewport = options.viewport || [800, 450],
+        padding = {left:0, right: 0,top: 0, bottom: 0};
+
+    var defaultLayout = [
+        {
+            width: viewport[0],
+            height: viewport[1],
+            padding: {left: 30, right: 30, top: 30, bottom: 30},
+            offset: [0, 0]
+        }
+    ];
+    if ($p === null) {
+        $p = new __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__["a" /* default */]({
+            container: container,
+            width: viewport[0],
+            height: viewport[1],
+            padding: padding
+        });
+        $p.padding = padding;
+        $p.viewport = viewport;
+    }
+    $p.container = container;
+    $p.views = options.views || defaultLayout;
+    return $p;
+}
+
+
+/***/ }),
 /* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6317,45 +6357,6 @@ function loadLine(text, delimiterCode, initPos) {
         c++;
     }
     return { fields: fields, size: c-initPos };
-}
-
-
-/***/ }),
-/* 44 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = init;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(18);
-
-
-function init(options) {
-    var $p = options.context || null,
-        container = options.container || document.body,
-        viewport = options.viewport || [800, 450],
-        padding = {left:0, right: 0,top: 0, bottom: 0};
-
-    var defaultLayout = [
-        {
-            width: viewport[0],
-            height: viewport[1],
-            padding: {left: 30, right: 30, top: 30, bottom: 30},
-            offset: [0, 0]
-        }
-    ];
-    if ($p === null) {
-        $p = new __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__["a" /* default */]({
-            container: container,
-            width: viewport[0],
-            height: viewport[1],
-            padding: padding
-        });
-        $p.padding = padding;
-        $p.viewport = viewport;
-    }
-    $p.container = container;
-    $p.views = options.views || defaultLayout;
-    return $p;
 }
 
 

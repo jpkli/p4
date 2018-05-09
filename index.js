@@ -4,6 +4,8 @@ import  * as ctypes  from './src/ctypes';
 import * as ajax from './src/ajax';
 import parse     from './src/parse';
 
+export default p6;
+
 var root = typeof self == 'object' && self.self === self && self ||
            typeof global == 'object' && global.global === global && global ||
            this;
