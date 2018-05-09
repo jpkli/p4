@@ -44,6 +44,7 @@ export default function pipeline(options) {
             var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
             $p.uniform.uFieldDomains.data = $p.fieldDomains;
         }
+        $p.opt = operation;
         pipeline.register('__init__');
         return pipeline;
     }
