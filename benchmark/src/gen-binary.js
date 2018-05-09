@@ -69,15 +69,6 @@ define(function(require) {
             });
         })
 
-        var data = db.data();
-
-        data.stats = db.stats();
-        var metadata = db.metadata();
-        data.keys = metadata.attributes;
-        data.size = metadata.size;
-        data.CAMs = metadata.CAMs;
-        data.TLBs = metadata.TLBs;
-        data.dtypes = metadata.types;
-        return data;
+        return db.data();
     }
 })

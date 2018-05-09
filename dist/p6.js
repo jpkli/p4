@@ -1702,7 +1702,7 @@ module.exports = g;
 /* harmony export (immutable) */ __webpack_exports__["a"] = pipeline;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__init__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__initialize__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(25);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(7);
@@ -1714,14 +1714,7 @@ module.exports = g;
 
 
 function pipeline(options) {
-    var pipeline = {},
-        registers = {},
-        profiles  = [],
-        operation = {},
-        response = {},
-        optID = 0;
-
-    var $p = Object(__WEBPACK_IMPORTED_MODULE_2__init__["a" /* default */])(options);
+    var $p = Object(__WEBPACK_IMPORTED_MODULE_2__initialize__["a" /* default */])(options);
     $p.views = [];
     $p.interactions = [];
     
@@ -1731,6 +1724,13 @@ function pipeline(options) {
     $p._update = false;
 
     $p.getResult = function() {};
+
+    var pipeline = {},
+        registers = {},
+        profiles  = [],
+        operation = {},
+        response = {},
+        optID = 0;
 
     function addToPipeline(opt, arg) {
         if( !$p._update) {
@@ -1743,16 +1743,15 @@ function pipeline(options) {
         }
     }
 
+    pipeline.ctx = $p.ctx;
+
     pipeline.data = function(dataOptions) {
         Object(__WEBPACK_IMPORTED_MODULE_0__allocate__["a" /* default */])($p, dataOptions);
         operation = Object(__WEBPACK_IMPORTED_MODULE_3__compile__["a" /* default */])($p);
         if(!$p.hasOwnProperty('fieldDomains')) {
             var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
-            console.log(dd);
             $p.uniform.uFieldDomains.data = $p.fieldDomains;
         }
-        $p.opt = operation;
-        pipeline.ctx = $p.ctx;
         pipeline.register('__init__');
         return pipeline;
     }
@@ -1804,7 +1803,6 @@ function pipeline(options) {
             throw new Error('"' + tag + '" is not found in regesters.');
 
         var reg = registers[tag];
-        // console.log('************* resume to ', tag, reg);
         //resume CPU registers
         $p.indexes = reg.indexes;
         $p.dataSize = reg.dataSize;
@@ -2133,8 +2131,8 @@ const vecId = ['x', 'y', 'z'];
     var data = dataProps || [];
 
     $p.indexes = data.indexes || [];
-    $p.categoryIndex = data.CAMs || {};
-    $p.categoryLookup = data.TLBs || {};
+    $p.categoryIndex = data.strHashes || {};
+    $p.categoryLookup = data.strLists || {};
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
@@ -2424,45 +2422,7 @@ function output($p) {
 
 
 /***/ }),
-/* 17 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = init;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(18);
-
-
-function init(options) {
-    var $p = options.context || null,
-        container = options.container || document.body,
-        viewport = options.viewport || [800, 450],
-        padding = {left:0, right: 0,top: 0, bottom: 0};
-
-    var defaultLayout = [
-        {
-            width: viewport[0],
-            height: viewport[1],
-            padding: {left: 30, right: 30, top: 30, bottom: 30},
-            offset: [0, 0]
-        }
-    ];
-    if ($p === null) {
-        $p = new __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__["a" /* default */]({
-            container: container,
-            width: viewport[0],
-            height: viewport[1],
-            padding: padding
-        });
-        $p.padding = padding;
-        $p.viewport = viewport;
-    }
-    $p.container = container;
-    $p.views = options.views || defaultLayout;
-    return $p;
-}
-
-
-/***/ }),
+/* 17 */,
 /* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -5938,22 +5898,23 @@ function color(arg){
 /* harmony export (immutable) */ __webpack_exports__["a"] = ColumnStore;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(0);
 
-function ColumnStore(option){
+function ColumnStore(arg){
     var cstore   = (this instanceof ColumnStore) ? this : {},
+        options = arg || {},
         columns  = [],                  // column-based binary data
-        size     = option.size  || 0,   // max size
-        count    = option.count || 0,   // number of entries stored
-        types    = option.types || [],  // types of the columns
-        attributes = option.attributes || option.keys || option.names || [],  // column attributes
-        struct   = option.struct|| option.schema || {},
-        CAMs     = option.CAMs  || {},  // content access memory
-        TLBs     = option.TLBs  || {},  // table lookaside buffer
+        size     = options.size  || 0,   // max size
+        count    = options.count || 0,   // number of entries stored
+        types    = options.types || [],  // types of the columns
+        attributes = options.attributes || options.keys || options.names || [],  // column attributes
+        struct   = options.struct|| options.schema || {},
+        strHashes     = options.strHashes  || {},  // content access memory
+        strLists     = options.strLists  || {},  // table lookaside buffer
         colStats = {},
         colAlloc = {},
         colRead  = {},                  // functions for reading values
-        skip     = option.skip  || 0;
+        skip     = options.skip  || 0;
 
-    if(option.struct) initStruct(option.struct);
+    if(options.struct) initStruct(options.struct);
 
     function initCStore() {
         if(size && types.length === attributes.length && types.length > 0) {
@@ -5969,15 +5930,15 @@ function ColumnStore(option){
             columns.keys = attributes;
             columns.types = types;
             columns.struct = struct;
-            columns.TLBs = TLBs;
-            columns.CAMs = CAMs;
+            columns.strLists = strLists;
+            columns.strHashes = strHashes;
             columns.size = size;
             columns.get = function(c) {
                 var index = attributes.indexOf(c);
                 if(index < 0 ) throw new Error("Error: No column named " + c);
                 return columns[index];
             }
-        }
+        } 
         return cstore;
     }
 
@@ -5994,7 +5955,7 @@ function ColumnStore(option){
                 types.push(struct[k]);
             }
         }
-        return initCStore();
+        return struct;
     }
 
     function configureColumn(cid) {
@@ -6003,14 +5964,14 @@ function ColumnStore(option){
         colAlloc[f] = __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]];
 
         if(colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["string"]){
-            TLBs[f] = [];
-            CAMs[f] = {};
+            strLists[f] = [];
+            strHashes[f] = {};
             colRead[f] = function(value) {
-                if(!CAMs[f].hasOwnProperty(value)){
-                    CAMs[f][value] = TLBs[f].length;
-                    TLBs[f].push(value);
+                if(!strHashes[f].hasOwnProperty(value)){
+                    strHashes[f][value] = strLists[f].length;
+                    strLists[f].push(value);
                 }
-                return CAMs[f][value];
+                return strHashes[f][value];
             };
         } else if(
             colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["int"] ||
@@ -6048,6 +6009,21 @@ function ColumnStore(option){
         return count;
     }
 
+    cstore.addObjects = function(objArray) {
+        if(count === 0 && skip > 0) {
+            for(var j = 0; j<skip; j++)
+                objArray.shift();
+        }
+        objArray.forEach(function(obj, i){
+            Object.keys(obj).forEach(function(v,j){
+                columns[j][count] = colRead[attributes[j]](obj[v]);
+            });
+            count++;
+        });
+        return count;
+    }
+
+
     cstore.addColumn = function(arg) {
         var props = arg || {},
             columnData = props.data || props.array,
@@ -6069,10 +6045,10 @@ function ColumnStore(option){
         if(columnData instanceof __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]]) {
             columns[cid] = columnData;
             if(values.length) {
-                TLBs[columnName] = values;
-                CAMs[columnName] = {};
+                strLists[columnName] = values;
+                strHashes[columnName] = {};
                 values.forEach(function(value, vi){
-                    CAMs[columnName][value] = vi;
+                    strHashes[columnName][value] = vi;
                 })
             }
         } else if(ArrayBuffer.isView(columnData)){
@@ -6092,14 +6068,25 @@ function ColumnStore(option){
             count: count,
             attributes: attributes,
             types: types,
-            TLBs: TLBs,
-            CAMs: CAMs,
+            strLists: strLists,
+            strHashes: strHashes,
             stats: cstore.stats()
         }
     }
 
-    cstore.data = cstore.columns = function() {
+    cstore.columns = function() {
         return columns;
+    }
+
+    cstore.data = function() {
+        var data = columns;
+        data.stats = cstore.stats();
+        data.keys = attributes;
+        data.size = size;
+        data.strHashes = strHashes;
+        data.strLists = strLists;
+        data.dtypes = types;
+        return data;
     }
 
     cstore.stats = function(col){
@@ -6137,6 +6124,56 @@ function ColumnStore(option){
     }
 
     cstore.size = size;
+
+    cstore.exportAsJSON = function() {
+        var rows = new Array(size);
+        for(var ri = 0; ri < size; ri++) {
+            var dataFrame = {};
+            attributes.forEach(function(attr, ai) {
+                if(types[ai] == 'string') {
+                    dataFrame[attr] = strLists[attr][columns[ai][ri]];
+                } else {
+                    dataFrame[attr] = columns[ai][ri];
+                }
+            })
+            rows[ri] = dataFrame;
+        }
+        return rows;
+    }
+
+    cstore.exportAsRowArray = function() {
+        var rows = new Array(size);
+        for(var ri = 0; ri < size; ri++) {
+            var row = new Array(attributes.length);
+            attributes.forEach(function(attr, ai) {
+                if(types[ai] == 'string') {
+                    row[ai] = strLists[attr][columns[ai][ri]];
+                } else {
+                    row[ai] = columns[ai][ri];
+                }
+            })
+            rows[ri] = row;
+        }
+        return rows;
+    }
+
+    cstore.export = function(arg) {
+        var format = arg || 'json';
+        if(format == 'rowArray') {
+            return cstore.exportAsRowArray();
+        } else {
+            return cstore.exportAsJSON();
+        }
+    }
+
+    cstore.import = function(arg) {
+        var data = arg.data || [],
+            schema = arg.schema || {};
+        size = data.length;
+        initStruct(schema);
+        initCStore();
+        cstore.addObjects(data);
+    }
 
     return initCStore();
 }
@@ -6280,6 +6317,45 @@ function loadLine(text, delimiterCode, initPos) {
         c++;
     }
     return { fields: fields, size: c-initPos };
+}
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = init;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(18);
+
+
+function init(options) {
+    var $p = options.context || null,
+        container = options.container || document.body,
+        viewport = options.viewport || [800, 450],
+        padding = {left:0, right: 0,top: 0, bottom: 0};
+
+    var defaultLayout = [
+        {
+            width: viewport[0],
+            height: viewport[1],
+            padding: {left: 30, right: 30, top: 30, bottom: 30},
+            offset: [0, 0]
+        }
+    ];
+    if ($p === null) {
+        $p = new __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__["a" /* default */]({
+            container: container,
+            width: viewport[0],
+            height: viewport[1],
+            padding: padding
+        });
+        $p.padding = padding;
+        $p.viewport = viewport;
+    }
+    $p.container = container;
+    $p.views = options.views || defaultLayout;
+    return $p;
 }
 
 

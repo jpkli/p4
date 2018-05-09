@@ -1,20 +1,21 @@
 import * as ctypes from './ctypes';
-export default function ColumnStore(option){
+export default function ColumnStore(arg){
     var cstore   = (this instanceof ColumnStore) ? this : {},
+        options = arg || {},
         columns  = [],                  // column-based binary data
-        size     = option.size  || 0,   // max size
-        count    = option.count || 0,   // number of entries stored
-        types    = option.types || [],  // types of the columns
-        attributes = option.attributes || option.keys || option.names || [],  // column attributes
-        struct   = option.struct|| option.schema || {},
-        CAMs     = option.CAMs  || {},  // content access memory
-        TLBs     = option.TLBs  || {},  // table lookaside buffer
+        size     = options.size  || 0,   // max size
+        count    = options.count || 0,   // number of entries stored
+        types    = options.types || [],  // types of the columns
+        attributes = options.attributes || options.keys || options.names || [],  // column attributes
+        struct   = options.struct|| options.schema || {},
+        strHashes     = options.strHashes  || {},  // content access memory
+        strLists     = options.strLists  || {},  // table lookaside buffer
         colStats = {},
         colAlloc = {},
         colRead  = {},                  // functions for reading values
-        skip     = option.skip  || 0;
+        skip     = options.skip  || 0;
 
-    if(option.struct) initStruct(option.struct);
+    if(options.struct) initStruct(options.struct);
 
     function initCStore() {
         if(size && types.length === attributes.length && types.length > 0) {
@@ -30,15 +31,15 @@ export default function ColumnStore(option){
             columns.keys = attributes;
             columns.types = types;
             columns.struct = struct;
-            columns.TLBs = TLBs;
-            columns.CAMs = CAMs;
+            columns.strLists = strLists;
+            columns.strHashes = strHashes;
             columns.size = size;
             columns.get = function(c) {
                 var index = attributes.indexOf(c);
                 if(index < 0 ) throw new Error("Error: No column named " + c);
                 return columns[index];
             }
-        }
+        } 
         return cstore;
     }
 
@@ -55,7 +56,7 @@ export default function ColumnStore(option){
                 types.push(struct[k]);
             }
         }
-        return initCStore();
+        return struct;
     }
 
     function configureColumn(cid) {
@@ -64,14 +65,14 @@ export default function ColumnStore(option){
         colAlloc[f] = ctypes[types[cid]];
 
         if(colAlloc[f] === ctypes.string){
-            TLBs[f] = [];
-            CAMs[f] = {};
+            strLists[f] = [];
+            strHashes[f] = {};
             colRead[f] = function(value) {
-                if(!CAMs[f].hasOwnProperty(value)){
-                    CAMs[f][value] = TLBs[f].length;
-                    TLBs[f].push(value);
+                if(!strHashes[f].hasOwnProperty(value)){
+                    strHashes[f][value] = strLists[f].length;
+                    strLists[f].push(value);
                 }
-                return CAMs[f][value];
+                return strHashes[f][value];
             };
         } else if(
             colAlloc[f] === ctypes.int ||
@@ -109,6 +110,21 @@ export default function ColumnStore(option){
         return count;
     }
 
+    cstore.addObjects = function(objArray) {
+        if(count === 0 && skip > 0) {
+            for(var j = 0; j<skip; j++)
+                objArray.shift();
+        }
+        objArray.forEach(function(obj, i){
+            Object.keys(obj).forEach(function(v,j){
+                columns[j][count] = colRead[attributes[j]](obj[v]);
+            });
+            count++;
+        });
+        return count;
+    }
+
+
     cstore.addColumn = function(arg) {
         var props = arg || {},
             columnData = props.data || props.array,
@@ -130,10 +146,10 @@ export default function ColumnStore(option){
         if(columnData instanceof ctypes[types[cid]]) {
             columns[cid] = columnData;
             if(values.length) {
-                TLBs[columnName] = values;
-                CAMs[columnName] = {};
+                strLists[columnName] = values;
+                strHashes[columnName] = {};
                 values.forEach(function(value, vi){
-                    CAMs[columnName][value] = vi;
+                    strHashes[columnName][value] = vi;
                 })
             }
         } else if(ArrayBuffer.isView(columnData)){
@@ -153,14 +169,25 @@ export default function ColumnStore(option){
             count: count,
             attributes: attributes,
             types: types,
-            TLBs: TLBs,
-            CAMs: CAMs,
+            strLists: strLists,
+            strHashes: strHashes,
             stats: cstore.stats()
         }
     }
 
-    cstore.data = cstore.columns = function() {
+    cstore.columns = function() {
         return columns;
+    }
+
+    cstore.data = function() {
+        var data = columns;
+        data.stats = cstore.stats();
+        data.keys = attributes;
+        data.size = size;
+        data.strHashes = strHashes;
+        data.strLists = strLists;
+        data.dtypes = types;
+        return data;
     }
 
     cstore.stats = function(col){
@@ -198,6 +225,56 @@ export default function ColumnStore(option){
     }
 
     cstore.size = size;
+
+    cstore.exportAsJSON = function() {
+        var rows = new Array(size);
+        for(var ri = 0; ri < size; ri++) {
+            var dataFrame = {};
+            attributes.forEach(function(attr, ai) {
+                if(types[ai] == 'string') {
+                    dataFrame[attr] = strLists[attr][columns[ai][ri]];
+                } else {
+                    dataFrame[attr] = columns[ai][ri];
+                }
+            })
+            rows[ri] = dataFrame;
+        }
+        return rows;
+    }
+
+    cstore.exportAsRowArray = function() {
+        var rows = new Array(size);
+        for(var ri = 0; ri < size; ri++) {
+            var row = new Array(attributes.length);
+            attributes.forEach(function(attr, ai) {
+                if(types[ai] == 'string') {
+                    row[ai] = strLists[attr][columns[ai][ri]];
+                } else {
+                    row[ai] = columns[ai][ri];
+                }
+            })
+            rows[ri] = row;
+        }
+        return rows;
+    }
+
+    cstore.export = function(arg) {
+        var format = arg || 'json';
+        if(format == 'rowArray') {
+            return cstore.exportAsRowArray();
+        } else {
+            return cstore.exportAsJSON();
+        }
+    }
+
+    cstore.import = function(arg) {
+        var data = arg.data || [],
+            schema = arg.schema || {};
+        size = data.length;
+        initStruct(schema);
+        initCStore();
+        cstore.addObjects(data);
+    }
 
     return initCStore();
 }

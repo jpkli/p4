@@ -4,8 +4,8 @@ export default function($p, dataProps) {
     var data = dataProps || [];
 
     $p.indexes = data.indexes || [];
-    $p.categoryIndex = data.CAMs || {};
-    $p.categoryLookup = data.TLBs || {};
+    $p.categoryIndex = data.strHashes || {};
+    $p.categoryLookup = data.strLists || {};
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};

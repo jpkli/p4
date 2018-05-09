@@ -1,17 +1,6 @@
 const path = require('path');
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-var serverConfig = {
-    entry: {
-        "p6": "./index.js"
-    },
-    target: 'node',
-    output: {
-      path: path.resolve(__dirname, 'dist'),
-      filename: 'p6.node.js'
-    }
-  };
-
 var clientConfig = {
     entry: {
         "p6": "./index.js",
@@ -31,4 +20,16 @@ var clientConfig = {
     // ]
 };
 
-module.exports = [ serverConfig, clientConfig ];
+// var serverConfig = {
+//     entry: {
+//         "p6": "./index.js"
+//     },
+//     target: 'node',
+//     output: {
+//         path: path.resolve(__dirname, 'dist'),
+//         filename: 'p6.node.js'
+//     }
+// };
+// module.exports = [ serverConfig, clientConfig ];
+
+module.exports = clientConfig;

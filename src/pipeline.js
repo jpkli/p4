@@ -1,19 +1,12 @@
 import allocate  from './allocate';
 import output    from './output';
-import init    from './init';
+import initialize    from './initialize';
 import compile   from './compile';
 import optDerive from './derive';
 import interact  from './interact';
 
 export default function pipeline(options) {
-    var pipeline = {},
-        registers = {},
-        profiles  = [],
-        operation = {},
-        response = {},
-        optID = 0;
-
-    var $p = init(options);
+    var $p = initialize(options);
     $p.views = [];
     $p.interactions = [];
     
@@ -23,6 +16,13 @@ export default function pipeline(options) {
     $p._update = false;
 
     $p.getResult = function() {};
+
+    var pipeline = {},
+        registers = {},
+        profiles  = [],
+        operation = {},
+        response = {},
+        optID = 0;
 
     function addToPipeline(opt, arg) {
         if( !$p._update) {
@@ -35,16 +35,15 @@ export default function pipeline(options) {
         }
     }
 
+    pipeline.ctx = $p.ctx;
+
     pipeline.data = function(dataOptions) {
         allocate($p, dataOptions);
         operation = compile($p);
         if(!$p.hasOwnProperty('fieldDomains')) {
             var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
-            console.log(dd);
             $p.uniform.uFieldDomains.data = $p.fieldDomains;
         }
-        $p.opt = operation;
-        pipeline.ctx = $p.ctx;
         pipeline.register('__init__');
         return pipeline;
     }
@@ -96,7 +95,6 @@ export default function pipeline(options) {
             throw new Error('"' + tag + '" is not found in regesters.');
 
         var reg = registers[tag];
-        // console.log('************* resume to ', tag, reg);
         //resume CPU registers
         $p.indexes = reg.indexes;
         $p.dataSize = reg.dataSize;

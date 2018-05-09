@@ -33,14 +33,7 @@ p6.ajax.get({
     db.addRows(rows);
 
     var data = db.data();
-    data.stats = db.stats();
-    var metadata = db.metadata();
-    data.keys = metadata.attributes;
-    data.size = metadata.size;
-    data.CAMs = metadata.CAMs;
-    data.TLBs = metadata.TLBs;
-    data.dtypes = metadata.types;
-    // console.log(metadata);
+
     var dsl = {
         container: "main-vis",
         viewport: [800, 450],
@@ -54,9 +47,10 @@ p6.ajax.get({
                 h4 = $('<h5/>').text(ex.category),
                 ul = $('<ul/>').addClass('list-unstyled example-list');
 
-                if(ex.hasOwnProperty('views')) {
-                    program.view(ex.views);
-                }
+            if(ex.hasOwnProperty('views')) {
+                program.view(ex.views);
+            }
+            
             ex.examples.forEach(function(item, ii){
                 var itemTag = item.file.split('.')[0];
                 var itemLink = $('<a/>').attr('href', '#'+itemTag).text(item.name);
