@@ -42,7 +42,7 @@ export function getAll(options) {
     var promises = [];
     options.forEach(function(option){
         promises.push(
-            ajax.get(option)
+            request(option)
             .then(function(result){
                 return new Promise(function(resolve, reject) {
                     resolve(result);

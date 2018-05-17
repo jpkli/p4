@@ -60,6 +60,7 @@ export default function pipeline(options) {
             }
         })
         $p.views = views;
+        return pipeline;
     }
 
     pipeline.register = function(tag) {
