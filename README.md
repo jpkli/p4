@@ -1,1 +1,1 @@
-# P6 - Portable Parallel Processing Pipeline and Platform
+# P6 - Portable Parallel Processing Pipelines and Platform

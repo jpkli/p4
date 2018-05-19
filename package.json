@@ -1,7 +1,7 @@
 {
   "name": "p6",
   "version": "0.5.3",
-  "description": "Portable parallel processing pipleines via WebGL",
+  "description": "Portable parallel processing pipelines and platform",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -35,7 +35,6 @@
     "jStat": "^1.7.1",
     "mocha": "^5.1.1",
     "uglifyjs-webpack-plugin": "^1.1.8",
-    "webpack": "^3.10.0",
-    "webpack-cli": "^2.0.14"
+    "webpack": "^3.10.0"
   }
 }
