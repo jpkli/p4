@@ -21,7 +21,7 @@ export default function derive($p, spec) {
         marco += 'if (index == ' + i + ') return ' + formula + "; \n \telse ";
     });
 
-    marco += " return 0.0;"
+    marco += " return 0.0;";
 
     $p.uniform("uOptMode", "float", 0)
         .uniform("uDeriveId", "int", 0)

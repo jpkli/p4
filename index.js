@@ -14,7 +14,7 @@ root.p6.cstore = cstore;
 root.p6.ctypes = ctypes;
 root.p6.parse = parse;
 
+export default root.p6;
+
 if(typeof module != 'undefined' && module.exports)
     module.exports = root.p6;
-else
-    export default root.p6;

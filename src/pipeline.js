@@ -151,7 +151,7 @@ export default function pipeline(options) {
         var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
         var binInterval = (binDomain[1] - binDomain[0]) / binCount;
 
-        var histFunction = (function() {max(ceil((binAttr - binMin) / float(binInterval)), 1.0) })
+        var histFunction = (function() { max(ceil((binAttr - binMin) / float(binInterval)), 1.0) })
             .toString()
             .slice(13, -1) // remove "function () {" from function.toString
             .replace('binAttr', binAttr)
