@@ -160,7 +160,7 @@ export default function chart(svg, arg) {
     }
 
     if(isHistogram) {
-        xAxisOption.tickPosition = [width / domainX.length /2, 0];
+        xAxisOption.tickPosition = [-width / domainX.length /2, 0];
         xAxisOption.scale = "ordinal";
         xAxisOption.domain = domainX;
         xAxisOption.ticks = domainX.length;
