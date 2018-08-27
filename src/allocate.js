@@ -2,7 +2,7 @@ import {seqFloat} from './utils';
 const vecId = ['x', 'y', 'z'];
 export default function($p, dataProps) {
     var data = dataProps || [];
-
+    console.log(data);
     $p.indexes = data.indexes || [];
     $p.categoryIndex = data.strHashes || {};
     $p.categoryLookup = data.strLists || {};
@@ -13,13 +13,13 @@ export default function($p, dataProps) {
     $p.pipeline = [];
     $p.crossfilters = {};
     $p.deriveCount = 0;
-    $p.resultDimension = [1, 1];
+    
     $p.dataSize = 0;
 
     var dkeys = $p.dkeys,
         dtypes = $p.dtypes,
         stats =  data.stats || null;
-
+    
     if (data.hasOwnProperty("size"))
         $p.dataSize = data.size;
     else if (Array.isArray(data))
@@ -31,13 +31,12 @@ export default function($p, dataProps) {
         colSize = Math.ceil($p.dataSize / rowSize);
 
     $p.dataDimension = [rowSize, colSize];
-
+    $p.resultDimension = [rowSize, colSize];
     $p.fields = $p.indexes.concat(dkeys.filter(function(k) {
         return $p.indexes.indexOf(k) === -1;
     }));
     $p.fieldWidths = new Array($p.fields.length).concat(new Array($p.deriveMax).fill(1));
     $p.fieldCount = $p.fields.length - $p.indexes.length;
-
 
     function getDataWidth(fid, range) {
         var range = Math.abs(range[1] - range[0]);
@@ -59,7 +58,7 @@ export default function($p, dataProps) {
         } else if (dtypes[fid] in ["float", "double", "numeric"]) {
             return 10;
         } else {
-            return range+1;
+            return range + 1;
         }
     }
     $p.fields.forEach(function(field) {
@@ -100,11 +99,15 @@ export default function($p, dataProps) {
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataFieldId.location, 0);
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemId.location, 1);
 
-    $p.attribute("_square", "vec2", new Float32Array([-1.0, -1.0,
-        1.0, -1.0, -1.0, 1.0, -1.0, 1.0,
-        1.0, -1.0,
-        1.0, 1.0
-    ]));
+    $p.attribute(
+        "_square",
+        "vec2",
+        new Float32Array([
+            -1.0, -1.0, 1.0, -1.0, 
+            -1.0, 1.0, -1.0, 1.0,
+            1.0, -1.0, 1.0, 1.0
+        ])
+    );
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 1);
 
     //setup all attribute, uniform, texture, varying needed by all the shaders

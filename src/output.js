@@ -2,35 +2,36 @@ export default function output($p) {
     return function(format) {
         var buf = $p.getResult(),
             res = {},
-            offset = 0;
+            offset = 0,
+            rs = 0;
 
         var rs = 0;
-
-        if ($p.resultDimension[0] > 1) {
-            res[$p.fields[rs]] = $p.attribute.aDataValx.data;
-            rs++;
-        }
-
-        if ($p.resultDimension[1] > 1) {
-            var bx = $p.attribute.aDataValx.data;
-            var by = $p.attribute.aDataValy.data;
-            var ax = new Array($p.resultDimension[0] * $p.resultDimension[1]),
-                ay = new Array($p.resultDimension[0] * $p.resultDimension[1]);
-
-            for (var y = 0; y < $p.resultDimension[1]; y++) {
-                for (var x = 0; x < $p.resultDimension[0]; x++) {
-
-                    ax[y * $p.resultDimension[0] + x] = bx[x];
-                    ay[y * $p.resultDimension[0] + x] = by[y]
-                }
+        if($p.indexes.length > 0) {
+            if ($p.resultDimension[0] > 1) {
+                res[$p.fields[rs]] = $p.attribute.aDataValx.data;
+                rs++;
             }
-            res[$p.fields[0]] = ax;
-            res[$p.fields[rs]] = ay;
-            rs++;
+
+            if ($p.resultDimension[1] > 1) {
+                var bx = $p.attribute.aDataValx.data;
+                var by = $p.attribute.aDataValy.data;
+                var ax = new Array($p.resultDimension[0] * $p.resultDimension[1]),
+                    ay = new Array($p.resultDimension[0] * $p.resultDimension[1]);
+
+                for (var y = 0; y < $p.resultDimension[1]; y++) {
+                    for (var x = 0; x < $p.resultDimension[0]; x++) {
+
+                        ax[y * $p.resultDimension[0] + x] = bx[x];
+                        ay[y * $p.resultDimension[0] + x] = by[y]
+                    }
+                }
+                res[$p.fields[0]] = ax;
+                res[$p.fields[rs]] = ay;
+                rs++;
+            }
         }
 
         var arraySize = $p.resultDimension[0] * $p.resultDimension[1];
-
         for (var i = rs; i < $p.fields.length; i++) {
             res[$p.fields[i]] = buf.subarray(offset, offset + arraySize);
             offset += arraySize;
@@ -38,7 +39,7 @@ export default function output($p) {
 
         if (format == 'row') {
             var objectArray = new Array(arraySize);
-
+            
             for (var i = 0; i < arraySize; i++) {
                 var obj = {};
                 Object.keys(res).forEach(function(f) {
@@ -46,7 +47,7 @@ export default function output($p) {
                         dtype = $p.dtypes[kid];
 
                     if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
-                        obj[f] = $p.categoryLookup[f][res[f][i]];
+                        obj[f] = $p.categoryLookup[f][res[f][i]-1];
                     } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
                         obj[f] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
                     } else {

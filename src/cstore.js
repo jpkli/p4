@@ -69,7 +69,7 @@ export default function ColumnStore(arg){
             strHashes[f] = {};
             colRead[f] = function(value) {
                 if(!strHashes[f].hasOwnProperty(value)){
-                    strHashes[f][value] = strLists[f].length;
+                    strHashes[f][value] = strLists[f].length + 1;
                     strLists[f].push(value);
                 }
                 return strHashes[f][value];
@@ -232,7 +232,7 @@ export default function ColumnStore(arg){
             var dataFrame = {};
             attributes.forEach(function(attr, ai) {
                 if(types[ai] == 'string') {
-                    dataFrame[attr] = strLists[attr][columns[ai][ri]];
+                    dataFrame[attr] = strLists[attr][columns[ai][ri] - 1];
                 } else {
                     dataFrame[attr] = columns[ai][ri];
                 }
@@ -248,7 +248,7 @@ export default function ColumnStore(arg){
             var row = new Array(attributes.length);
             attributes.forEach(function(attr, ai) {
                 if(types[ai] == 'string') {
-                    row[ai] = strLists[attr][columns[ai][ri]];
+                    row[ai] = strLists[attr][columns[ai][ri]-1];
                 } else {
                     row[ai] = columns[ai][ri];
                 }
