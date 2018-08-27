@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 61);
+/******/ 	return __webpack_require__(__webpack_require__.s = 93);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,12 +95,7 @@ module.exports = g;
 /* 2 */,
 /* 3 */,
 /* 4 */,
-/* 5 */,
-/* 6 */,
-/* 7 */,
-/* 8 */,
-/* 9 */,
-/* 10 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -130,322 +125,20 @@ const nominal  = Uint16Array;
 
 
 /***/ }),
+/* 6 */,
+/* 7 */,
+/* 8 */,
+/* 9 */,
+/* 10 */,
 /* 11 */,
-/* 12 */,
-/* 13 */,
-/* 14 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = ColumnStore;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(10);
-
-function ColumnStore(arg){
-    var cstore   = (this instanceof ColumnStore) ? this : {},
-        options = arg || {},
-        columns  = [],                  // column-based binary data
-        size     = options.size  || 0,   // max size
-        count    = options.count || 0,   // number of entries stored
-        types    = options.types || [],  // types of the columns
-        attributes = options.attributes || options.keys || options.names || [],  // column attributes
-        struct   = options.struct|| options.schema || {},
-        strHashes     = options.strHashes  || {},  // content access memory
-        strLists     = options.strLists  || {},  // table lookaside buffer
-        colStats = {},
-        colAlloc = {},
-        colRead  = {},                  // functions for reading values
-        skip     = options.skip  || 0;
-
-    if(options.struct) initStruct(options.struct);
-
-    function initCStore() {
-        if(size && types.length === attributes.length && types.length > 0) {
-            attributes.forEach(function(c, i){
-                configureColumn(i);
-                columns[i] = new colAlloc[c](size);
-                if(!columns.hasOwnProperty(c))
-                    Object.defineProperty(columns, c, {
-                        get: function() { return columns[i]; }
-                    });
-            });
-            columns.attributes = attributes;
-            columns.keys = attributes;
-            columns.types = types;
-            columns.struct = struct;
-            columns.strLists = strLists;
-            columns.strHashes = strHashes;
-            columns.size = size;
-            columns.get = function(c) {
-                var index = attributes.indexOf(c);
-                if(index < 0 ) throw new Error("Error: No column named " + c);
-                return columns[index];
-            }
-        } 
-        return cstore;
-    }
-
-    function initStruct(s) {
-        struct = s;
-        if(Array.isArray(struct)) {
-            struct.forEach(function(s){
-                attributes.push(s.name);
-                types.push(s.type);
-            })
-        } else {
-            for(var k in struct){
-                attributes.push(k);
-                types.push(struct[k]);
-            }
-        }
-        return struct;
-    }
-
-    function configureColumn(cid) {
-        if(typeof(cid) == "string") cid = attributes.indexOf(cid);
-        var f = attributes[cid];
-        colAlloc[f] = __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]];
-
-        if(colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["string"]){
-            strLists[f] = [];
-            strHashes[f] = {};
-            colRead[f] = function(value) {
-                if(!strHashes[f].hasOwnProperty(value)){
-                    strHashes[f][value] = strLists[f].length;
-                    strLists[f].push(value);
-                }
-                return strHashes[f][value];
-            };
-        } else if(
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["int"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["short"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["integer"]
-        ) {
-            colRead[f] = function(value) {  return parseInt(value) || 0; };
-        } else if(
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["float"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["double"] ||
-            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["numeric"]
-        ){
-            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
-        } else if(
-                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["time"] ||
-                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["temporal"]
-        ) {
-            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
-        } else {
-            throw new Error("Invalid data type for TypedArray data!")
-        }
-    }
-
-    cstore.addRows = function(rowArray) {
-        if(count === 0 && skip > 0) {
-            for(var j = 0; j<skip; j++)
-                rowArray.shift();
-        }
-        rowArray.forEach(function(row, i){
-            row.forEach(function(v,j){
-                columns[j][count] = colRead[attributes[j]](v);
-            });
-            count++;
-        });
-        return count;
-    }
-
-    cstore.addObjects = function(objArray) {
-        if(count === 0 && skip > 0) {
-            for(var j = 0; j<skip; j++)
-                objArray.shift();
-        }
-        objArray.forEach(function(obj, i){
-            Object.keys(obj).forEach(function(v,j){
-                columns[j][count] = colRead[attributes[j]](obj[v]);
-            });
-            count++;
-        });
-        return count;
-    }
-
-
-    cstore.addColumn = function(arg) {
-        var props = arg || {},
-            columnData = props.data || props.array,
-            columnName = props.name,
-            columnType = props.dtype,
-            values = props.values || [];
-
-        var cid = attributes.indexOf(columnName);
-        if( cid < 0) {
-            attributes.push(columnName);
-            types.push(columnType);
-            configureColumn(columnName);
-            cid = types.length - 1;
-            Object.defineProperty(columns, columnName, {
-                get: function() { return columns[cid]; }
-            });
-        }
-
-        if(columnData instanceof __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]]) {
-            columns[cid] = columnData;
-            if(values.length) {
-                strLists[columnName] = values;
-                strHashes[columnName] = {};
-                values.forEach(function(value, vi){
-                    strHashes[columnName][value] = vi;
-                })
-            }
-        } else if(ArrayBuffer.isView(columnData)){
-            columns[cid] = new colAlloc[columnName](size);
-            for(var di = 0; di < size; di++) {
-                columns[cid][di] = colRead[columnName](columnData[di]);
-            }
-        } else {
-            throw new Error("Error: Invalid data type for columnArray!");
-        }
-        size = count = columnData.length;
-    }
-
-    cstore.metadata = cstore.info = function() {
-        return {
-            size: size,
-            count: count,
-            attributes: attributes,
-            types: types,
-            strLists: strLists,
-            strHashes: strHashes,
-            stats: cstore.stats()
-        }
-    }
-
-    cstore.columns = function() {
-        return columns;
-    }
-
-    cstore.data = function() {
-        var data = columns;
-        data.stats = cstore.stats();
-        data.keys = attributes;
-        data.size = size;
-        data.strHashes = strHashes;
-        data.strLists = strLists;
-        data.dtypes = types;
-        return data;
-    }
-
-    cstore.stats = function(col){
-        var col = col || attributes;
-        col.forEach(function(name, c){
-            if(!colStats[c]){
-                var min, max, avg;
-                min = max = avg = columns[c][0];
-
-                for(var i = 1; i < columns[c].length; i++){
-                    var d = columns[c][i];
-                    if(d > max) max = d;
-                    else if(d < min) min = d;
-                    avg = avg - (avg-d) / i;
-                }
-                if(max == min) max += 0.000001;
-                colStats[name] = {min: min, max: max, avg: avg};
-            }
-        })
-        return colStats;
-    }
-
-    cstore.domains = function(col){
-        var col = col || attributes,
-            domains = [];
-
-        col.forEach(function(name, c){
-            domains[name] = [colStats[name].min, colStats[name].max];
-        })
-        return domains;
-    }
-
-    cstore.ctypes = function() {
-        return __WEBPACK_IMPORTED_MODULE_0__ctypes__;
-    }
-
-    cstore.size = size;
-
-    cstore.exportAsJSON = function() {
-        var rows = new Array(size);
-        for(var ri = 0; ri < size; ri++) {
-            var dataFrame = {};
-            attributes.forEach(function(attr, ai) {
-                if(types[ai] == 'string') {
-                    dataFrame[attr] = strLists[attr][columns[ai][ri]];
-                } else {
-                    dataFrame[attr] = columns[ai][ri];
-                }
-            })
-            rows[ri] = dataFrame;
-        }
-        return rows;
-    }
-
-    cstore.exportAsRowArray = function() {
-        var rows = new Array(size);
-        for(var ri = 0; ri < size; ri++) {
-            var row = new Array(attributes.length);
-            attributes.forEach(function(attr, ai) {
-                if(types[ai] == 'string') {
-                    row[ai] = strLists[attr][columns[ai][ri]];
-                } else {
-                    row[ai] = columns[ai][ri];
-                }
-            })
-            rows[ri] = row;
-        }
-        return rows;
-    }
-
-    cstore.export = function(arg) {
-        var format = arg || 'json';
-        if(format == 'rowArray') {
-            return cstore.exportAsRowArray();
-        } else {
-            return cstore.exportAsJSON();
-        }
-    }
-
-    cstore.import = function(arg) {
-        var data = arg.data || [],
-            schema = arg.schema || {};
-        size = data.length;
-        initStruct(schema);
-        initCStore();
-        cstore.addObjects(data);
-    }
-
-    return initCStore();
-}
-
-
-/***/ }),
-/* 15 */,
-/* 16 */,
-/* 17 */,
-/* 18 */,
-/* 19 */,
-/* 20 */,
-/* 21 */,
-/* 22 */,
-/* 23 */,
-/* 24 */,
-/* 25 */,
-/* 26 */,
-/* 27 */,
-/* 28 */,
-/* 29 */,
-/* 30 */,
-/* 31 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* unused harmony export seq */
 /* unused harmony export seqInt */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return seqFloat; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(5);
 
 
 function seq(dtype, start, end, interval) {
@@ -465,7 +158,7 @@ let seqFloat = seq.bind(null, "float");
 
 
 /***/ }),
-/* 32 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -570,12 +263,12 @@ function Uniform(glContext, name, type, data) {
 
 
 /***/ }),
-/* 33 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Texture;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(13);
 
 
 function Texture(glContext) {
@@ -712,7 +405,7 @@ function Texture(glContext) {
 
 
 /***/ }),
-/* 34 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -948,7 +641,7 @@ function Shader(glContext, glResource) {
 
 
 /***/ }),
-/* 35 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1123,7 +816,7 @@ function derive($p, spec) {
 
 
 /***/ }),
-/* 36 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1240,12 +933,12 @@ function reveal($p) {
 
 
 /***/ }),
-/* 37 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = interact;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__metavis_brush__ = __webpack_require__(85);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__metavis_brush__ = __webpack_require__(58);
 
 
 function interact($p, options) {
@@ -1432,7 +1125,7 @@ function interact($p, options) {
 
 
 /***/ }),
-/* 38 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1575,12 +1268,12 @@ function publicMethods(context) {
 
 
 /***/ }),
-/* 39 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = axis;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scale__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scale__ = __webpack_require__(21);
 
 
 function axis(arg) {
@@ -1846,7 +1539,7 @@ function axis(arg) {
 
 
 /***/ }),
-/* 40 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1932,12 +1625,12 @@ function Scale(arg) {
 
 
 /***/ }),
-/* 41 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = printformat;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__arrays__ = __webpack_require__(88);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__arrays__ = __webpack_require__(61);
 
 
 function printformat(spec) {
@@ -1981,99 +1674,309 @@ function printformat(spec) {
 
 
 /***/ }),
-/* 42 */,
-/* 43 */,
-/* 44 */,
-/* 45 */,
-/* 46 */,
-/* 47 */,
-/* 48 */,
-/* 49 */,
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */,
-/* 54 */,
-/* 55 */,
-/* 56 */,
-/* 57 */,
-/* 58 */,
-/* 59 */,
-/* 60 */,
-/* 61 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_pipeline__ = __webpack_require__(63);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_cstore__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ctypes__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_ajax__ = __webpack_require__(90);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_parse__ = __webpack_require__(91);
+/* harmony export (immutable) */ __webpack_exports__["a"] = ColumnStore;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(5);
+
+function ColumnStore(arg){
+    var cstore   = (this instanceof ColumnStore) ? this : {},
+        options = arg || {},
+        columns  = [],                  // column-based binary data
+        size     = options.size  || 0,   // max size
+        count    = options.count || 0,   // number of entries stored
+        types    = options.types || [],  // types of the columns
+        attributes = options.attributes || options.keys || options.names || [],  // column attributes
+        struct   = options.struct|| options.schema || {},
+        strHashes     = options.strHashes  || {},  // content access memory
+        strLists     = options.strLists  || {},  // table lookaside buffer
+        colStats = {},
+        colAlloc = {},
+        colRead  = {},                  // functions for reading values
+        skip     = options.skip  || 0;
+
+    if(options.struct) initStruct(options.struct);
+
+    function initCStore() {
+        if(size && types.length === attributes.length && types.length > 0) {
+            attributes.forEach(function(c, i){
+                configureColumn(i);
+                columns[i] = new colAlloc[c](size);
+                if(!columns.hasOwnProperty(c))
+                    Object.defineProperty(columns, c, {
+                        get: function() { return columns[i]; }
+                    });
+            });
+            columns.attributes = attributes;
+            columns.keys = attributes;
+            columns.types = types;
+            columns.struct = struct;
+            columns.strLists = strLists;
+            columns.strHashes = strHashes;
+            columns.size = size;
+            columns.get = function(c) {
+                var index = attributes.indexOf(c);
+                if(index < 0 ) throw new Error("Error: No column named " + c);
+                return columns[index];
+            }
+        } 
+        return cstore;
+    }
+
+    function initStruct(s) {
+        struct = s;
+        if(Array.isArray(struct)) {
+            struct.forEach(function(s){
+                attributes.push(s.name);
+                types.push(s.type);
+            })
+        } else {
+            for(var k in struct){
+                attributes.push(k);
+                types.push(struct[k]);
+            }
+        }
+        return struct;
+    }
+
+    function configureColumn(cid) {
+        if(typeof(cid) == "string") cid = attributes.indexOf(cid);
+        var f = attributes[cid];
+        colAlloc[f] = __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]];
+
+        if(colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["string"]){
+            strLists[f] = [];
+            strHashes[f] = {};
+            colRead[f] = function(value) {
+                if(!strHashes[f].hasOwnProperty(value)){
+                    strHashes[f][value] = strLists[f].length + 1;
+                    strLists[f].push(value);
+                }
+                return strHashes[f][value];
+            };
+        } else if(
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["int"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["short"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["integer"]
+        ) {
+            colRead[f] = function(value) {  return parseInt(value) || 0; };
+        } else if(
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["float"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["double"] ||
+            colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["numeric"]
+        ){
+            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
+        } else if(
+                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["time"] ||
+                colAlloc[f] === __WEBPACK_IMPORTED_MODULE_0__ctypes__["temporal"]
+        ) {
+            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
+        } else {
+            throw new Error("Invalid data type for TypedArray data!")
+        }
+    }
+
+    cstore.addRows = function(rowArray) {
+        if(count === 0 && skip > 0) {
+            for(var j = 0; j<skip; j++)
+                rowArray.shift();
+        }
+        rowArray.forEach(function(row, i){
+            row.forEach(function(v,j){
+                columns[j][count] = colRead[attributes[j]](v);
+            });
+            count++;
+        });
+        return count;
+    }
+
+    cstore.addObjects = function(objArray) {
+        if(count === 0 && skip > 0) {
+            for(var j = 0; j<skip; j++)
+                objArray.shift();
+        }
+        objArray.forEach(function(obj, i){
+            Object.keys(obj).forEach(function(v,j){
+                columns[j][count] = colRead[attributes[j]](obj[v]);
+            });
+            count++;
+        });
+        return count;
+    }
 
 
+    cstore.addColumn = function(arg) {
+        var props = arg || {},
+            columnData = props.data || props.array,
+            columnName = props.name,
+            columnType = props.dtype,
+            values = props.values || [];
 
+        var cid = attributes.indexOf(columnName);
+        if( cid < 0) {
+            attributes.push(columnName);
+            types.push(columnType);
+            configureColumn(columnName);
+            cid = types.length - 1;
+            Object.defineProperty(columns, columnName, {
+                get: function() { return columns[cid]; }
+            });
+        }
 
+        if(columnData instanceof __WEBPACK_IMPORTED_MODULE_0__ctypes__[types[cid]]) {
+            columns[cid] = columnData;
+            if(values.length) {
+                strLists[columnName] = values;
+                strHashes[columnName] = {};
+                values.forEach(function(value, vi){
+                    strHashes[columnName][value] = vi;
+                })
+            }
+        } else if(ArrayBuffer.isView(columnData)){
+            columns[cid] = new colAlloc[columnName](size);
+            for(var di = 0; di < size; di++) {
+                columns[cid][di] = colRead[columnName](columnData[di]);
+            }
+        } else {
+            throw new Error("Error: Invalid data type for columnArray!");
+        }
+        size = count = columnData.length;
+    }
 
+    cstore.metadata = cstore.info = function() {
+        return {
+            size: size,
+            count: count,
+            attributes: attributes,
+            types: types,
+            strLists: strLists,
+            strHashes: strHashes,
+            stats: cstore.stats()
+        }
+    }
 
-var root = typeof self == 'object' && self.self === self && self ||
-           typeof global == 'object' && global.global === global && global ||
-           this;
+    cstore.columns = function() {
+        return columns;
+    }
 
-root.p4 = __WEBPACK_IMPORTED_MODULE_0__src_pipeline__["a" /* default */];
-root.p4.ajax = __WEBPACK_IMPORTED_MODULE_3__src_ajax__;
-root.p4.cstore = __WEBPACK_IMPORTED_MODULE_1__src_cstore__["a" /* default */];
-root.p4.ctypes = __WEBPACK_IMPORTED_MODULE_2__src_ctypes__;
-root.p4.parse = __WEBPACK_IMPORTED_MODULE_4__src_parse__["a" /* default */];
+    cstore.data = function() {
+        var data = columns;
+        data.stats = cstore.stats();
+        data.keys = attributes;
+        data.size = size;
+        data.strHashes = strHashes;
+        data.strLists = strLists;
+        data.dtypes = types;
+        return data;
+    }
 
-/* harmony default export */ __webpack_exports__["default"] = (root.p4);
+    cstore.stats = function(col){
+        var col = col || attributes;
+        col.forEach(function(name, c){
+            if(!colStats[c]){
+                var min, max, avg;
+                min = max = avg = columns[c][0];
 
-if(typeof module != 'undefined' && module.exports)
-    module.exports = root.p4;
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(62)(module)))
+                for(var i = 1; i < columns[c].length; i++){
+                    var d = columns[c][i];
+                    if(d > max) max = d;
+                    else if(d < min) min = d;
+                    avg = avg - (avg-d) / i;
+                }
+                if(max == min) max += 0.000001;
+                colStats[name] = {min: min, max: max, avg: avg};
+            }
+        })
+        return colStats;
+    }
+
+    cstore.domains = function(col){
+        var col = col || attributes,
+            domains = [];
+
+        col.forEach(function(name, c){
+            domains[name] = [colStats[name].min, colStats[name].max];
+        })
+        return domains;
+    }
+
+    cstore.ctypes = function() {
+        return __WEBPACK_IMPORTED_MODULE_0__ctypes__;
+    }
+
+    cstore.size = size;
+
+    cstore.exportAsJSON = function() {
+        var rows = new Array(size);
+        for(var ri = 0; ri < size; ri++) {
+            var dataFrame = {};
+            attributes.forEach(function(attr, ai) {
+                if(types[ai] == 'string') {
+                    dataFrame[attr] = strLists[attr][columns[ai][ri] - 1];
+                } else {
+                    dataFrame[attr] = columns[ai][ri];
+                }
+            })
+            rows[ri] = dataFrame;
+        }
+        return rows;
+    }
+
+    cstore.exportAsRowArray = function() {
+        var rows = new Array(size);
+        for(var ri = 0; ri < size; ri++) {
+            var row = new Array(attributes.length);
+            attributes.forEach(function(attr, ai) {
+                if(types[ai] == 'string') {
+                    row[ai] = strLists[attr][columns[ai][ri]-1];
+                } else {
+                    row[ai] = columns[ai][ri];
+                }
+            })
+            rows[ri] = row;
+        }
+        return rows;
+    }
+
+    cstore.export = function(arg) {
+        var format = arg || 'json';
+        if(format == 'rowArray') {
+            return cstore.exportAsRowArray();
+        } else {
+            return cstore.exportAsJSON();
+        }
+    }
+
+    cstore.import = function(arg) {
+        var data = arg.data || [],
+            schema = arg.schema || {};
+        size = data.length;
+        initStruct(schema);
+        initCStore();
+        cstore.addObjects(data);
+    }
+
+    return initCStore();
+}
+
 
 /***/ }),
-/* 62 */
-/***/ (function(module, exports) {
-
-module.exports = function(originalModule) {
-	if(!originalModule.webpackPolyfill) {
-		var module = Object.create(originalModule);
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		Object.defineProperty(module, "exports", {
-			enumerable: true,
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
-/* 63 */
+/* 24 */,
+/* 25 */,
+/* 26 */,
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = pipeline;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(64);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(65);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__initialize__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(74);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(35);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__initialize__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(18);
 
 
 
@@ -2287,6 +2190,7 @@ function pipeline(options) {
 
     pipeline.cache = function(tag) {
         operation.cache.execute(tag);
+        $p.getResult = operation.cache.result;
         return pipeline;
     }
 
@@ -2373,6 +2277,7 @@ function pipeline(options) {
                 pipeline[opt](arg);
             }
         })
+        return pipeline;
     }
 
     pipeline.head = function() {
@@ -2490,16 +2395,25 @@ function pipeline(options) {
 
 
 /***/ }),
-/* 64 */
+/* 28 */,
+/* 29 */,
+/* 30 */,
+/* 31 */,
+/* 32 */,
+/* 33 */,
+/* 34 */,
+/* 35 */,
+/* 36 */,
+/* 37 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(12);
 
 const vecId = ['x', 'y', 'z'];
 /* harmony default export */ __webpack_exports__["a"] = (function($p, dataProps) {
     var data = dataProps || [];
-
+    console.log(data);
     $p.indexes = data.indexes || [];
     $p.categoryIndex = data.strHashes || {};
     $p.categoryLookup = data.strLists || {};
@@ -2510,13 +2424,13 @@ const vecId = ['x', 'y', 'z'];
     $p.pipeline = [];
     $p.crossfilters = {};
     $p.deriveCount = 0;
-    $p.resultDimension = [1, 1];
+    
     $p.dataSize = 0;
 
     var dkeys = $p.dkeys,
         dtypes = $p.dtypes,
         stats =  data.stats || null;
-
+    
     if (data.hasOwnProperty("size"))
         $p.dataSize = data.size;
     else if (Array.isArray(data))
@@ -2528,13 +2442,12 @@ const vecId = ['x', 'y', 'z'];
         colSize = Math.ceil($p.dataSize / rowSize);
 
     $p.dataDimension = [rowSize, colSize];
-
+    $p.resultDimension = [rowSize, colSize];
     $p.fields = $p.indexes.concat(dkeys.filter(function(k) {
         return $p.indexes.indexOf(k) === -1;
     }));
     $p.fieldWidths = new Array($p.fields.length).concat(new Array($p.deriveMax).fill(1));
     $p.fieldCount = $p.fields.length - $p.indexes.length;
-
 
     function getDataWidth(fid, range) {
         var range = Math.abs(range[1] - range[0]);
@@ -2556,7 +2469,7 @@ const vecId = ['x', 'y', 'z'];
         } else if (dtypes[fid] in ["float", "double", "numeric"]) {
             return 10;
         } else {
-            return range+1;
+            return range + 1;
         }
     }
     $p.fields.forEach(function(field) {
@@ -2597,11 +2510,15 @@ const vecId = ['x', 'y', 'z'];
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataFieldId.location, 0);
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemId.location, 1);
 
-    $p.attribute("_square", "vec2", new Float32Array([-1.0, -1.0,
-        1.0, -1.0, -1.0, 1.0, -1.0, 1.0,
-        1.0, -1.0,
-        1.0, 1.0
-    ]));
+    $p.attribute(
+        "_square",
+        "vec2",
+        new Float32Array([
+            -1.0, -1.0, 1.0, -1.0, 
+            -1.0, 1.0, -1.0, 1.0,
+            1.0, -1.0, 1.0, 1.0
+        ])
+    );
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 1);
 
     //setup all attribute, uniform, texture, varying needed by all the shaders
@@ -2719,7 +2636,7 @@ const vecId = ['x', 'y', 'z'];
 
 
 /***/ }),
-/* 65 */
+/* 38 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2728,35 +2645,36 @@ function output($p) {
     return function(format) {
         var buf = $p.getResult(),
             res = {},
-            offset = 0;
+            offset = 0,
+            rs = 0;
 
         var rs = 0;
-
-        if ($p.resultDimension[0] > 1) {
-            res[$p.fields[rs]] = $p.attribute.aDataValx.data;
-            rs++;
-        }
-
-        if ($p.resultDimension[1] > 1) {
-            var bx = $p.attribute.aDataValx.data;
-            var by = $p.attribute.aDataValy.data;
-            var ax = new Array($p.resultDimension[0] * $p.resultDimension[1]),
-                ay = new Array($p.resultDimension[0] * $p.resultDimension[1]);
-
-            for (var y = 0; y < $p.resultDimension[1]; y++) {
-                for (var x = 0; x < $p.resultDimension[0]; x++) {
-
-                    ax[y * $p.resultDimension[0] + x] = bx[x];
-                    ay[y * $p.resultDimension[0] + x] = by[y]
-                }
+        if($p.indexes.length > 0) {
+            if ($p.resultDimension[0] > 1) {
+                res[$p.fields[rs]] = $p.attribute.aDataValx.data;
+                rs++;
             }
-            res[$p.fields[0]] = ax;
-            res[$p.fields[rs]] = ay;
-            rs++;
+
+            if ($p.resultDimension[1] > 1) {
+                var bx = $p.attribute.aDataValx.data;
+                var by = $p.attribute.aDataValy.data;
+                var ax = new Array($p.resultDimension[0] * $p.resultDimension[1]),
+                    ay = new Array($p.resultDimension[0] * $p.resultDimension[1]);
+
+                for (var y = 0; y < $p.resultDimension[1]; y++) {
+                    for (var x = 0; x < $p.resultDimension[0]; x++) {
+
+                        ax[y * $p.resultDimension[0] + x] = bx[x];
+                        ay[y * $p.resultDimension[0] + x] = by[y]
+                    }
+                }
+                res[$p.fields[0]] = ax;
+                res[$p.fields[rs]] = ay;
+                rs++;
+            }
         }
 
         var arraySize = $p.resultDimension[0] * $p.resultDimension[1];
-
         for (var i = rs; i < $p.fields.length; i++) {
             res[$p.fields[i]] = buf.subarray(offset, offset + arraySize);
             offset += arraySize;
@@ -2764,7 +2682,7 @@ function output($p) {
 
         if (format == 'row') {
             var objectArray = new Array(arraySize);
-
+            
             for (var i = 0; i < arraySize; i++) {
                 var obj = {};
                 Object.keys(res).forEach(function(f) {
@@ -2772,7 +2690,7 @@ function output($p) {
                         dtype = $p.dtypes[kid];
 
                     if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
-                        obj[f] = $p.categoryLookup[f][res[f][i]];
+                        obj[f] = $p.categoryLookup[f][res[f][i]-1];
                     } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
                         obj[f] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
                     } else {
@@ -2792,12 +2710,12 @@ function output($p) {
 
 
 /***/ }),
-/* 66 */
+/* 39 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = init;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(67);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl_src_flexgl__ = __webpack_require__(40);
 
 
 function init(options) {
@@ -2831,15 +2749,15 @@ function init(options) {
 
 
 /***/ }),
-/* 67 */
+/* 40 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = FlexGL;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__resource__ = __webpack_require__(68);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__program__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shader__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__framebuffer__ = __webpack_require__(73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__resource__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__program__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shader__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__framebuffer__ = __webpack_require__(46);
 
 
 
@@ -3132,16 +3050,16 @@ function FlexGL(arg) {
 
 
 /***/ }),
-/* 68 */
+/* 41 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Resource;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__attribute__ = __webpack_require__(69);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__texture__ = __webpack_require__(33);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__varying__ = __webpack_require__(70);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subroutine__ = __webpack_require__(71);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__attribute__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__texture__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__varying__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subroutine__ = __webpack_require__(44);
 
 
 
@@ -3199,7 +3117,7 @@ function Resource(glContext) {
 
 
 /***/ }),
-/* 69 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3259,7 +3177,7 @@ function Attribute(glContext) {
 
 
 /***/ }),
-/* 70 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3293,7 +3211,7 @@ function Varying(glContext) {
 
 
 /***/ }),
-/* 71 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3331,12 +3249,12 @@ function Subroutine() {
 
 
 /***/ }),
-/* 72 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Program;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shader__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shader__ = __webpack_require__(15);
 
 
 function Program(glContext, resources) {
@@ -3427,12 +3345,12 @@ function Program(glContext, resources) {
 
 
 /***/ }),
-/* 73 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Framebuffer;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__texture__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__texture__ = __webpack_require__(14);
 
 
 function Framebuffer(glContext) {
@@ -3507,18 +3425,18 @@ function Framebuffer(glContext) {
 
 
 /***/ }),
-/* 74 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = compile;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__derive__ = __webpack_require__(35);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__reveal__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__aggregate__ = __webpack_require__(75);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__cache__ = __webpack_require__(76);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__match__ = __webpack_require__(77);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__extent__ = __webpack_require__(78);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__visualize__ = __webpack_require__(79);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__derive__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__reveal__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__aggregate__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__cache__ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__match__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__extent__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__visualize__ = __webpack_require__(52);
 
 
 
@@ -3547,12 +3465,12 @@ function compile(fxgl, fields, spec) {
 
 
 /***/ }),
-/* 75 */
+/* 48 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = aggregate;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(12);
 
 
 const vecId = ['x', 'y', 'z'];
@@ -3694,27 +3612,25 @@ function aggregate($p) {
                 if (opt > 4) getVarStd = true;
             }
         });
-
+        
         if (getAvgValues) {
-            // console.log('*** Second Pass for Aggregation');
+            console.log('*** Second Pass for Aggregation');
             var fieldCount = $p.uniform.uFieldCount.data,
                 preAggrData = $p.uniform.uDataInput.data;
 
             $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
             $p.uniform.uFieldCount.data = resultFieldIds.length;
 
-
-                $p.framebuffer(
-                    "fAggrStats",
-                    "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
-                );
-                $p.bindFramebuffer("fAggrStats");
-
-
+            $p.framebuffer(
+                "fAggrStats",
+                "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
+            );
+            $p.bindFramebuffer("fAggrStats");
 
             gl = $p.program("group2");
             $p.framebuffer.enableRead("fGroupResults");
             gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
+            gl.viewport(0, 0, $p.resultDimension[0], $p.resultDimension[1]* resultFieldIds.length);
 
             gl.disable(gl.BLEND);
             resultFieldIds.forEach(function(f, i) {
@@ -3752,13 +3668,6 @@ function aggregate($p) {
             $p.resultDimension = [$p.fieldWidths[groupFieldIds[0]], 1];
         }
 
-
-        // console.log( groupFieldIds, $p.resultDimension, $p.fieldWidths, $p.fieldDomains);
-        // var resultFields = Object.keys(spec).filter(function(d){return d!='$by' && d!='$group';}),
-        //     resultFieldIds = resultFields.map(function(f) { return fields.indexOf(f); }),
-        //     operators = resultFields.map(function(r){return spec[r]; });
-
-
         var newFieldSpec = spec.$calculate || spec.$reduce || spec.$out || null;
 
         if (newFieldSpec === null) {
@@ -3775,7 +3684,7 @@ function aggregate($p) {
                 return newFieldSpec[f][Object.keys(newFieldSpec[f])[0]];
             }),
             resultFieldIds = resultFields.map(function(f) {
-                return $p.fields.indexOf(f);
+                return (f == '*') ? 0 : $p.fields.indexOf(f);
             }),
             operators = resultFields.map(function(f, i) {
                 return Object.keys(newFieldSpec[newFieldNames[i]])[0];
@@ -3787,15 +3696,16 @@ function aggregate($p) {
                 "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFields.length]
             );
         }
+
         _execute(operators, groupFieldIds, resultFieldIds);
 
         $p.getResult = aggregate.result;
         $p.indexes = groupFields;
         $p.dataDimension = $p.resultDimension;
 
-        var newFieldIds = groupFieldIds.filter(function(f) {
-            return f !== -1
-        }).concat(resultFieldIds);
+        
+        var oldFieldIds = groupFieldIds.concat(resultFields);
+        var newFieldIds = groupFields.concat(resultFields).map( (f, i) => i );
 
         $p.fields = groupFields
             .map(function(gf) {
@@ -3810,15 +3720,16 @@ function aggregate($p) {
         // $p.fieldWidths = $p.fieldWidths.concat($p.deriveWidths);
         // $p.fieldDomains = $p.fieldDomains.concat($p.deriveDomains);
 
-        $p.fieldDomains = newFieldIds.map(function(f) {
+        var newFieldDomains = oldFieldIds.map(function(f) {
             return $p.fieldDomains[f];
         });
-        $p.fieldWidths = newFieldIds.map(function(f) {
+        var newFieldWidths = newFieldIds.map(function(f) {
             return $p.fieldWidths[f];
         });
-
+        $p.fieldDomains = newFieldDomains;
+        $p.fieldWidths = newFieldWidths;
         // $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
-
+       
         $p.attribute.aDataItemId = Object(__WEBPACK_IMPORTED_MODULE_0__utils__["a" /* seqFloat */])(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
         $p.dataSize = $p.resultDimension[0] * $p.resultDimension[1];
         $p.uniform.uDataSize.data = $p.dataSize;
@@ -3856,13 +3767,14 @@ function aggregate($p) {
         $p.indexes.forEach(function(d, i) {
             // $p.attribute['aDataId' + vecId[i]] = seqFloat(0, $p.resultDimension[i]-1);
             var interval = 1;
-
+            var ifid = $p.fields.indexOf(d);
+      
             if ($p.intervals.hasOwnProperty(d))
                 interval = $p.intervals[d].interval;
 
             $p.attribute['aDataVal' + vecId[i]] = Object(__WEBPACK_IMPORTED_MODULE_0__utils__["a" /* seqFloat */])(
-                $p.fieldDomains[i][0],
-                $p.fieldDomains[i][1],
+                $p.fieldDomains[ifid][0],
+                $p.fieldDomains[ifid][1],
                 interval
             );
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
@@ -3877,13 +3789,18 @@ function aggregate($p) {
             rowTotal = Math.min(resultSize, $p.resultDimension[0]),
             colTotal = Math.ceil(resultSize / $p.resultDimension[0]);
 
-        $p.bindFramebuffer("fGroupResults");
+        if(getAvgValues) {
+            $p.bindFramebuffer("fAggrStats");
+        } else {
+            $p.bindFramebuffer("fGroupResults");
+        }
+       
         var gl = $p.program("group"),
             result = new Float32Array(rowTotal * colTotal * 4 * resultFieldCount);
 
         gl.readPixels(offset[0], offset[1], rowTotal, colTotal * resultFieldCount, gl.RGBA, gl.FLOAT, result);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
+        console.log(result.filter((d,i) => i % 4 ===3)); 
         return result.filter(function(d, i) {
             return i % 4 === 3;
         });
@@ -3894,70 +3811,60 @@ function aggregate($p) {
 
 
 /***/ }),
-/* 76 */
+/* 49 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = cache;
-function cache(fxgl) {
+function cache($p) {
     var cache = {},
-        dataDimension = fxgl.uniform.uDataDim.data,
-        fieldCount =  fxgl.uniform.uFieldCount.data,
+        dataDimension = $p.uniform.uDataDim.data,
+        fieldCount =  $p.uniform.uFieldCount.data,
         cacheTag;
 
-    var vs = fxgl.shader.vertex(function () {
+    var vs = $p.shader.vertex(function () {
          gl_Position = vec4(this._square, 0, 1);
     });
 
-    var fs = fxgl.shader.fragment(function () {
+    var fs = $p.shader.fragment(function () {
         var x, y;
-        $vec4(value);
+
         x = (gl_FragCoord.x) / this.uDataDim.x;
         y = (gl_FragCoord.y) / (this.uDataDim.y * float(this.uFieldCount));
-        value = texture2D(this.uDataInput, vec2(x, y));
-        gl_FragColor = value;
+
+        gl_FragColor = texture2D(this.uDataInput, vec2(x, y));
     });
 
-    fxgl.program("cache", vs, fs);
+    $p.program("cache", vs, fs);
 
-    cache.execute = function(tag, dataDim, fieldTotal) {
+    cache.execute = function(tag) {
         cacheTag = tag;
-        dataDimension = dataDim || fxgl.uniform.uDataDim.data;
-        fieldCount = fieldTotal || fxgl.uniform.uFieldCount.data;
-
-        console.log(fieldCount);
-
-        fxgl.framebuffer(tag, "float", [dataDimension[0], dataDimension[1]*fieldCount]);
-        fxgl.bindFramebuffer(tag);
-        var gl = fxgl.program("cache");
-
-        // console.log(dataDimension, fieldCount);
-        gl.viewport(0, 0, dataDimension[0], dataDimension[1]*fieldCount);
+        dataDimension = $p.uniform.uDataDim.data;
+        fieldCount = $p.uniform.uFieldCount.data;
+        $p.framebuffer(tag, "float", [dataDimension[0], dataDimension[1] * fieldCount]);
+        $p.bindFramebuffer(tag);
+        var gl = $p.program("cache");
+        gl.viewport(0, 0, dataDimension[0], dataDimension[1] * fieldCount);
         gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.BLEND);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-        var result = new Float32Array(dataDimension[0]*dataDimension[1]*4*fieldCount);
-        gl.readPixels(0, 0, dataDimension[0], dataDimension[1]*fieldCount, gl.RGBA, gl.FLOAT, result);
-        console.log(result.filter(function(d, i){ return i%4===3 } ));
-
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        fxgl.framebuffer.enableRead(tag);
-        fxgl.uniform.uDataInput = fxgl.framebuffer[tag].texture;
+        $p.framebuffer.enableRead(tag);
+        $p.uniform.uDataInput = $p.framebuffer[tag].texture;
     }
 
     cache.result =  function() {
-        fxgl.bindFramebuffer(cacheTag);
-        var gl = fxgl.program("cache"),
-            result = new Float32Array(dataDimension[0]*dataDimension[1]*4*fieldCount);
-
-        gl.readPixels(0, 0, dataDimension[0], dataDimension[1]*fieldCount, gl.RGBA, gl.FLOAT, result);
+        var gl = $p.ctx;
+        $p.bindFramebuffer(cacheTag);
+        dataDimension = $p.uniform.uDataDim.data;
+        var result = new Float32Array(dataDimension[0]*dataDimension[1]*4*fieldCount);
+        gl.readPixels(0, 0, dataDimension[0], dataDimension[1] * fieldCount, gl.RGBA, gl.FLOAT, result);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-        return result.filter(function(d, i){ return i%4===0;} );
+        result = result.filter(function(d, i){ return i%4===3;} );
+        return result;
     }
 
     return cache;
@@ -3965,7 +3872,7 @@ function cache(fxgl) {
 
 
 /***/ }),
-/* 77 */
+/* 50 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4240,7 +4147,7 @@ function match($p) {
 
 
 /***/ }),
-/* 78 */
+/* 51 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4337,18 +4244,18 @@ function extent(fxgl) {
 
 
 /***/ }),
-/* 79 */
+/* 52 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = visualize;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__color__ = __webpack_require__(80);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ctypes__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__render__ = __webpack_require__(83);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__reveal__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__encode__ = __webpack_require__(84);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__metavis_layout__ = __webpack_require__(86);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__color__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ctypes__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__render__ = __webpack_require__(56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__reveal__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__encode__ = __webpack_require__(57);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__metavis_layout__ = __webpack_require__(59);
 
 
 
@@ -4600,13 +4507,13 @@ function visualize($p) {
 
 
 /***/ }),
-/* 80 */
+/* 53 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = color;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gradients__ = __webpack_require__(81);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colorhex__ = __webpack_require__(82);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gradients__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colorhex__ = __webpack_require__(55);
 
 
 
@@ -4766,7 +4673,7 @@ function mapColorRGB($int_fieldId, $float_value) {
 
 
 /***/ }),
-/* 81 */
+/* 54 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4781,7 +4688,7 @@ const gradients = {
 
 
 /***/ }),
-/* 82 */
+/* 55 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4932,7 +4839,7 @@ const colorhex = {
 
 
 /***/ }),
-/* 83 */
+/* 56 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5136,7 +5043,7 @@ function render(fxgl) {
 
 
 /***/ }),
-/* 84 */
+/* 57 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5268,7 +5175,7 @@ function encode($p, vmap, colorManager) {
 
 
 /***/ }),
-/* 85 */
+/* 58 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5413,13 +5320,13 @@ function brush(arg){
 
 
 /***/ }),
-/* 86 */
+/* 59 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = layout;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chart__ = __webpack_require__(87);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chart__ = __webpack_require__(60);
 
 
 
@@ -5607,15 +5514,15 @@ function layout(arg){
 
 
 /***/ }),
-/* 87 */
+/* 60 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = chart;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__axis__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__format__ = __webpack_require__(41);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scale__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__legend__ = __webpack_require__(89);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__axis__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__format__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scale__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__legend__ = __webpack_require__(62);
 
 
 
@@ -5879,7 +5786,7 @@ function chart(svg, arg) {
 
 
 /***/ }),
-/* 88 */
+/* 61 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6135,14 +6042,14 @@ function vectorAvg(vectors) {
 
 
 /***/ }),
-/* 89 */
+/* 62 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = color;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__axis__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__format__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__axis__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__format__ = __webpack_require__(22);
 
 
 
@@ -6299,7 +6206,100 @@ function color(arg){
 
 
 /***/ }),
-/* 90 */
+/* 63 */,
+/* 64 */,
+/* 65 */,
+/* 66 */,
+/* 67 */,
+/* 68 */,
+/* 69 */,
+/* 70 */,
+/* 71 */,
+/* 72 */,
+/* 73 */,
+/* 74 */,
+/* 75 */,
+/* 76 */,
+/* 77 */,
+/* 78 */,
+/* 79 */,
+/* 80 */,
+/* 81 */,
+/* 82 */,
+/* 83 */,
+/* 84 */,
+/* 85 */,
+/* 86 */,
+/* 87 */,
+/* 88 */,
+/* 89 */,
+/* 90 */,
+/* 91 */,
+/* 92 */,
+/* 93 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_pipeline__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_cstore__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ctypes__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_ajax__ = __webpack_require__(95);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_parse__ = __webpack_require__(96);
+
+
+
+
+
+
+var root = typeof self == 'object' && self.self === self && self ||
+           typeof global == 'object' && global.global === global && global ||
+           this;
+
+root.p4 = __WEBPACK_IMPORTED_MODULE_0__src_pipeline__["a" /* default */];
+root.p4.ajax = __WEBPACK_IMPORTED_MODULE_3__src_ajax__;
+root.p4.cstore = __WEBPACK_IMPORTED_MODULE_1__src_cstore__["a" /* default */];
+root.p4.ctypes = __WEBPACK_IMPORTED_MODULE_2__src_ctypes__;
+root.p4.parse = __WEBPACK_IMPORTED_MODULE_4__src_parse__["a" /* default */];
+
+/* harmony default export */ __webpack_exports__["default"] = (root.p4);
+
+if(typeof module != 'undefined' && module.exports)
+    module.exports = root.p4;
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(94)(module)))
+
+/***/ }),
+/* 94 */
+/***/ (function(module, exports) {
+
+module.exports = function(originalModule) {
+	if(!originalModule.webpackPolyfill) {
+		var module = Object.create(originalModule);
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		Object.defineProperty(module, "exports", {
+			enumerable: true,
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 95 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6371,7 +6371,7 @@ function post(arg) {
 
 
 /***/ }),
-/* 91 */
+/* 96 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -1,0 +1,90 @@
+{
+    "data" : {
+        "url": "data/synthetic",
+        "dtype": "typedArray",
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float"
+        }
+    },
+    "views": [
+        {
+            "id": "c1",
+            "width": 250,
+            "height": 400,
+            "padding": {"left": 45, "right": 10, "top": 10, "bottom":40},
+            "offset": [0, 0]
+        },
+        {
+            "id": "c2",
+            "width": 250,
+            "height": 400,
+            "padding": {"left": 45, "right": 10, "top": 10, "bottom":40},
+            "offset": [250, 0]
+        },
+        {
+            "id": "c3",
+            "width": 250,
+            "height": 400,
+            "padding": {"left": 45, "right": 10, "top": 10, "bottom":40},
+            "offset": [500, 0]
+        }
+    ],
+    "pipeline": [
+        {
+            "$match": {
+                "BabyWeight": [0, 15],
+                "MotherWeight": [70, 370]
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c1",
+                "mark": "line",
+                "color": "steelblue",
+                "opacity": 0.15,
+                "x": [
+                    "BabyWeight",
+                    "MotherWeight",
+                    "MotherWgtGain",
+                    "MotherHeight"
+                ]
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c2",
+                "mark": "line",
+                "color": "steelblue",
+                "opacity": "auto",
+                "x": [
+                    "BabyWeight",
+                    "MotherWeight",
+                    "MotherWgtGain",
+                    "MotherHeight"
+                ]
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c3",
+                "mark": "line",
+                "color": "auto",
+                "x": [
+                    "BabyWeight",
+                    "MotherWeight",
+                    "MotherWgtGain",
+                    "MotherHeight"
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,85 @@
+{
+    "data" : {
+        "url": "data/synthetic",
+        "dtype": "typedArray",
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float"
+        }
+    },
+    "views": [
+        {
+            "id": "c1",
+            "width": 250,
+            "height": 260,
+            "padding": {"left": 40, "right": 10, "top": 10, "bottom":40},
+            "offset": [0, 100]
+        },
+        {
+            "id": "c2",
+            "width": 250,
+            "height": 260,
+            "padding": {"left": 40, "right": 10, "top": 10, "bottom":40},
+            "offset": [250, 100]
+        },
+        {
+            "id": "c3",
+            "width": 250,
+            "height": 260,
+            "padding": {"left": 40, "right": 10, "top": 10, "bottom":40},
+            "offset": [500, 100]
+        }
+    ],
+    "pipeline": [
+        {
+            "$match": {
+                "BabyWeight": [0, 15],
+                "MotherWeight": [70, 370]
+            }
+        },
+        {
+            "$derive": {
+                "Binned BabyWeight": "floor(BabyWeight)",
+                "Binned MotherWeight": "floor(MotherWeight / 21.0) - 3."
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c3",
+                "mark": "rect",
+                "color": "steelblue",
+                "opacity": "auto",
+                "x": "Binned MotherWeight",
+                "y": "Binned BabyWeight"
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c1",
+                "mark": "circle",
+                "color": "steelblue",
+                "opacity": 0.15,
+                "x": "MotherWeight",
+                "y": "BabyWeight"
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c2",
+                "mark": "circle",
+                "color": "steelblue",
+                "opacity": "auto",
+                "x": "MotherWeight",
+                "y": "BabyWeight"
+            }
+        }
+    ]
+}

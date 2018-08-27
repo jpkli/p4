@@ -1,6 +1,6 @@
 {
     "data" : {
-        "source": "data/NatalityUSA2015Dec.csv",
+        "source": "data/NatalityUSA2015.csv",
         "format": "csv",
         "schema": {
             "BirthMonth"   : "int",
@@ -29,8 +29,7 @@
             "$aggregate" : {
                 "$group": ["FatherAge", "MotherAge"],
                 "$reduce" : {
-                    "Babies": { "$count": "*"},
-                    "Avg. Weight": { "$avg": "Weight"}
+                    "Babies": { "$count": "*"}
                 }
             }
         },

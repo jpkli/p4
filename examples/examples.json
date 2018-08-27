@@ -1,6 +1,6 @@
 [
     {
-        "category": "Basic Charts",
+        "category": "Single View",
         "examples": [
             {
                 "name": "Bar Chart",
@@ -17,6 +17,7 @@
             {
                 "name": "Heatmap",
                 "file": "heatmap.json"
+<<<<<<< HEAD
             }
         ],
         "views": [
@@ -34,6 +35,8 @@
             {
                 "name": "Histogram",
                 "file": "histogram.json"
+=======
+>>>>>>> a8d931264e00ccbcd54bb2862117bbf40c6044f3
             },
             {
                 "name": "Derive New Variable",
@@ -42,31 +45,30 @@
             {
                 "name": "Derive+Match+Group",
                 "file": "derive-match-group.json"
-            }
-        ],
-        "views": [
-            {
-                "width": 500,
-                "height": 400,
-                "offset": [0, 0],
-                "padding": {"left": 70, "right": 20, "top": 40, "bottom": 60}
-            }
-        ]
-    },
-    {
-        "category": "Mulitple Views",
-        "examples": [
+            },
             {
                 "name": "Bushing and Linking",
                 "file": "brush-link.json"
             },
             {
-                "name": "Coordinated Views",
-                "file": "multiviews.json"
+                "name": "Point Perception",
+                "file": "perception-point.json"
             },
             {
-                "name": "Correlating Bar Charts",
-                "file": "hoverbars.json"
+                "name": "Line Perception",
+                "file": "perception-line.json"
+            },
+            {
+                "name": "Multiple Views",
+                "file": "multiviews.json"
+            }
+        ],
+        "views": [
+            {
+                "width": 500,
+                "height": 450,
+                "offset": [0, 0],
+                "padding": {"left": 60, "right": 40, "top": 40, "bottom": 60}
             }
         ]
     }

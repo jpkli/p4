@@ -1,104 +1,13 @@
 <html>
 
 <head>
-    <title>P6: JavaScript library for Big Data processing and visualization</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>P4: JavaScript library for Big Data processing and visualization</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.6/showdown.min.js
 "></script>
-    <style>
-        .navbar-nav>.active>a {
-            background: #f7f7f7!important;
-            border-bottom: 4px solid steelblue;
-            font-weight: bolder;
-        }
-
-        .navbar-nav>li>a {
-            font-size: 1.2em;
-            padding: 15px 20px;
-        }
-
-        .navbar-brand {
-            font-size: 3em;
-            padding-right: 30px;
-            font-weight: bolder;
-            color: steelblue!important;
-        }
-
-        .container {
-            max-width: 880px;
-        }
-
-        .title {
-            color: #000;
-        }
-
-        .sidebar-module {
-            margin-bottom: 1em;
-        }
-
-        .example-image {
-            overflow: hidden;
-        }
-
-        .example-image img {
-            width: 90%;
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 100%;
-            width: 100%;
-            opacity: 0;
-            transition: .5s ease;
-            background-color: #222;
-        }
-
-        .example-image:hover .overlay {
-            opacity: 0.5;
-        }
-
-        .text {
-            color: white;
-            font-size: 1.3em;
-            position: absolute;
-            width: 70%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            -ms-transform: translate(-50%, -50%);
-            text-align: center;
-        }
-
-        .docs ol {
-            margin-left: 1em;
-        }
-        .docs .active {
-            font-weight: bold;
-        }
-
-        #docs-main pre {
-            background-color: #F8F8F8;
-            border-radius: 0;
-            font-family: "Courier New", Courier, monospace;
-        }
-
-        #docs-main img {
-            margin-left: 20%;
-            width: 60%;
-        }
-
-        /*.example-image:hover img {
-            -ms-transform: scale(1.1);
-            -webkit-transform: scale(1.1);
-            transform: scale(1.1);
-        }*/
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
@@ -111,207 +20,147 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">P6</a>
+                <a class="navbar-brand" href="#">P4</a>
             </div>
             <div id="main-menu" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li class="active"><a class="mtab" href="#home">Home</a></li>
-                    <li><a class="mtab" href="#documentation">Documentation</a></li>
-                    <li><a href="examples">Examples</a></li>
-                    <li><a class="mtab" href="benchmark">Benchmarks</a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="../navbar/">Github</a></li>
+                    <li><a  id="menu-usage" class="mtab" href="#usage">Usage</a></li>
+                    <li><a href="/demos/p4">Examples</a></li>
+                    <li><a href="https://github.com/jpkli/p4">Source Code</a></li>
                 </ul>
             </div>
         </div>
     </nav>
-
-
     <div class="container page" id="home">
         <div class="page-header" style="margin: 0">
             <h2 class="title">
-                <strong>P6</strong> -
+                <strong>P4</strong> -
                 <strong>P</strong>ortable
-                 and
-                 <strong>P</strong>roductive
-                 <strong>P</strong>arallel
-                 <strong>P</strong>rocessing
-                 <strong>P</strong>i<strong>p</strong>elines
+                <strong>P</strong>arallel
+                <strong>P</strong>rocessing
+                <strong>P</strong>ipelines
             </h2>
             <p class="lead">A GPU accelerated JavaScript library for data processing and interactive visualization.</p>
         </div>
 
         <div class="row">
             <div class="col-xs-6 col-lg-4">
-                <a href="examples#bar-chart" class="example-image">
-                    <img src="docs/images/barchart.png" />
+                <a class="example-image" href="/demos/p4#parallel-coordinates">
+                    <img src="examples/images/parallel-coordinates.png" />
                     <div class="overlay">
-                        <div class="text">Aggregate <hr />Bar Chart</div>
+                        <div class="text">Mutidimentional Match <br />(Parallel Coordinates)</div>
+                    </div>
+                </a>
+            </div>
+            <!-- <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="/demos/p4#bar-chart">
+                    <img src="examples/images/bar-chart.png" />
+                    <div class="overlay">
+                        <div class="text">Aggregate <br />(Bar Chart)</div>
+                    </div>
+                </a>
+            </div> -->
+            <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="/demos/p4#scatter-plot">
+                    <img src="examples/images/scatter-plot.png" />
+                    <div class="overlay">
+                        <div class="text">Match <br />(Scatter Plot)</div>
                     </div>
                 </a>
             </div>
             <div class="col-xs-6 col-lg-4">
-                <a class="example-image" href="examples#scatter-plot">
-                    <img src="docs/images/scatterplot.png" />
+                <a class="example-image" href="/demos/p4#heatmap2D">
+                    <img src="examples/images/heatmap.png" />
                     <div class="overlay">
-                        <div class="text">Match <hr />Scatter Plot</div>
+                        <div class="text">Match &amp; Group <br /> (2D Heatmap)</div>
                     </div>
                 </a>
             </div>
 
             <div class="col-xs-6 col-lg-4">
-                <a class="example-image" href="examples#heatmap">
-                    <img src="docs/images/heatmap.png" />
+                <a class="example-image" href="/demos/p4#brush-link">
+                    <img src="examples/images/brush-link.png" />
                     <div class="overlay">
-                        <div class="text">Match &amp; Group <hr />2D Heatmap</div>
+                        <div class="text">Brush &amp; Link <br />(Multiple Views)</div>
                     </div>
                 </a>
             </div>
 
             <div class="col-xs-6 col-lg-4">
-                <a class="example-image" href="examples#derive-match-group">
-                    <img src="docs/images/colorbars.png" />
+                <a class="example-image" href="/demos/p4#perception-line">
+                    <img src="examples/images/perception-line.png" />
                     <div class="overlay">
-                        <div class="text">Derive, Match, &amp; Group <hr />Column Chart</div>
+                        <div class="text">Enhance Perception (Parallel Coordinates)</div>
                     </div>
                 </a>
             </div>
 
+
             <div class="col-xs-6 col-lg-4">
-                <a class="example-image" href="examples#parallel-coordinates">
-                    <img src="docs/images/parallelcoordinates.png" />
+                <a class="example-image" href="/demos/p4#derive-match-group">
+                    <img src="examples/images/colorbars.png" />
                     <div class="overlay">
-                        <div class="text">Mutidimentional Matches <hr />Parallel Coordinates</div>
+                        <div class="text">Derive, Match, &amp; Group <br />(Colored Bar Chart)</div>
                     </div>
                 </a>
             </div>
-            <div class="col-xs-6 col-lg-4">
-                <a class="example-image" href="examples#multiviews">
-                    <img src="docs/images/multiviews.png" />
+            <!-- <div class="col-xs-6 col-lg-4">
+                <a class="example-image" href="/demos/p4#perception-point">
+                    <img src="examples/images/perception-point.png" />
                     <div class="overlay">
-                        <div class="text">Brush &amp; Link <hr />Multiple Views</div>
+                        <div class="text">Enhance Perception (Scatter Plot)</div>
                     </div>
                 </a>
-            </div>
+            </div> -->
         </div>
-        <!--/row-->
 
-        <div class="row">
+        <p class="paragraph">
+            <strong>P4</strong> is designed for building high-performance and interactive system for exploratory analysis and visualization of big data.
+            P4 provides high performance by leveraging GPU computing to accelerate both data processing and rendering, while offering a simple programming interface with declarative grammars for rapid specification of data transformations, visualizations, and interactions.
+        </p>
 
-            <div class="col-xs-6 col-lg-4">
-                <h3>Performance</h3>
-                <p>Parallel processing via GPU computing for accelerating transformation and visualization of big data.
-                    <a href="#">learn more</a>
-                </p>
-            </div>
-            <div class="col-xs-6 col-lg-4">
-                <h3>Productivity</h3>
-                <p>An easy-to-use programming interface for rapid specification of data processing, visualization, and interaction.
-                    <a href="#">learn more</a>
-                </p>
-            </div>
-            <div class="col-xs-6 col-lg-4">
-                <h3>Portability</h3>
-                <p>Run accross computing devices and web browsers, seamlessly cooperating with various web technologies.
-                    <a href="#">learn more</a>
-                </p>
-            </div>
-            <div class="col-xs-6 col-lg-4">
-                <h3>Programmability</h3>
-                <p>Runtime GPU code generation for adding flexibility, expressivenenss, and customizations.
-                    <a href="#">learn more</a>
-                </p>
-            </div>
-            <div class="col-xs-6 col-lg-4">
-                <h3>Pipelining</h3>
-                <p>Chained operations and seamless interoperability between data processing and visualizantion rendering.
-                    <a href="#">learn more</a>
-                </p>
-            </div>
-            <div class="col-xs-6 col-lg-4">
-                <h3>Perception</h3>
-                <p>Advanced tenchinques for enhancing percetual scalability and augmenting human cognition.
-                    <a href="#">learn more</a>
-                </p>
-            </div>
-        </div>
-        <!--/row-->
-    </div>
-
-    <div class="container page" id="documentation">
-        <div class="row page">
-            <div class="col-sm-2">
-                <div class="docs sidebar-module">
-                    <h5><a class="active" href="#overview">Overview</a></h5>
-                    <h5><a href="#data">Data and I/O</a></h5>
-                    <h5><a href="#operations">Operations</a></h5>
-                    <h5><a href="#control">Control Flow</a></h5>
-                </div>
-                <div class="docs sidebar-module">
-                    <h5><a href="#">Data Transform</a></h5>
-                    <ol class="docs list-unstyled">
-                        <li><a href="#">Match</a></li>
-                        <li><a href="#">Derive</a></li>
-                        <li><a href="#">Aggregate</a></li>
-                    </ol>
-                </div>
-                <div class="docs sidebar-module">
-                    <h5>Visualization</h5>
-                    <ol class="list-unstyled">
-                        <li><a href="#">Encodings</a></li>
-                        <li><a href="#">Views</a></a>
-                        </li>
-                        <li><a href="#">Colors</a></li>
-                    </ol>
-                </div>
-                <div class="sidebar-module">
-                    <h5>Interaction</h5>
-                    <ol class="list-unstyled">
-                        <li><a href="#">Events</a></li>
-                        <li><a href="#">Responses</a></a>
-                        </li>
-                        <li><a href="#">Across Views</a></li>
-                    </ol>
-                </div>
-            </div>
-            <div class="col-sm-10" id="docs-main">
-                <div>
-                    <h3>Pipeline Architecture</h3>
-                </div>
-            </div>
+        <h4>
+            The mission of P4 is to help more people use data analytics and visualization with GPU computing. P4 makes it possible for visualization designers and system developers with little or no knowledge in parallel programming and GPU computing to develop data analytics and visualization applications that efficiently run on the GPU.
+        </h4>
+        <div style="text-align: center;">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/NJWTCGHSin8?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
     </div>
+
+    <div class="container page" id="usage">
+        <div id="docs-main"></div>
+    </div>
+    <footer class="footer" style="text-align: center;">
+        <hr />
+        <p>
+            P4 is developed with
+             <span class="glyphicon glyphicon-heart" style="color: red; opacity: 0.5;"></span>
+            by <a href="https://github.com/jpkli">Kelvin Li</a> at <a href="http://www.ucdavis.edu"  style="color: darkblue;">U.C. Davis</a> <a href="http://vidi.cs.ucdavis.edu" style="color: green">VIDI Labs</a>.</p>
+    </footer>
     <script>
         showdown.setFlavor('github');
         var converter = new showdown.Converter();
-        $('.docs a').click(function(e){
-            e.preventDefault();
-            var docs = $(this).attr('href').slice(1) + '.md';
-            $.get('docs/' + docs, function(text){
-                html = converter.makeHtml(text);
-                $('#docs-main').html(html);
-            });
+        $.get('docs.md', function(text){
+            html = converter.makeHtml(text);
+            $('#docs-main').html(html);
+        });
 
-            $('.docs .active').removeClass('active');
-            $(this).addClass('active');
-        })
-
-        $('.docs .active').trigger('click');
-
-        $('.page').each(function(i) {
-            if (i > 0)
-                $('#' + $(this).attr('id')).hide();
-        })
+        if(window.location.hash == '#usage') {
+            $("#home").hide();
+        } else  {
+            $("#usage").hide();
+        }
 
         $('.mtab').click(function(e) {
-            // e.preventDefault();
+            e.preventDefault();
             $($('#main-menu > ul > li.active > a').first().attr('href')).hide();
             $('#main-menu > ul > li.active').first().removeClass('active');
 
             $(this).parent().addClass('active');
             $($(this).attr('href')).show();
         })
+
     </script>
 </body>
 

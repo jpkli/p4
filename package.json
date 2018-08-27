@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jpkli/p6.git"
+    "url": "git+https://github.com/jpkli/p4.git"
   },
   "keywords": [
     "gpu computing",
@@ -26,7 +26,7 @@
   "author": "Kelvin Li",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/jpkli/p6/issues"
+    "url": "https://github.com/jpkli/p4/issues"
   },
   "homepage": "https://github.com/jpkli/p6#readme",
   "devDependencies": {
