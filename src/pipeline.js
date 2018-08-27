@@ -211,6 +211,7 @@ export default function pipeline(options) {
 
     pipeline.cache = function(tag) {
         operation.cache.execute(tag);
+        $p.getResult = operation.cache.result;
         return pipeline;
     }
 
@@ -297,6 +298,7 @@ export default function pipeline(options) {
                 pipeline[opt](arg);
             }
         })
+        return pipeline;
     }
 
     pipeline.head = function() {

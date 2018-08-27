@@ -139,27 +139,25 @@ export default function aggregate($p) {
                 if (opt > 4) getVarStd = true;
             }
         });
-
+        
         if (getAvgValues) {
-            // console.log('*** Second Pass for Aggregation');
+            console.log('*** Second Pass for Aggregation');
             var fieldCount = $p.uniform.uFieldCount.data,
                 preAggrData = $p.uniform.uDataInput.data;
 
             $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
             $p.uniform.uFieldCount.data = resultFieldIds.length;
 
-
-                $p.framebuffer(
-                    "fAggrStats",
-                    "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
-                );
-                $p.bindFramebuffer("fAggrStats");
-
-
+            $p.framebuffer(
+                "fAggrStats",
+                "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
+            );
+            $p.bindFramebuffer("fAggrStats");
 
             gl = $p.program("group2");
             $p.framebuffer.enableRead("fGroupResults");
             gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
+            gl.viewport(0, 0, $p.resultDimension[0], $p.resultDimension[1]* resultFieldIds.length);
 
             gl.disable(gl.BLEND);
             resultFieldIds.forEach(function(f, i) {
@@ -197,13 +195,6 @@ export default function aggregate($p) {
             $p.resultDimension = [$p.fieldWidths[groupFieldIds[0]], 1];
         }
 
-
-        // console.log( groupFieldIds, $p.resultDimension, $p.fieldWidths, $p.fieldDomains);
-        // var resultFields = Object.keys(spec).filter(function(d){return d!='$by' && d!='$group';}),
-        //     resultFieldIds = resultFields.map(function(f) { return fields.indexOf(f); }),
-        //     operators = resultFields.map(function(r){return spec[r]; });
-
-
         var newFieldSpec = spec.$calculate || spec.$reduce || spec.$out || null;
 
         if (newFieldSpec === null) {
@@ -220,7 +211,7 @@ export default function aggregate($p) {
                 return newFieldSpec[f][Object.keys(newFieldSpec[f])[0]];
             }),
             resultFieldIds = resultFields.map(function(f) {
-                return $p.fields.indexOf(f);
+                return (f == '*') ? 0 : $p.fields.indexOf(f);
             }),
             operators = resultFields.map(function(f, i) {
                 return Object.keys(newFieldSpec[newFieldNames[i]])[0];
@@ -232,15 +223,16 @@ export default function aggregate($p) {
                 "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFields.length]
             );
         }
+
         _execute(operators, groupFieldIds, resultFieldIds);
 
         $p.getResult = aggregate.result;
         $p.indexes = groupFields;
         $p.dataDimension = $p.resultDimension;
 
-        var newFieldIds = groupFieldIds.filter(function(f) {
-            return f !== -1
-        }).concat(resultFieldIds);
+        
+        var oldFieldIds = groupFieldIds.concat(resultFields);
+        var newFieldIds = groupFields.concat(resultFields).map( (f, i) => i );
 
         $p.fields = groupFields
             .map(function(gf) {
@@ -255,15 +247,16 @@ export default function aggregate($p) {
         // $p.fieldWidths = $p.fieldWidths.concat($p.deriveWidths);
         // $p.fieldDomains = $p.fieldDomains.concat($p.deriveDomains);
 
-        $p.fieldDomains = newFieldIds.map(function(f) {
+        var newFieldDomains = oldFieldIds.map(function(f) {
             return $p.fieldDomains[f];
         });
-        $p.fieldWidths = newFieldIds.map(function(f) {
+        var newFieldWidths = newFieldIds.map(function(f) {
             return $p.fieldWidths[f];
         });
-
+        $p.fieldDomains = newFieldDomains;
+        $p.fieldWidths = newFieldWidths;
         // $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
-
+       
         $p.attribute.aDataItemId = seqFloat(0, $p.resultDimension[0] * $p.resultDimension[1] - 1);
         $p.dataSize = $p.resultDimension[0] * $p.resultDimension[1];
         $p.uniform.uDataSize.data = $p.dataSize;
@@ -301,13 +294,14 @@ export default function aggregate($p) {
         $p.indexes.forEach(function(d, i) {
             // $p.attribute['aDataId' + vecId[i]] = seqFloat(0, $p.resultDimension[i]-1);
             var interval = 1;
-
+            var ifid = $p.fields.indexOf(d);
+      
             if ($p.intervals.hasOwnProperty(d))
                 interval = $p.intervals[d].interval;
 
             $p.attribute['aDataVal' + vecId[i]] = seqFloat(
-                $p.fieldDomains[i][0],
-                $p.fieldDomains[i][1],
+                $p.fieldDomains[ifid][0],
+                $p.fieldDomains[ifid][1],
                 interval
             );
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
@@ -322,13 +316,18 @@ export default function aggregate($p) {
             rowTotal = Math.min(resultSize, $p.resultDimension[0]),
             colTotal = Math.ceil(resultSize / $p.resultDimension[0]);
 
-        $p.bindFramebuffer("fGroupResults");
+        if(getAvgValues) {
+            $p.bindFramebuffer("fAggrStats");
+        } else {
+            $p.bindFramebuffer("fGroupResults");
+        }
+       
         var gl = $p.program("group"),
             result = new Float32Array(rowTotal * colTotal * 4 * resultFieldCount);
 
         gl.readPixels(offset[0], offset[1], rowTotal, colTotal * resultFieldCount, gl.RGBA, gl.FLOAT, result);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
+        console.log(result.filter((d,i) => i % 4 ===3)); 
         return result.filter(function(d, i) {
             return i % 4 === 3;
         });
