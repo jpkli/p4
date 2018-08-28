@@ -28,9 +28,8 @@
   "bugs": {
     "url": "https://github.com/jpkli/p4/issues"
   },
-  "homepage": "https://github.com/jpkli/p6#readme",
+  "homepage": "https://github.com/jpkli/p4#readme",
   "devDependencies": {
-    "p3.js": "^0.2.0",
     "chai": "^4.1.2",
     "jStat": "^1.7.1",
     "mocha": "^5.1.1",
