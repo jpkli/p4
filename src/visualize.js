@@ -1,14 +1,12 @@
 import colors from './color';
-import ctypes from './ctypes';
 import render from './render';
 import reveal from './reveal';
 import encode from './encode';
-import interact from './interact';
-
 import Layout from './metavis/layout';
 
 const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
 const userActions = ['click', 'hover', 'brush', 'zoom', 'pan'];
+const visMarks = ['dot', 'circle', 'line', 'rect'];
 
 export default function visualize($p) {
 
@@ -29,7 +27,7 @@ export default function visualize($p) {
 
     $p.uniform('uVisualEncodings',  'int',   new Array(visualEncodings.length).fill(-1))
         .uniform('uViewDim',        'vec2',  $p.viewport)
-        .uniform('uVisShape',       'int',   1)
+        .uniform('uVisMark',        'int',   1)
         .uniform('uInterleaveX',    'int',   0)
         .uniform('uVisDomains',     'vec2',  $p.fieldDomains.map(d=>d.slice()))
         .uniform('uVisScale',       'vec2', [1.0, 1.0])
@@ -77,6 +75,10 @@ export default function visualize($p) {
             viewIndex = options.viewIndex,
             viewTag = $p.views[viewIndex].id;
 
+        // if(!vmap.height && vmap.y) {
+        //     vmap.height = vmap.y;
+        // }
+
         var visDomain = {},
             visDimension = vmap.viewport || [$p.views[viewIndex].width, $p.views[viewIndex].height] || viewport;
 
@@ -84,7 +86,6 @@ export default function visualize($p) {
             height =  visDimension[1],
             padding = $p.views[viewIndex].padding || chartPadding,
             offset = $p.views[viewIndex].offset || [0, 0];
-
 
         var dimSetting = encode($p, vmap, colorManager);
 
@@ -94,6 +95,8 @@ export default function visualize($p) {
                 if(vmap.zero && (f == vmap.height || f == vmap.width ) && visDomain[f][0]>0) visDomain[f][0] = 0;
             });
         }
+
+        $p.uniform.uVisMark.data = visMarks.indexOf(mark);
 
         var gl = $p.program($p.renderMode);
         $p.framebuffer.enableRead('fFilterResults');
@@ -209,8 +212,10 @@ export default function visualize($p) {
                 gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
             } else {
                 if(primitive == gl.LINE_STRIP) {
-                    console.log($p.dataDimension);
+                    console.log($p.dataDimension, $p.renderMode);
+                    gl.lineWidth(1.0);
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+                    // gl.drawArrays(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
                 } else {
                     gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
                 }
