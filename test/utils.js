@@ -60,7 +60,7 @@ export function randomJSONs(arg) {
                 data[i][prop.name] = prop.values[vid];
             } else {
                 let value = boundedRandom(prop);
-                data[i][prop.name] = (prop.dtype == 'float') ? parseFloat(value) : parseInt(value);
+                data[i][prop.name] = (prop.dtype == 'float') ? parseFloat(value) : Math.round(value);
             }
         });
     }
