@@ -63,12 +63,12 @@ export default function encode($p, vmap, colorManager) {
             ext = $p.fieldDomains[vmapIndex[0]];
         if($p.categoryLookup.hasOwnProperty(vmap.x)){
             viewSetting.scaleX = 'categorical';
-             viewSetting.domainX = new Array(len).fill(0).map(
-                 (d,i)=>$p.categoryLookup[vmap.x][i]
-             );
+            viewSetting.domainX = new Array(len).fill(0).map(
+                (d,i)=>$p.categoryLookup[vmap.x][i]
+            );
          } else if (isRect) {
-             viewSetting.scaleX = 'ordinal';
-             viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
+            viewSetting.scaleX = 'ordinal';
+            viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
          }
          markSpace[0] = 0.02;
     }
@@ -77,10 +77,10 @@ export default function encode($p, vmap, colorManager) {
             ext = $p.fieldDomains[vmapIndex[1]];
 
         if($p.categoryLookup.hasOwnProperty(vmap.y)){
-             viewSetting.scaleY = 'categorical';
-             viewSetting.domainY = new Array(len).fill(0).map(
-                 (d,i)=>$p.categoryLookup[vmap.y][i]
-             ).reverse();
+            viewSetting.scaleY = 'categorical';
+            viewSetting.domainY = new Array(len).fill(0).map(
+                (d,i)=>$p.categoryLookup[vmap.y][i]
+            ).reverse();
         } else if (isRect) {
             viewSetting.scaleY = 'ordinal';
             viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
