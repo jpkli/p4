@@ -1,4 +1,4 @@
-import FlexGL from '../flexgl/src/flexgl';
+import FlexGL from '../flexgl';
 
 export default function init(options) {
     var $p = options.context || null,

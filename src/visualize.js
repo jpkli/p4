@@ -167,7 +167,6 @@ export default function visualize($p) {
             width-padding.left-padding.right,
             height-padding.top-padding.bottom
         );
-        gl.lineWidth(1.0);
 
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);

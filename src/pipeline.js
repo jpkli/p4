@@ -398,7 +398,6 @@ export default function pipeline(options) {
     }
 
     pipeline.updateData = function(newData) {
-        console.log(newData)
         pipeline.head();
         for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
             let buf = new Float32Array(newData[ai]);
