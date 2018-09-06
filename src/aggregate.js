@@ -107,8 +107,10 @@ export default function aggregate($p) {
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
 
         $p.uniform.uGroupFields = groupFieldIds;
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        if(!$p._progress) {
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        }
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);
         gl.enable(gl.BLEND);
@@ -141,7 +143,7 @@ export default function aggregate($p) {
         });
         
         if (getAvgValues) {
-            console.log('*** Second Pass for Aggregation');
+            // console.log('*** Second Pass for Aggregation');
             var fieldCount = $p.uniform.uFieldCount.data,
                 preAggrData = $p.uniform.uDataInput.data;
 
@@ -217,7 +219,8 @@ export default function aggregate($p) {
                 return Object.keys(newFieldSpec[newFieldNames[i]])[0];
             });
 
-        if (!$p._update) {
+        if (!$p._update && !$p._progress) {
+            console.log('allocate new framework for aggregation result')
             $p.framebuffer(
                 "fGroupResults",
                 "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFields.length]
@@ -250,7 +253,7 @@ export default function aggregate($p) {
         var newFieldDomains = oldFieldIds.map(function(f) {
             return $p.fieldDomains[f];
         });
-        var newFieldWidths = newFieldIds.map(function(f) {
+        var newFieldWidths = oldFieldIds.map(function(f) {
             return $p.fieldWidths[f];
         });
         $p.fieldDomains = newFieldDomains;

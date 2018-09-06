@@ -145,15 +145,23 @@ export default function($p, dataProps) {
         indexCount: $p.indexes.length
     });
 
-    $p.fields.slice($p.indexes.length).forEach(function(attr, ai) {
-        var buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
-        for (var i = 0, l = data[attr].length; i < l; i++) {
-            buf[i] = data[attr][i];
-        }
+    // $p.fields.slice($p.indexes.length).forEach(function(attr, ai) {
+    //     // var buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
+    //     // for (var i = 0, l = data[attr].length; i < l; i++) {
+    //     //     buf[i] = data[attr][i];
+    //     // }
+    //     var buf = new Float32Array(data[attr]);
+    //     $p.texture.tData.update(
+    //         buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
+    //     );
+    // });
+
+    for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
+        let buf = new Float32Array(data[attr]);
         $p.texture.tData.update(
             buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
         );
-    });
+    }
 
     //TODO: get data statistics using the GPU
     if(stats !== null) {

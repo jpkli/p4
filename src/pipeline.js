@@ -35,7 +35,7 @@ export default function pipeline(options) {
         }
     }
 
-    pipeline.ctx = $p.ctx;
+    pipeline.ctx = $p;
 
     pipeline.data = function(dataOptions) {
         allocate($p, dataOptions);
@@ -349,7 +349,6 @@ export default function pipeline(options) {
                 viewIndex: viewIndex
             });
             pipeline.interact();
-
         }
         return pipeline;
     }
@@ -396,6 +395,18 @@ export default function pipeline(options) {
                 }
             })
         })
+    }
+
+    pipeline.updateData = function(newData) {
+        console.log(newData)
+        pipeline.head();
+        for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
+            let buf = new Float32Array(newData[ai]);
+            $p.texture.tData.update(
+                buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
+            );
+        }
+        return pipeline;
     }
 
     pipeline.exportImage = function(beforeExport) {
