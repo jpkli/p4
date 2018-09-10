@@ -1,15 +1,14 @@
 
 import {assert} from 'chai';
-import {jStat} from 'jStat';
+import {normal} from 'jStat';
 import cstore from '../src/cstore'
-
 
 let equal = assert.equal;
 let closeTo = assert.closeTo;
 let hasAllKeys = assert.hasAllKeys;
-let normalDist = jStat.normal.sample;
+let normalDist = normal.sample;
 
-let boundedRandom = (p) => {
+export function boundedRandom(p) {
     let min = p.min || 0;
     let max = p.max || p.values.length || 1;
     let value = min - 1;

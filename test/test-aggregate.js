@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { validate } from './utils';
 import cstore from '../src/cstore';
-import p4 from '../src/pipeline';
+import p4 from '../';
 import p3 from 'p.3';
 
 export default function({

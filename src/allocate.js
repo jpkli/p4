@@ -9,7 +9,6 @@ export default function($p, dataProps) {
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
-    $p.cachedResult = [];
     $p.pipeline = [];
     $p.crossfilters = {};
     $p.deriveCount = 0;
@@ -20,12 +19,11 @@ export default function($p, dataProps) {
         dtypes = $p.dtypes,
         stats =  data.stats || null;
     
-    if (data.hasOwnProperty("size"))
+    if (Number.isInteger(data.size)) {
         $p.dataSize = data.size;
-    else if (Array.isArray(data))
-        $p.dataSize = Math.max.apply(null, data.map(function(d) {
-            return d.length;
-        }));
+    } else if (Array.isArray(data)) {
+        $p.dataSize = Math.max(...data.map(d => d.length));
+    }
 
     var rowSize = Math.min($p.dataSize, 8192),
         colSize = Math.ceil($p.dataSize / rowSize);

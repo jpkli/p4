@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 95);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,47 +95,12 @@ module.exports = g;
 /* 2 */,
 /* 3 */,
 /* 4 */,
-/* 5 */,
-/* 6 */,
-/* 7 */,
-/* 8 */,
-/* 9 */,
-/* 10 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "int", function() { return int; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "short", function() { return short; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "float", function() { return float; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "double", function() { return double; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "string", function() { return string; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "time", function() { return time; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "temporal", function() { return temporal; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "integer", function() { return integer; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "numeric", function() { return numeric; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nominal", function() { return nominal; });
-const int      = Int32Array;
-const short    = Int16Array;
-const float    = Float32Array;
-const double   = Float64Array;
-const string   = Uint16Array;
-const time     = Float64Array;
-const temporal = Float64Array;
-const integer  = Int32Array;
-const numeric  = Float32Array;
-const nominal  = Uint16Array;
-
-
-
-
-/***/ }),
-/* 11 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = ColumnStore;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(6);
 
 function ColumnStore(arg){
     var cstore   = (this instanceof ColumnStore) ? this : {},
@@ -419,455 +384,113 @@ function ColumnStore(arg){
 
 
 /***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "int", function() { return int; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "short", function() { return short; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "float", function() { return float; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "double", function() { return double; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "string", function() { return string; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "time", function() { return time; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "temporal", function() { return temporal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "integer", function() { return integer; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "numeric", function() { return numeric; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nominal", function() { return nominal; });
+const int      = Int32Array;
+const short    = Int16Array;
+const float    = Float32Array;
+const double   = Float64Array;
+const string   = Uint16Array;
+const time     = Float64Array;
+const temporal = Float64Array;
+const integer  = Int32Array;
+const numeric  = Float32Array;
+const nominal  = Uint16Array;
+
+
+
+
+/***/ }),
+/* 7 */,
+/* 8 */,
+/* 9 */,
+/* 10 */,
+/* 11 */,
 /* 12 */,
 /* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = pipeline;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__initialize__ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(48);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(63);
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_main__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_cstore__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ctypes__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_ajax__ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_parse__ = __webpack_require__(69);
 
 
 
 
 
 
+var root = typeof self == 'object' && self.self === self && self ||
+           typeof global == 'object' && global.global === global && global ||
+           this;
 
-function pipeline(options) {
-    var $p = Object(__WEBPACK_IMPORTED_MODULE_2__initialize__["a" /* default */])(options);
-    $p.views = [];
-    $p.interactions = [];
-    
-    $p.visualization = null;
-    $p.deriveMax = options.deriveMax || 4;
-    $p._responseType = 'unselected';
-    $p._update = false;
+root.p4 = __WEBPACK_IMPORTED_MODULE_0__src_main__["a" /* default */];
+root.p4.ajax = __WEBPACK_IMPORTED_MODULE_3__src_ajax__;
+root.p4.cstore = __WEBPACK_IMPORTED_MODULE_1__src_cstore__["a" /* default */];
+root.p4.ctypes = __WEBPACK_IMPORTED_MODULE_2__src_ctypes__;
+root.p4.parse = __WEBPACK_IMPORTED_MODULE_4__src_parse__["a" /* default */];
 
-    $p.getResult = function() {};
+/* harmony default export */ __webpack_exports__["default"] = (root.p4);
 
-    var pipeline = {},
-        registers = {},
-        profiles  = [],
-        operation = {},
-        response = {},
-        optID = 0;
-
-    function addToPipeline(opt, arg) {
-        if( !$p._update) {
-            var spec = {};
-            spec[opt] = arg;
-            $p.pipeline.push(spec);
-            return optID++;
-        } else {
-            return -1;
-        }
-    }
-
-    pipeline.ctx = $p;
-
-    pipeline.data = function(dataOptions) {
-        Object(__WEBPACK_IMPORTED_MODULE_0__allocate__["a" /* default */])($p, dataOptions);
-        operation = Object(__WEBPACK_IMPORTED_MODULE_3__compile__["a" /* default */])($p);
-        if(!$p.hasOwnProperty('fieldDomains')) {
-            var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
-            $p.uniform.uFieldDomains.data = $p.fieldDomains;
-        }
-        $p.opt = operation;
-        pipeline.register('__init__');
-        return pipeline;
-    }
-
-    pipeline.view = function(views) {
-        $p.views.forEach(function(v){
-            if(v.hasOwnProperty('chart')) {
-                v.chart.svg.remove();
-                delete v.chart;
-            }
-            if(!v.hasOwnProperty('padding')) {
-                v.padding = {left: 30, right: 30, top: 30, bottom: 30};
-            }
-        })
-        $p.views = views;
-        return pipeline;
-    }
-
-    pipeline.register = function(tag) {
-        registers[tag] = {
-            indexes: $p.indexes,
-            dataSize: $p.dataSize,
-            fields: $p.fields,
-            dataDim: $p.uniform.uDataDim.data.slice(),
-            fieldWidths: $p.fieldWidths.slice(),
-            fieldDomains: $p.fieldDomains.slice(),
-            deriveCount: $p.deriveCount,
-            filterFlag: $p.uniform.uFilterFlag.data,
-            filterControls: $p.uniform.uFilterControls.data.slice(),
-            dataInput: $p.uniform.uDataInput.data,
-            attribute: {
-                aDataIdx: {
-                    ids: $p.attribute.aDataIdx.data,
-                    value: $p.attribute.aDataValx.data
-                },
-                aDataIdy: {
-                    ids: $p.attribute.aDataIdy.data,
-                    value: $p.attribute.aDataValy.data
-                },
-                aDataFieldId: $p.attribute.aDataFieldId.data,
-                aDataItemId: $p.attribute.aDataItemId.data
-            }
-        }
-        return pipeline;
-    }
-
-    pipeline.resume = function(tag) {
-        addToPipeline('resume', tag);
-        if (!registers.hasOwnProperty(tag))
-            throw new Error('"' + tag + '" is not found in regesters.');
-
-        var reg = registers[tag];
-        //resume CPU registers
-        $p.indexes = reg.indexes;
-        $p.dataSize = reg.dataSize;
-        $p.deriveCount = reg.deriveCount;
-        $p.fieldCount = reg.fields.length - reg.indexes.length - reg.deriveCount;
-        $p.fields = reg.fields.slice();
-        $p.fieldWidths = reg.fieldWidths.slice();
-        $p.fieldDomains = reg.fieldDomains.slice();
-        $p.dataDimension = reg.dataDim.slice();
-
-        //resume GPU Uniforms
-        $p.uniform.uFieldCount.data = $p.fieldCount;
-        $p.uniform.uDataSize.data = $p.dataSize;
-        $p.uniform.uDataDim.data = reg.dataDim;
-        $p.uniform.uIndexCount.data = reg.indexes.length;
-        $p.uniform.uFieldDomains.data = reg.fieldDomains;
-        $p.uniform.uFieldWidths.data = reg.fieldWidths;
-        $p.uniform.uFilterFlag.data = reg.filterFlag;
-        // $p.uniform.uFilterControls.data = reg.filterControls;
-        $p.uniform.uDataInput.data = reg.dataInput;
-
-        //resume GPU Attribute Buffers
-        $p.attribute['aDataIdx'] = reg.attribute['aDataIdx'].ids;
-        $p.attribute['aDataIdy'] = reg.attribute['aDataIdy'].ids;
-        $p.attribute['aDataValx'] = reg.attribute['aDataIdx'].value;
-        $p.attribute['aDataValy'] = reg.attribute['aDataIdy'].value;
-        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataIdx'].location, 0);
-        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataIdy'].location, 1);
-        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataValx'].location, 0);
-        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataValy'].location, 1);
-
-        $p.attribute['aDataFieldId'] = reg.attribute['aDataFieldId'];
-        $p.attribute['aDataItemId'] = reg.attribute['aDataItemId'];
-
-        return pipeline;
-    }
-
-    pipeline.bin = function (spec) {
-        var deriveSpec = {},
-            binAttr,
-            binCount;
-
-        if (typeof spec == 'object') {
-            binAttr = Object.keys(spec)[0];
-            binCount = spec[binAttr];
-        } else {
-            binAttr = spec;
-            //Apply Sturges' formula for determining the number of bins
-            binCount = Math.ceil(Math.log2($p.dataSize)) + 1;
-        }
-
-        var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
-        var binInterval = (binDomain[1] - binDomain[0]) / binCount;
-
-        var histFunction = (function() { max(ceil((binAttr - binMin) / float(binInterval)), 1.0) })
-            .toString()
-            .slice(13, -1) // remove "function () {" from function.toString
-            .replace('binAttr', binAttr)
-            .replace('binMin', binDomain[0] + '.0')
-            .replace('binInterval', binInterval)
-
-        deriveSpec['bin@'+binAttr] = histFunction;
-        $p.intervals[binAttr] = {};
-        $p.intervals[binAttr].dtype = 'historgram';
-        $p.intervals[binAttr].interval = binInterval;
-        $p.intervals[binAttr].min = binDomain[0];
-        $p.intervals[binAttr].max = binDomain[1];
-        $p.intervals[binAttr].align = 'right';
-        pipeline.derive(deriveSpec);
-        // var deriveFields = $p.fields.slice(-$p.deriveCount),
-        //     dfid = deriveFields.indexOf('bin@'+binAttr);
-        // $p.deriveDomains[dfid] = [stats[binAttr].min, stats[binAttr].max];
-        return 'bin@'+binAttr;
-    }
-
-    pipeline.aggregate = function(spec) {
-        if(spec.$bin) {
-            spec.$group = pipeline.bin(spec.$bin);
-            delete spec.$bin;
-        }
-
-        addToPipeline('aggregate', spec);
-        if(Object.keys($p.crossfilters).length)
-            $p.uniform.uFilterFlag = 1;
-
-        operation.aggregate.execute(spec);
-        // console.log(JSON.stringify(pipeline.result('row')));
-        return pipeline;
-    }
-
-    pipeline.filter = function(spec) {
-        addToPipeline('filter', spec);
-        operation.match.execute(spec);
-        $p.getResult = operation.match.result;
-        return pipeline;
-    }
-
-    pipeline.match = pipeline.filter;
-
-    pipeline.derive = function(spec) {
-        addToPipeline('derive', spec);
-
-        //TODO: support JS function as expression for deriving new variable
-        //.replace(/function\s*[\w|\d]+\s*\((.+)\)/g, "$1")
-        // if (!opt.hasOwnProperty('derive')) {
-            operation.derive = Object(__WEBPACK_IMPORTED_MODULE_4__derive__["a" /* default */])($p, spec);
-        // }
-        operation.derive.execute(spec);
-        $p.getResult = operation.derive.result;
-        return pipeline;
-    }
-
-    pipeline.cache = function(tag) {
-        operation.cache.execute(tag);
-        $p.getResult = operation.cache.result;
-        return pipeline;
-    }
-
-    pipeline.clear = function() {
-        console.log($p.visLayers);
-    }
-
-    pipeline.read = function() {
-        console.log("Read>>", $p.getResult());
-        return pipeline;
-    }
-
-    pipeline.result = Object(__WEBPACK_IMPORTED_MODULE_1__output__["a" /* default */])($p);
-
-    pipeline.output = function(callback) {
-        addToPipeline('output', callback);
-        callback(pipeline.result('row'));
-        return pipeline;
-    }
-
-    var branchID = 0;
-    pipeline.branch = function(branches) {
-        pipeline.register('_branch'+branchID);
-        branches.forEach(function(b){
-            var operations = Object.keys(b).map(function(o) {
-                var obj = {};
-                obj[o] = b[o];
-                return obj;
-            });
-            pipeline.run(operations);
-            pipeline.resume('_branch' + branchID);
-        })
-        branchID++;
-    }
-
-    $p.readResult = pipeline.result;
-
-    pipeline.getResult = function (d) {
-        return $p.getResult(d);
-    }
-
-    pipeline.readPixels = function(arg) {
-        var options = arg || {},
-            offset = options.offset || [0, 0],
-            resultSize = options.size || $p.dataDimension[0]* $p.dataDimension[1],
-            rowSize = Math.min(resultSize, $p.dataDimension[0]),
-            colSize = Math.ceil(resultSize/$p.dataDimension[0]);
-
-        $p.bindFramebuffer(null);
-        var gl = $p.ctx,
-            result = new Uint8Array(rowSize * colSize * 4);
-
-        gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, result);
-        return result.filter(function(d, i){ return i%4===3;} );
-    }
-
-    pipeline.clearViews = function() {
-        $p.bindFramebuffer("offScreenFBO");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer("visStats");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer(null);
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-    }
-
-    pipeline.runSpec = function(specs) {
-        pipeline.head();
-        pipeline.clearViews();
-        $p.interactions = [];
-        response = {};
-        $p.pipeline = [];
-        $p.crossfilters = [];
-        $p.uniform.uFilterFlag.data = 0;
-        // $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
-        specs.forEach(function(spec){
-            var opt = Object.keys(spec)[0],
-                arg = spec[opt];
-
-            opt = opt.slice(1);
-            if(typeof pipeline[opt] == 'function') {
-                pipeline[opt](arg);
-            }
-        })
-        return pipeline;
-    }
-
-    pipeline.head = function() {
-        pipeline.resume('__init__');
-        return pipeline;
-    }
-
-    pipeline.run = function(opts) {
-        var operations = opts || $p.pipeline;
-        operations.forEach(function(p, i){
-            var opt = Object.keys(p)[0];
-            pipeline[opt](p[opt]);
-        })
-
-        return pipeline;
-    }
-
-    pipeline.visualize = function(vmap) {
-        var optID = addToPipeline('visualize', vmap);
-        var viewIndex = 0,
-            filters = {};
-        if(typeof vmap.id == 'string') {
-            viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
-            if(viewIndex == -1) {
-                //find the next available view slot in all views
-                for(var vi = 0; vi < $p.views.length; vi++){
-                    if(!$p.views[vi].id) {
-                        viewIndex = vi;
-                        $p.views[viewIndex].id = vmap.id;
-                        break;
-                    }
-                }
-            }
-        }
-        if(vmap.mark == 'bar') vmap.zero = true;
-        $p.views[viewIndex].vmap = vmap;
-        var encoding = vmap,
-            viewTag = $p.views[viewIndex].id;
-
-        if($p._update && response.hasOwnProperty(viewTag)) {
-            if(response[viewTag].hasOwnProperty($p._responseType)) {
-                encoding = Object.assign({}, vmap, response[viewTag][$p._responseType]);
-            }
-        }
-        if(encoding.opacity != 0){
-            operation.visualize({
-                vmap: encoding,
-                viewIndex: viewIndex
-            });
-            pipeline.interact();
-        }
-        return pipeline;
-    }
-
-    pipeline.interact = function(spec) {
-        if(typeof(spec) != 'undefined') $p.interactions.push(spec);
-        $p.interactions.forEach(function(interaction){
-            Object(__WEBPACK_IMPORTED_MODULE_5__interact__["a" /* default */])($p, {
-                actions: interaction.event,
-                view: interaction.from,
-                condition: interaction.condition,
-                callback: function(selection) {
-                    response = interaction.response;
-                    if(!$p._update) {
-                        $p._update = true;
-                        $p.crossfilters = {};
-                        if(typeof selection == 'object') {
-                            Object.keys(selection).forEach(function(k) {
-                                if(selection[k].length < 2) {
-                                    if($p.intervals.hasOwnProperty(k)) {
-                                        var value = (Array.isArray(selection[k]))
-                                            ? selection[k][0]
-                                            : selection[k];
-                                        selection[k] = [value-$p.intervals[k].interval, value];
-                                    } else if(!$p.categoryLookup.hasOwnProperty(k)) {
-                                        selection[k] = [selection[k][0] + selection[k][0] + 1];
-                                    }
-                                }
-                                $p.crossfilters[k] = selection[k];
-                            });
-                        }
-                        $p._responseType = 'unselected';
-                        $p.uniform.uFilterLevel.data = 0.2;
-                        $p.uniform.uVisLevel.data = 0.1;
-                        pipeline.head().run();
-                        $p._responseType = 'selected';
-                        $p.uniform.uVisLevel.data = 0.2;
-                        pipeline.head().filter({}).run();
-                        $p._responseType = 'unselected';
-                        $p._update = false;
-                        $p.uniform.uFilterLevel.data = 0.1;
-                        $p.uniform.uVisLevel.data = 0.1;
-                    }
-                }
-            })
-        })
-    }
-
-    pipeline.updateData = function(newData) {
-        console.log(newData)
-        pipeline.head();
-        for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
-            let buf = new Float32Array(newData[ai]);
-            $p.texture.tData.update(
-                buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
-            );
-        }
-        return pipeline;
-    }
-
-    pipeline.exportImage = function(beforeExport) {
-        var beforeExport = beforeExport || function() { pipeline.head().run() };
-        if(typeof operation.visualize.chart.exportImage === 'function') {
-            return operation.visualize.chart.exportImage(beforeExport);
-        } else {
-            return pipeline;
-        }
-    }
-
-    if(options.hasOwnProperty('data')) {
-        pipeline.data(options.data);
-    }
-
-    return pipeline;
-}
-
+if(typeof module != 'undefined' && module.exports)
+    module.exports = root.p4;
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(14)(module)))
 
 /***/ }),
 /* 14 */
+/***/ (function(module, exports) {
+
+module.exports = function(originalModule) {
+	if(!originalModule.webpackPolyfill) {
+		var module = Object.create(originalModule);
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		Object.defineProperty(module, "exports", {
+			enumerable: true,
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* unused harmony export seq */
 /* unused harmony export seqInt */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return seqFloat; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__ctypes__ = __webpack_require__(6);
 
 
 function seq(dtype, start, end, interval) {
@@ -887,7 +510,7 @@ let seqFloat = seq.bind(null, "float");
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -992,12 +615,12 @@ function Uniform(glContext, name, type, data) {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Texture;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(16);
 
 
 function Texture(glContext) {
@@ -1134,7 +757,7 @@ function Texture(glContext) {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1370,7 +993,7 @@ function Shader(glContext, glResource) {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1545,7 +1168,7 @@ function derive($p, spec) {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1662,7 +1285,7 @@ function reveal($p) {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1805,12 +1428,12 @@ function publicMethods(context) {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = axis;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scale__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scale__ = __webpack_require__(23);
 
 
 function axis(arg) {
@@ -2076,7 +1699,7 @@ function axis(arg) {
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2162,12 +1785,12 @@ function Scale(arg) {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = printformat;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__arrays__ = __webpack_require__(61);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__arrays__ = __webpack_require__(63);
 
 
 function printformat(spec) {
@@ -2211,39 +1834,9 @@ function printformat(spec) {
 
 
 /***/ }),
-/* 24 */,
 /* 25 */,
 /* 26 */,
-/* 27 */
-/***/ (function(module, exports) {
-
-module.exports = function(originalModule) {
-	if(!originalModule.webpackPolyfill) {
-		var module = Object.create(originalModule);
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		Object.defineProperty(module, "exports", {
-			enumerable: true,
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
+/* 27 */,
 /* 28 */,
 /* 29 */,
 /* 30 */,
@@ -2253,11 +1846,392 @@ module.exports = function(originalModule) {
 /* 34 */,
 /* 35 */,
 /* 36 */,
-/* 37 */
+/* 37 */,
+/* 38 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(14);
+/* harmony export (immutable) */ __webpack_exports__["a"] = pipeline;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__allocate__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__output__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__initialize__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__compile__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__derive__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__interact__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__control__ = __webpack_require__(67);
+
+
+
+
+
+
+
+
+
+function pipeline(options) {
+    var $p = Object(__WEBPACK_IMPORTED_MODULE_2__initialize__["a" /* default */])(options);
+    $p.views = [];
+    $p.interactions = [];
+    
+    $p.visualization = null;
+    $p.deriveMax = options.deriveMax || 4;
+    $p._responseType = 'unselected';
+    $p._update = false;
+
+    $p.getResult = function() {};
+
+    var pipeline = {},
+        registers = {},
+        profiles  = [],
+        operation = {},
+        response = {},
+        optID = 0;
+
+    function addToPipeline(opt, arg) {
+        if( !$p._update) {
+            var spec = {};
+            spec[opt] = arg;
+            $p.pipeline.push(spec);
+            return optID++;
+        } else {
+            return -1;
+        }
+    }
+
+    pipeline.enable = function(pModule) {
+        // pModule.call(pipeline, $p);
+        Object.assign(pipeline, Object(__WEBPACK_IMPORTED_MODULE_6__control__["a" /* default */])($p))
+        console.log(pipeline)
+        return pipeline;
+    }
+
+    pipeline.ctx = $p;
+
+    pipeline.data = function(dataOptions) {
+        Object(__WEBPACK_IMPORTED_MODULE_0__allocate__["a" /* default */])($p, dataOptions);
+        operation = Object(__WEBPACK_IMPORTED_MODULE_3__compile__["a" /* default */])($p);
+        if(!$p.hasOwnProperty('fieldDomains')) {
+            var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
+            $p.uniform.uFieldDomains.data = $p.fieldDomains;
+        }
+        $p.opt = operation;
+        pipeline.register('__init__');
+        return pipeline;
+    }
+
+    pipeline.view = function(views) {
+        $p.views.forEach(function(v){
+            if(v.hasOwnProperty('chart')) {
+                v.chart.svg.remove();
+                delete v.chart;
+            }
+            if(!v.hasOwnProperty('padding')) {
+                v.padding = {left: 30, right: 30, top: 30, bottom: 30};
+            }
+        })
+        $p.views = views;
+        return pipeline;
+    }
+
+    pipeline.enable(__WEBPACK_IMPORTED_MODULE_6__control__["a" /* default */])
+
+    pipeline.bin = function (spec) {
+        var deriveSpec = {},
+            binAttr,
+            binCount;
+
+        if (typeof spec == 'object') {
+            binAttr = Object.keys(spec)[0];
+            binCount = spec[binAttr];
+        } else {
+            binAttr = spec;
+            //Apply Sturges' formula for determining the number of bins
+            binCount = Math.ceil(Math.log2($p.dataSize)) + 1;
+        }
+
+        var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
+        var binInterval = (binDomain[1] - binDomain[0]) / binCount;
+
+        var histFunction = (function() { max(ceil((binAttr - binMin) / float(binInterval)), 1.0) })
+            .toString()
+            .slice(13, -1) // remove "function () {" from function.toString
+            .replace('binAttr', binAttr)
+            .replace('binMin', binDomain[0] + '.0')
+            .replace('binInterval', binInterval)
+
+        deriveSpec['bin@'+binAttr] = histFunction;
+        $p.intervals[binAttr] = {};
+        $p.intervals[binAttr].dtype = 'historgram';
+        $p.intervals[binAttr].interval = binInterval;
+        $p.intervals[binAttr].min = binDomain[0];
+        $p.intervals[binAttr].max = binDomain[1];
+        $p.intervals[binAttr].align = 'right';
+        pipeline.derive(deriveSpec);
+        // var deriveFields = $p.fields.slice(-$p.deriveCount),
+        //     dfid = deriveFields.indexOf('bin@'+binAttr);
+        // $p.deriveDomains[dfid] = [stats[binAttr].min, stats[binAttr].max];
+        return 'bin@'+binAttr;
+    }
+
+    pipeline.aggregate = function(spec) {
+        if(spec.$bin) {
+            spec.$group = pipeline.bin(spec.$bin);
+            delete spec.$bin;
+        }
+
+        addToPipeline('aggregate', spec);
+        if(Object.keys($p.crossfilters).length)
+            $p.uniform.uFilterFlag = 1;
+
+        operation.aggregate.execute(spec);
+        // console.log(JSON.stringify(pipeline.result('row')));
+        return pipeline;
+    }
+
+    pipeline.filter = function(spec) {
+        addToPipeline('filter', spec);
+        operation.match.execute(spec);
+        $p.getResult = operation.match.result;
+        return pipeline;
+    }
+
+    pipeline.match = pipeline.filter;
+
+    pipeline.derive = function(spec) {
+        addToPipeline('derive', spec);
+
+        //TODO: support JS function as expression for deriving new variable
+        //.replace(/function\s*[\w|\d]+\s*\((.+)\)/g, "$1")
+        // if (!opt.hasOwnProperty('derive')) {
+            operation.derive = Object(__WEBPACK_IMPORTED_MODULE_4__derive__["a" /* default */])($p, spec);
+        // }
+        operation.derive.execute(spec);
+        $p.getResult = operation.derive.result;
+        return pipeline;
+    }
+
+    pipeline.cache = function(tag) {
+        operation.cache.execute(tag);
+        $p.getResult = operation.cache.result;
+        return pipeline;
+    }
+
+    pipeline.clear = function() {
+        console.log($p.visLayers);
+    }
+
+    pipeline.read = function() {
+        console.log("Read>>", $p.getResult());
+        return pipeline;
+    }
+
+    pipeline.result = Object(__WEBPACK_IMPORTED_MODULE_1__output__["a" /* default */])($p);
+
+    pipeline.output = function(callback) {
+        addToPipeline('output', callback);
+        callback(pipeline.result('row'));
+        return pipeline;
+    }
+
+    var branchID = 0;
+    pipeline.branch = function(branches) {
+        pipeline.register('_branch'+branchID);
+        branches.forEach(function(b){
+            var operations = Object.keys(b).map(function(o) {
+                var obj = {};
+                obj[o] = b[o];
+                return obj;
+            });
+            pipeline.run(operations);
+            pipeline.resume('_branch' + branchID);
+        })
+        branchID++;
+    }
+
+    $p.readResult = pipeline.result;
+
+    pipeline.getResult = function (d) {
+        return $p.getResult(d);
+    }
+
+    pipeline.readPixels = function(arg) {
+        var options = arg || {},
+            offset = options.offset || [0, 0],
+            resultSize = options.size || $p.dataDimension[0]* $p.dataDimension[1],
+            rowSize = Math.min(resultSize, $p.dataDimension[0]),
+            colSize = Math.ceil(resultSize/$p.dataDimension[0]);
+
+        $p.bindFramebuffer(null);
+        var gl = $p.ctx,
+            result = new Uint8Array(rowSize * colSize * 4);
+
+        gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, result);
+        return result.filter(function(d, i){ return i%4===3;} );
+    }
+
+    pipeline.clearViews = function() {
+        $p.bindFramebuffer("offScreenFBO");
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        $p.bindFramebuffer("visStats");
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        $p.bindFramebuffer(null);
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+    }
+
+    pipeline.runSpec = function(specs) {
+        pipeline.head();
+        pipeline.clearViews();
+        $p.interactions = [];
+        response = {};
+        $p.pipeline = [];
+        $p.crossfilters = [];
+        $p.uniform.uFilterFlag.data = 0;
+        // $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
+        specs.forEach(function(spec){
+            var opt = Object.keys(spec)[0],
+                arg = spec[opt];
+
+            opt = opt.slice(1);
+            if(typeof pipeline[opt] == 'function') {
+                pipeline[opt](arg);
+            }
+        })
+        return pipeline;
+    }
+
+    pipeline.head = function() {
+        pipeline.resume('__init__');
+        return pipeline;
+    }
+
+    pipeline.run = function(opts) {
+        var operations = opts || $p.pipeline;
+        operations.forEach(function(p, i){
+            var opt = Object.keys(p)[0];
+            pipeline[opt](p[opt]);
+        })
+
+        return pipeline;
+    }
+
+    pipeline.visualize = function(vmap) {
+        var optID = addToPipeline('visualize', vmap);
+        var viewIndex = 0,
+            filters = {};
+        if(typeof vmap.id == 'string') {
+            viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
+            if(viewIndex == -1) {
+                //find the next available view slot in all views
+                for(var vi = 0; vi < $p.views.length; vi++){
+                    if(!$p.views[vi].id) {
+                        viewIndex = vi;
+                        $p.views[viewIndex].id = vmap.id;
+                        break;
+                    }
+                }
+            }
+        }
+        if(vmap.mark == 'bar') vmap.zero = true;
+        $p.views[viewIndex].vmap = vmap;
+        var encoding = vmap,
+            viewTag = $p.views[viewIndex].id;
+
+        if($p._update && response.hasOwnProperty(viewTag)) {
+            if(response[viewTag].hasOwnProperty($p._responseType)) {
+                encoding = Object.assign({}, vmap, response[viewTag][$p._responseType]);
+            }
+        }
+        if(encoding.opacity != 0){
+            operation.visualize({
+                vmap: encoding,
+                viewIndex: viewIndex
+            });
+            pipeline.interact();
+        }
+        return pipeline;
+    }
+
+    pipeline.interact = function(spec) {
+        if(typeof(spec) != 'undefined') $p.interactions.push(spec);
+        $p.interactions.forEach(function(interaction){
+            Object(__WEBPACK_IMPORTED_MODULE_5__interact__["a" /* default */])($p, {
+                actions: interaction.event,
+                view: interaction.from,
+                condition: interaction.condition,
+                callback: function(selection) {
+                    response = interaction.response;
+                    if(!$p._update) {
+                        $p._update = true;
+                        $p.crossfilters = {};
+                        if(typeof selection == 'object') {
+                            Object.keys(selection).forEach(function(k) {
+                                if(selection[k].length < 2) {
+                                    if($p.intervals.hasOwnProperty(k)) {
+                                        var value = (Array.isArray(selection[k]))
+                                            ? selection[k][0]
+                                            : selection[k];
+                                        selection[k] = [value-$p.intervals[k].interval, value];
+                                    } else if(!$p.categoryLookup.hasOwnProperty(k)) {
+                                        selection[k] = [selection[k][0] + selection[k][0] + 1];
+                                    }
+                                }
+                                $p.crossfilters[k] = selection[k];
+                            });
+                        }
+                        $p._responseType = 'unselected';
+                        $p.uniform.uFilterLevel.data = 0.2;
+                        $p.uniform.uVisLevel.data = 0.1;
+                        pipeline.head().run();
+                        $p._responseType = 'selected';
+                        $p.uniform.uVisLevel.data = 0.2;
+                        pipeline.head().filter({}).run();
+                        $p._responseType = 'unselected';
+                        $p._update = false;
+                        $p.uniform.uFilterLevel.data = 0.1;
+                        $p.uniform.uVisLevel.data = 0.1;
+                    }
+                }
+            })
+        })
+    }
+
+    pipeline.updateData = function(newData) {
+        pipeline.head();
+        for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
+            let buf = new Float32Array(newData[ai]);
+            $p.texture.tData.update(
+                buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
+            );
+        }
+        return pipeline;
+    }
+
+    pipeline.exportImage = function(beforeExport) {
+        var beforeExport = beforeExport || function() { pipeline.head().run() };
+        if(typeof operation.visualize.chart.exportImage === 'function') {
+            return operation.visualize.chart.exportImage(beforeExport);
+        } else {
+            return pipeline;
+        }
+    }
+
+    if(options.hasOwnProperty('data')) {
+        pipeline.data(options.data);
+    }
+
+    return pipeline;
+}
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(15);
 
 const vecId = ['x', 'y', 'z'];
 /* harmony default export */ __webpack_exports__["a"] = (function($p, dataProps) {
@@ -2269,7 +2243,6 @@ const vecId = ['x', 'y', 'z'];
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
-    $p.cachedResult = [];
     $p.pipeline = [];
     $p.crossfilters = {};
     $p.deriveCount = 0;
@@ -2280,12 +2253,11 @@ const vecId = ['x', 'y', 'z'];
         dtypes = $p.dtypes,
         stats =  data.stats || null;
     
-    if (data.hasOwnProperty("size"))
+    if (Number.isInteger(data.size)) {
         $p.dataSize = data.size;
-    else if (Array.isArray(data))
-        $p.dataSize = Math.max.apply(null, data.map(function(d) {
-            return d.length;
-        }));
+    } else if (Array.isArray(data)) {
+        $p.dataSize = Math.max(...data.map(d => d.length));
+    }
 
     var rowSize = Math.min($p.dataSize, 8192),
         colSize = Math.ceil($p.dataSize / rowSize);
@@ -2493,7 +2465,7 @@ const vecId = ['x', 'y', 'z'];
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2567,12 +2539,12 @@ function output($p) {
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = init;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__flexgl__ = __webpack_require__(42);
 
 
 function init(options) {
@@ -2608,11 +2580,11 @@ function init(options) {
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_main__ = __webpack_require__(41);
+/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_main__ = __webpack_require__(43);
 
 
 var root = typeof self == 'object' && self.self === self && self ||
@@ -2625,18 +2597,18 @@ root.flexgl = __WEBPACK_IMPORTED_MODULE_0__src_main__["a" /* default */];
 
 if(typeof module != 'undefined' && module.exports)
     module.exports = __WEBPACK_IMPORTED_MODULE_0__src_main__["a" /* default */];
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(27)(module)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(14)(module)))
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = FlexGL;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__resource__ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__program__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shader__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__framebuffer__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__resource__ = __webpack_require__(44);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__program__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shader__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__framebuffer__ = __webpack_require__(49);
 
 
 
@@ -2930,16 +2902,16 @@ function FlexGL(arg) {
 
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Resource;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__attribute__ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__texture__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__varying__ = __webpack_require__(44);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subroutine__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__uniform__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__attribute__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__texture__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__varying__ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__subroutine__ = __webpack_require__(47);
 
 
 
@@ -2997,7 +2969,7 @@ function Resource(glContext) {
 
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3057,7 +3029,7 @@ function Attribute(glContext) {
 
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3091,7 +3063,7 @@ function Varying(glContext) {
 
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3129,12 +3101,12 @@ function Subroutine() {
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Program;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shader__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__shader__ = __webpack_require__(18);
 
 
 function Program(glContext, resources) {
@@ -3225,12 +3197,12 @@ function Program(glContext, resources) {
 
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = Framebuffer;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__texture__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__texture__ = __webpack_require__(17);
 
 
 function Framebuffer(glContext) {
@@ -3305,18 +3277,18 @@ function Framebuffer(glContext) {
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = compile;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__derive__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__reveal__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__aggregate__ = __webpack_require__(49);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__cache__ = __webpack_require__(50);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__match__ = __webpack_require__(51);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__extent__ = __webpack_require__(52);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__visualize__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__derive__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__reveal__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__aggregate__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__cache__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__match__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__extent__ = __webpack_require__(54);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__visualize__ = __webpack_require__(55);
 
 
 
@@ -3345,12 +3317,12 @@ function compile(fxgl, fields, spec) {
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = aggregate;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(15);
 
 
 const vecId = ['x', 'y', 'z'];
@@ -3694,7 +3666,7 @@ function aggregate($p) {
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3755,7 +3727,7 @@ function cache($p) {
 
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4030,7 +4002,7 @@ function match($p) {
 
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4127,16 +4099,16 @@ function extent(fxgl) {
 
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = visualize;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__color__ = __webpack_require__(54);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__render__ = __webpack_require__(57);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__reveal__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__encode__ = __webpack_require__(58);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__metavis_layout__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__color__ = __webpack_require__(56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__render__ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__reveal__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__encode__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__metavis_layout__ = __webpack_require__(61);
 
 
 
@@ -4306,7 +4278,6 @@ function visualize($p) {
             width-padding.left-padding.right,
             height-padding.top-padding.bottom
         );
-        gl.lineWidth(1.0);
 
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);
@@ -4393,13 +4364,13 @@ function visualize($p) {
 
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = color;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gradients__ = __webpack_require__(55);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colorhex__ = __webpack_require__(56);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gradients__ = __webpack_require__(57);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colorhex__ = __webpack_require__(58);
 
 
 
@@ -4559,7 +4530,7 @@ function mapColorRGB($int_fieldId, $float_value) {
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4574,7 +4545,7 @@ const gradients = {
 
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4725,7 +4696,7 @@ const colorhex = {
 
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4929,7 +4900,7 @@ function render(fxgl) {
 
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5061,13 +5032,13 @@ function encode($p, vmap, colorManager) {
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = layout;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chart__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chart__ = __webpack_require__(62);
 
 
 
@@ -5255,15 +5226,15 @@ function layout(arg){
 
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = chart;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__axis__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__format__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scale__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__legend__ = __webpack_require__(62);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__axis__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__format__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scale__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__legend__ = __webpack_require__(64);
 
 
 
@@ -5527,7 +5498,7 @@ function chart(svg, arg) {
 
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5783,14 +5754,14 @@ function vectorAvg(vectors) {
 
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = color;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__axis__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__format__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__svg__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__axis__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__format__ = __webpack_require__(24);
 
 
 
@@ -5947,12 +5918,12 @@ function color(arg){
 
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = interact;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__metavis_brush__ = __webpack_require__(64);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__metavis_brush__ = __webpack_require__(66);
 
 
 function interact($p, options) {
@@ -6139,7 +6110,7 @@ function interact($p, options) {
 
 
 /***/ }),
-/* 64 */
+/* 66 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6284,70 +6255,112 @@ function brush(arg){
 
 
 /***/ }),
-/* 65 */,
-/* 66 */,
-/* 67 */,
-/* 68 */,
-/* 69 */,
-/* 70 */,
-/* 71 */,
-/* 72 */,
-/* 73 */,
-/* 74 */,
-/* 75 */,
-/* 76 */,
-/* 77 */,
-/* 78 */,
-/* 79 */,
-/* 80 */,
-/* 81 */,
-/* 82 */,
-/* 83 */,
-/* 84 */,
-/* 85 */,
-/* 86 */,
-/* 87 */,
-/* 88 */,
-/* 89 */,
-/* 90 */,
-/* 91 */,
-/* 92 */,
-/* 93 */,
-/* 94 */,
-/* 95 */
+/* 67 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(global, module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__src_pipeline__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__src_cstore__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__src_ctypes__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__src_ajax__ = __webpack_require__(96);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_parse__ = __webpack_require__(97);
+/* harmony default export */ __webpack_exports__["a"] = (function ($p) {
 
+    let registers = {};
+    let control = {};
 
+    control.register = function(tag) {
+        registers[tag] = {
+            indexes: $p.indexes,
+            dataSize: $p.dataSize,
+            fields: $p.fields,
+            dataDim: $p.uniform.uDataDim.data.slice(),
+            fieldWidths: $p.fieldWidths.slice(),
+            fieldDomains: $p.fieldDomains.slice(),
+            deriveCount: $p.deriveCount,
+            filterFlag: $p.uniform.uFilterFlag.data,
+            filterControls: $p.uniform.uFilterControls.data.slice(),
+            dataInput: $p.uniform.uDataInput.data,
+            attribute: {
+                aDataIdx: {
+                    ids: $p.attribute.aDataIdx.data,
+                    value: $p.attribute.aDataValx.data
+                },
+                aDataIdy: {
+                    ids: $p.attribute.aDataIdy.data,
+                    value: $p.attribute.aDataValy.data
+                },
+                aDataFieldId: $p.attribute.aDataFieldId.data,
+                aDataItemId: $p.attribute.aDataItemId.data
+            }
+        }
+        return control;
+    }
+    
+    control.resume = function(tag) {
+        if (!registers.hasOwnProperty(tag))
+            throw new Error('"' + tag + '" is not found in regesters.');
+    
+        var reg = registers[tag];
+        //resume CPU registers
+        $p.indexes = reg.indexes;
+        $p.dataSize = reg.dataSize;
+        $p.deriveCount = reg.deriveCount;
+        $p.fieldCount = reg.fields.length - reg.indexes.length - reg.deriveCount;
+        $p.fields = reg.fields.slice();
+        $p.fieldWidths = reg.fieldWidths.slice();
+        $p.fieldDomains = reg.fieldDomains.slice();
+        $p.dataDimension = reg.dataDim.slice();
+    
+        //resume GPU Uniforms
+        $p.uniform.uFieldCount.data = $p.fieldCount;
+        $p.uniform.uDataSize.data = $p.dataSize;
+        $p.uniform.uDataDim.data = reg.dataDim;
+        $p.uniform.uIndexCount.data = reg.indexes.length;
+        $p.uniform.uFieldDomains.data = reg.fieldDomains;
+        $p.uniform.uFieldWidths.data = reg.fieldWidths;
+        $p.uniform.uFilterFlag.data = reg.filterFlag;
+        // $p.uniform.uFilterControls.data = reg.filterControls;
+        $p.uniform.uDataInput.data = reg.dataInput;
+    
+        //resume GPU Attribute Buffers
+        $p.attribute['aDataIdx'] = reg.attribute['aDataIdx'].ids;
+        $p.attribute['aDataIdy'] = reg.attribute['aDataIdy'].ids;
+        $p.attribute['aDataValx'] = reg.attribute['aDataIdx'].value;
+        $p.attribute['aDataValy'] = reg.attribute['aDataIdy'].value;
+        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataIdx'].location, 0);
+        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataIdy'].location, 1);
+        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataValx'].location, 0);
+        $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataValy'].location, 1);
+    
+        $p.attribute['aDataFieldId'] = reg.attribute['aDataFieldId'];
+        $p.attribute['aDataItemId'] = reg.attribute['aDataItemId'];
+    
+        return control;
+    }
 
+    control.head = function() {
+        control.resume('__init__');
+        return control;
+    }
 
+    var branchID = 0;
+    control.branch = function(branches) {
+        branches.forEach(function(b){
+            var operations = Object.keys(b).map(function(o) {
+                var obj = {};
+                obj[o] = b[o];
+                return obj;
+            });
+            control.run(operations);
+            control.resume('_branch' + branchID);
+        })
+        branchID++;
 
+        return control;
+    }
 
-var root = typeof self == 'object' && self.self === self && self ||
-           typeof global == 'object' && global.global === global && global ||
-           this;
+    return control;
+});
 
-root.p4 = __WEBPACK_IMPORTED_MODULE_0__src_pipeline__["a" /* default */];
-root.p4.ajax = __WEBPACK_IMPORTED_MODULE_3__src_ajax__;
-root.p4.cstore = __WEBPACK_IMPORTED_MODULE_1__src_cstore__["a" /* default */];
-root.p4.ctypes = __WEBPACK_IMPORTED_MODULE_2__src_ctypes__;
-root.p4.parse = __WEBPACK_IMPORTED_MODULE_4__src_parse__["a" /* default */];
-
-/* harmony default export */ __webpack_exports__["default"] = (root.p4);
-
-if(typeof module != 'undefined' && module.exports)
-    module.exports = root.p4;
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(27)(module)))
 
 /***/ }),
-/* 96 */
+/* 68 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6419,7 +6432,7 @@ function post(arg) {
 
 
 /***/ }),
-/* 97 */
+/* 69 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
