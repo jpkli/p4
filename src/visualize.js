@@ -24,7 +24,7 @@ export default function visualize($p) {
         canvas: $p.canvas,
         padding: chartPadding
     });
-
+    
     $p.uniform('uVisualEncodings',  'int',   new Array(visualEncodings.length).fill(-1))
         .uniform('uViewDim',        'vec2',  $p.viewport)
         .uniform('uVisMark',        'int',   1)
@@ -189,6 +189,7 @@ export default function visualize($p) {
             if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function') {
                 pv.chart.svg.remove();
             }
+            console.log(pv)
             pv.chart = vis.addChart(viewSetting);
         } else {
             $p.uniform.uVisDomains = $p.views[viewIndex].domains;
@@ -248,5 +249,6 @@ export default function visualize($p) {
         }
     }
     viz.chart = vis;
+
     return viz;
 }

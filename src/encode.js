@@ -23,9 +23,9 @@ export default function encode($p, vmap, colorManager) {
         }
     } else {
         if($p.categoryLookup.hasOwnProperty(vmap.color)) {
-            $p.uniform.uColorMode = 0;
+            $p.uniform.uColorMode.data = 0;
         } else {
-            $p.uniform.uColorMode = 1;
+            $p.uniform.uColorMode.data = 1;
         }
     }
 

@@ -1,5 +1,8 @@
-export default function output($p) {
-    return function(format) {
+export default function($p) {
+
+    let output = {};
+    
+    output.result = function(format) {
         var buf = $p.getResult(),
             res = {},
             offset = 0,
@@ -63,4 +66,30 @@ export default function output($p) {
             return res;
         }
     }
+
+    output.readPixels = function({
+        offset = [0, 0],
+        resultSize =  $p.dataDimension[0]* $p.dataDimension[1],
+        rowSize = Math.min(resultSize, $p.dataDimension[0]),
+        colSize = Math.ceil(resultSize / $p.dataDimension[0])
+    }) {
+        let result = new Uint8Array(rowSize * colSize * 4);
+        $p.bindFramebuffer(null);
+        $p.ctx.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, result);
+        return result.filter(function(d, i){ return i%4===3;} );
+    }
+
+    output.clearViews = function() {
+        $p.bindFramebuffer("offScreenFBO");
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        $p.bindFramebuffer("visStats");
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        $p.bindFramebuffer(null);
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+    }
+
+    return output;
 }

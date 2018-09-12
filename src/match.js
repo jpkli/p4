@@ -37,7 +37,7 @@ function vertexShaderFilter(){
     gl_Position = vec4(x, y, 0.0, 1.0);
 }
 
-function vertexShaderSelect(){
+function vertexShaderSelect() {
     var i, j, k, value;
     i = (this.aDataIdx+0.5) / this.uDataDim.x;
     j = (this.aDataIdy+0.5) / this.uDataDim.y;
@@ -71,13 +71,9 @@ export default function match($p) {
         visRanges = $p.fieldDomains,
         inSelections = new Array(SELECT_MAX);
 
-    $p.uniform("uFilterControls","int", filterControls)
-        .uniform("uVisControls","int", filterControls)
-        .uniform("uFilterRanges","vec2", filterRanges)
-        .uniform("uVisRanges","vec2", filterRanges)
-        .uniform("uInSelections", "float", Float32Array.from(inSelections))
-        .uniform("uSelectMax", "int", SELECT_MAX)
-        .uniform("uSelectCount", "int", 0);
+    $p.uniform("uInSelections", "float", Float32Array.from(inSelections));
+    $p.uniform("uSelectMax", "int", SELECT_MAX);
+    $p.uniform("uSelectCount", "int", 0);
 
     var filter = {
         vs: $p.shader.vertex(vertexShaderFilter),
@@ -106,13 +102,15 @@ export default function match($p) {
             return $p.crossfilters[s].hasOwnProperty('$in');
         }))
 
-
         $p.bindFramebuffer("fFilterResults");
-        $p.framebuffer.enableRead("fDerivedValues");
+
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
         if(matchFields.length) {
             gl = $p.program("match");
+            if($p.deriveCount > 0) {
+                $p.framebuffer.enableRead("fDerivedValues");
+            }
             gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
@@ -187,6 +185,9 @@ export default function match($p) {
             $p.uniform.uVisRanges.data = visRanges;
 
             gl = $p.program("filter");
+            if($p.deriveCount > 0) {
+                $p.framebuffer.enableRead("fDerivedValues");
+            }
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
@@ -207,13 +208,11 @@ export default function match($p) {
         visControls = new Array(fieldCount).fill(0);
         var filterSpec = spec;
 
-
         Object.keys($p.crossfilters).forEach(function(k, i) {
             if($p.categoryIndex.hasOwnProperty(k) && !$p.crossfilters[k].$in) {
                 $p.crossfilters[k] = {$in: $p.crossfilters[k]};
             }
         });
-
 
         Object.keys(filterSpec).forEach(function(k, i) {
             if($p.categoryIndex.hasOwnProperty(k) && !spec[k].$in) {
@@ -237,7 +236,7 @@ export default function match($p) {
                 $p.fieldWidths[fid] = $p.getDataWidth(fid, d);
             });
 
-            $p.uniform.uFieldDomains.data = $p.fieldDomains;
+            $p.uniform.uFieldDomains.value($p.fieldDomains);
             $p.uniform.uFieldWidths.data = $p.fieldWidths;
         }
     }

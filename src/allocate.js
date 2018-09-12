@@ -9,7 +9,7 @@ export default function($p, dataProps) {
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
-    $p.pipeline = [];
+
     $p.crossfilters = {};
     $p.deriveCount = 0;
     
@@ -35,7 +35,7 @@ export default function($p, dataProps) {
     }));
     $p.fieldWidths = new Array($p.fields.length).concat(new Array($p.deriveMax).fill(1));
     $p.fieldCount = $p.fields.length - $p.indexes.length;
-
+   
     function getDataWidth(fid, range) {
         var range = Math.abs(range[1] - range[0]);
         if (dtypes[fid] == "index" || dtypes[fid] == "int" || dtypes[fid] == "string") {
@@ -108,6 +108,22 @@ export default function($p, dataProps) {
     );
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 1);
 
+    //TODO: get data statistics using the GPU
+    if(stats !== null) {
+        $p.fieldDomains = $p.fields.map(function(k, i) {
+            return [stats[k].min, stats[k].max];
+        })
+        .concat(new Array($p.deriveMax).fill([0, 1]));
+
+        $p.uniform("uFieldDomains", "vec2",  $p.fieldDomains);
+        console.log($p.fieldDomains, $p.fields);
+    } else {
+        $p.uniform("uFieldDomains", "vec2",  $p.fields.map(f => [0, 1]));
+    }
+
+    console.log($p.fieldDomains, $p.fields, $p.fieldCount)
+
+    let filterControls = new Array($p.fieldCount).fill(0);
     //setup all attribute, uniform, texture, varying needed by all the shaders
     $p.uniform("uDataSize",    "float", $p.dataSize);
     $p.uniform("uDataDim",     "vec2",  $p.dataDimension);
@@ -117,6 +133,10 @@ export default function($p, dataProps) {
     $p.uniform("uFieldCount",  "int",   $p.fieldCount);
     $p.uniform("uFieldId",     "int",   0);
     $p.uniform("uFilterFlag",  "int",   0);
+    $p.uniform("uFilterControls","int", filterControls)
+    $p.uniform("uVisControls","int", filterControls);
+    $p.uniform("uFilterRanges","vec2", $p.fieldDomains);
+    $p.uniform("uVisRanges","vec2", $p.fieldDomains);
     $p.uniform("uGroupFields", "int",   [0, -1]);
     $p.uniform("uDataInput",   "sampler2D");
     $p.uniform("uDeriveCount", "int", $p.deriveMax);
@@ -137,43 +157,22 @@ export default function($p, dataProps) {
     $p.framebuffer("fFilterResults", "unsigned_byte", $p.dataDimension);
     $p.framebuffer("fGroupResults", "float", [1024, 1]);
     $p.framebuffer("fDerivedValues", "float", [$p.dataDimension[0], $p.dataDimension[1] * $p.deriveMax]);
-
+    $p.framebuffer("fStats", "float", [2, $p.fieldCount]);
     $p.parameter({
         fieldCount: $p.fields.length - $p.indexes.length,
         indexCount: $p.indexes.length
     });
 
-    // $p.fields.slice($p.indexes.length).forEach(function(attr, ai) {
-    //     // var buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
-    //     // for (var i = 0, l = data[attr].length; i < l; i++) {
-    //     //     buf[i] = data[attr][i];
-    //     // }
-    //     var buf = new Float32Array(data[attr]);
-    //     $p.texture.tData.update(
-    //         buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
-    //     );
-    // });
+    $p.fields.slice($p.indexes.length).forEach(function(attr, ai) {
+        let buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
+        for (let i = 0, l = data[attr].length; i < l; i++) {
+            buf[i] = data[attr][i];
+        }
 
-    for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
-        let buf = new Float32Array(data[attr]);
         $p.texture.tData.update(
             buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
         );
-    }
-
-    //TODO: get data statistics using the GPU
-    if(stats !== null) {
-        $p.fieldDomains = $p.fields.map(function(k, i) {
-            return [stats[k].min, stats[k].max];
-        })
-        .concat(new Array($p.deriveMax).fill([0, 1]));
-
-        $p.uniform("uFieldDomains", "vec2",  $p.fieldDomains);
-
-    } else {
-        $p.uniform("uFieldDomains", "vec2",  $p.fields.map(f => [0, 1]));
-    }
-
+    });
 
     // $p.texture.tData.sampler = $p.uniform.uDataInput;
     $p.uniform.uDataInput = $p.texture.tData;

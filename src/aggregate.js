@@ -98,9 +98,12 @@ export default function aggregate($p) {
         resultFieldCount = resultFieldIds.length;
         var gl = $p.program("group");
         $p.bindFramebuffer("fGroupResults");
-        $p.framebuffer.enableRead("fDerivedValues");
-        $p.framebuffer.enableRead("fFilterResults");
-
+        if($p.deriveCount > 0) {
+            $p.framebuffer.enableRead("fDerivedValues");
+        }
+        if($p.uniform.uFilterFlag.value() === 1) {
+            $p.framebuffer.enableRead("fFilterResults");
+        }
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
@@ -233,8 +236,8 @@ export default function aggregate($p) {
         $p.indexes = groupFields;
         $p.dataDimension = $p.resultDimension;
 
-        
-        var oldFieldIds = groupFieldIds.concat(resultFields);
+       
+        var oldFieldIds = groupFields.concat(resultFields).map( f => $p.fields.indexOf(f));
         var newFieldIds = groupFields.concat(resultFields).map( (f, i) => i );
 
         $p.fields = groupFields
@@ -256,6 +259,7 @@ export default function aggregate($p) {
         var newFieldWidths = oldFieldIds.map(function(f) {
             return $p.fieldWidths[f];
         });
+
         $p.fieldDomains = newFieldDomains;
         $p.fieldWidths = newFieldWidths;
         // $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
@@ -283,7 +287,7 @@ export default function aggregate($p) {
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
         }
         if (!$p._update) {
-            resultDomains = $p.opt.extent(resultFieldIds, $p.dataDimension);
+            resultDomains = $p.extent(resultFieldIds, $p.dataDimension);
         }
         for (var ii = $p.indexes.length; ii < $p.indexes.length + resultFieldIds.length; ii++) {
             $p.fieldDomains[ii] = resultDomains[ii - $p.indexes.length];

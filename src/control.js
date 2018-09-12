@@ -3,6 +3,10 @@ export default function ($p) {
     let registers = {};
     let control = {};
 
+    let serializeArray = function(arrayOfArray) {
+        return [].concat.apply([], arrayOfArray);
+    }
+
     control.register = function(tag) {
         registers[tag] = {
             indexes: $p.indexes,
@@ -51,7 +55,7 @@ export default function ($p) {
         $p.uniform.uDataSize.data = $p.dataSize;
         $p.uniform.uDataDim.data = reg.dataDim;
         $p.uniform.uIndexCount.data = reg.indexes.length;
-        $p.uniform.uFieldDomains.data = reg.fieldDomains;
+        $p.uniform.uFieldDomains.data = serializeArray(reg.fieldDomains);
         $p.uniform.uFieldWidths.data = reg.fieldWidths;
         $p.uniform.uFilterFlag.data = reg.filterFlag;
         // $p.uniform.uFilterControls.data = reg.filterControls;
@@ -73,10 +77,10 @@ export default function ($p) {
         return control;
     }
 
-    control.head = function() {
-        control.resume('__init__');
-        return control;
-    }
+    // control.head = function() {
+    //     control.resume('__init__');
+    //     return control;
+    // }
 
     var branchID = 0;
     control.branch = function(branches) {

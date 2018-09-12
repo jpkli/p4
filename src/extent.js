@@ -1,11 +1,8 @@
 
 const smallest = -Math.pow(2, 128);
-export default function extent(fxgl) {
+export default function extent($p) {
 
-    var fieldCount = fxgl.uniform.uFieldCount.data;
-    fxgl.framebuffer("fStats", "float", [2, fieldCount]);
-
-    var vs = fxgl.shader.vertex(function() {
+    var vs = $p.shader.vertex(function() {
         gl_PointSize = 1.0;
         var i, j;
         if (this.aDataIdy * this.uDataDim.x + this.aDataIdx >= this.uDataSize) {
@@ -19,7 +16,7 @@ export default function extent(fxgl) {
         gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
     });
 
-    var fs = fxgl.shader.fragment(function() {
+    var fs = $p.shader.fragment(function() {
         if (this.vDiscardData == 1.0) discard;
         if (this.vResult >= 0.0) {
             gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
@@ -28,34 +25,33 @@ export default function extent(fxgl) {
         }
     });
 
-    var gl = fxgl.program("stats", vs, fs);
+    var gl = $p.program("stats", vs, fs);
 
     return function(fieldIds, dataDimension) {
-        if (!fxgl._update) {
-            fxgl.framebuffer("fStats", "float", [2, fieldIds.length]);
+        if (!$p._update) {
+            $p.framebuffer("fStats", "float", [2, fieldIds.length]);
         }
-        var gl = fxgl.program("stats");
-        fxgl.framebuffer.enableRead("fGroupResults");
+        var gl = $p.program("stats");
+        $p.framebuffer.enableRead("fGroupResults");
 
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdx.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValx.location, 0);
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataIdy.location, 1);
-        gl.ext.vertexAttribDivisorANGLE(fxgl.attribute.aDataValy.location, 1);
+        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
 
-        fxgl.bindFramebuffer("fStats");
+        $p.bindFramebuffer("fStats");
         gl.clearColor(smallest, smallest, smallest, smallest);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.ONE, gl.ONE);
-        // gl.finish();
-        // fxgl.uniform.uDeriveCount = deriveFieldCount;
+
         var extents = new Array(fieldIds.length);
         var start = new Date();
-        var idCount = fxgl.uniform.uIndexCount.data;
+        var idCount = $p.uniform.uIndexCount.data;
         fieldIds.forEach(function(d, i) {
-            fxgl.uniform.uFieldId = i + idCount;
+            $p.uniform.uFieldId = i + idCount;
             gl.viewport(0, i, 1, 1);
             gl.blendEquation(gl.MAX_EXT);
             gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);

@@ -2,63 +2,40 @@ import allocate  from './allocate';
 import output    from './output';
 import initialize    from './initialize';
 import compile   from './compile';
-import optDerive from './derive';
 import interact  from './interact';
 import control from './control';
+import pipeline from './pipeline';
+import operate from './operate';
+import kernels from './kernels';
 
-
-export default function pipeline(options) {
+export default function p4(options) {
     var $p = initialize(options);
     $p.views = [];
     $p.interactions = [];
-    
-    $p.visualization = null;
+    $p.responses = {};
+
     $p.deriveMax = options.deriveMax || 4;
     $p._responseType = 'unselected';
     $p._update = false;
 
     $p.getResult = function() {};
-
-    var pipeline = {},
-        registers = {},
-        profiles  = [],
-        operation = {},
-        response = {},
-        optID = 0;
-
-    function addToPipeline(opt, arg) {
-        if( !$p._update) {
-            var spec = {};
-            spec[opt] = arg;
-            $p.pipeline.push(spec);
-            return optID++;
-        } else {
-            return -1;
-        }
-    }
-
-    pipeline.enable = function(pModule) {
-        // pModule.call(pipeline, $p);
-        Object.assign(pipeline, control($p))
-        console.log(pipeline)
-        return pipeline;
-    }
-
-    pipeline.ctx = $p;
-
-    pipeline.data = function(dataOptions) {
+    let api = pipeline($p);
+    api.ctx = $p;
+    api.data = function(dataOptions) {
         allocate($p, dataOptions);
-        operation = compile($p);
-        if(!$p.hasOwnProperty('fieldDomains')) {
-            var dd = operation.extent($p.fields.map((f, i) => i), $p.dataDimension);
-            $p.uniform.uFieldDomains.data = $p.fieldDomains;
+        $p.extent = kernels.extent($p);
+        // $p.operations = compile($p);
+        api.addModule(control);
+        api.addModule(output);
+        let operations = operate($p);
+        for(let optName of Object.keys(operations)) {
+            api.addOperation(optName, operations[optName])
         }
-        $p.opt = operation;
-        pipeline.register('__init__');
-        return pipeline;
+        api.register('__init__');
+        return api;
     }
 
-    pipeline.view = function(views) {
+    api.view = function(views) {
         $p.views.forEach(function(v){
             if(v.hasOwnProperty('chart')) {
                 v.chart.svg.remove();
@@ -69,163 +46,18 @@ export default function pipeline(options) {
             }
         })
         $p.views = views;
-        return pipeline;
+        return api;
     }
 
-    pipeline.enable(control)
-
-    pipeline.bin = function (spec) {
-        var deriveSpec = {},
-            binAttr,
-            binCount;
-
-        if (typeof spec == 'object') {
-            binAttr = Object.keys(spec)[0];
-            binCount = spec[binAttr];
-        } else {
-            binAttr = spec;
-            //Apply Sturges' formula for determining the number of bins
-            binCount = Math.ceil(Math.log2($p.dataSize)) + 1;
-        }
-
-        var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
-        var binInterval = (binDomain[1] - binDomain[0]) / binCount;
-
-        var histFunction = (function() { max(ceil((binAttr - binMin) / float(binInterval)), 1.0) })
-            .toString()
-            .slice(13, -1) // remove "function () {" from function.toString
-            .replace('binAttr', binAttr)
-            .replace('binMin', binDomain[0] + '.0')
-            .replace('binInterval', binInterval)
-
-        deriveSpec['bin@'+binAttr] = histFunction;
-        $p.intervals[binAttr] = {};
-        $p.intervals[binAttr].dtype = 'historgram';
-        $p.intervals[binAttr].interval = binInterval;
-        $p.intervals[binAttr].min = binDomain[0];
-        $p.intervals[binAttr].max = binDomain[1];
-        $p.intervals[binAttr].align = 'right';
-        pipeline.derive(deriveSpec);
-        // var deriveFields = $p.fields.slice(-$p.deriveCount),
-        //     dfid = deriveFields.indexOf('bin@'+binAttr);
-        // $p.deriveDomains[dfid] = [stats[binAttr].min, stats[binAttr].max];
-        return 'bin@'+binAttr;
-    }
-
-    pipeline.aggregate = function(spec) {
-        if(spec.$bin) {
-            spec.$group = pipeline.bin(spec.$bin);
-            delete spec.$bin;
-        }
-
-        addToPipeline('aggregate', spec);
-        if(Object.keys($p.crossfilters).length)
-            $p.uniform.uFilterFlag = 1;
-
-        operation.aggregate.execute(spec);
-        // console.log(JSON.stringify(pipeline.result('row')));
-        return pipeline;
-    }
-
-    pipeline.filter = function(spec) {
-        addToPipeline('filter', spec);
-        operation.match.execute(spec);
-        $p.getResult = operation.match.result;
-        return pipeline;
-    }
-
-    pipeline.match = pipeline.filter;
-
-    pipeline.derive = function(spec) {
-        addToPipeline('derive', spec);
-
-        //TODO: support JS function as expression for deriving new variable
-        //.replace(/function\s*[\w|\d]+\s*\((.+)\)/g, "$1")
-        // if (!opt.hasOwnProperty('derive')) {
-            operation.derive = optDerive($p, spec);
-        // }
-        operation.derive.execute(spec);
-        $p.getResult = operation.derive.result;
-        return pipeline;
-    }
-
-    pipeline.cache = function(tag) {
-        operation.cache.execute(tag);
-        $p.getResult = operation.cache.result;
-        return pipeline;
-    }
-
-    pipeline.clear = function() {
-        console.log($p.visLayers);
-    }
-
-    pipeline.read = function() {
-        console.log("Read>>", $p.getResult());
-        return pipeline;
-    }
-
-    pipeline.result = output($p);
-
-    pipeline.output = function(callback) {
-        addToPipeline('output', callback);
-        callback(pipeline.result('row'));
-        return pipeline;
-    }
-
-    var branchID = 0;
-    pipeline.branch = function(branches) {
-        pipeline.register('_branch'+branchID);
-        branches.forEach(function(b){
-            var operations = Object.keys(b).map(function(o) {
-                var obj = {};
-                obj[o] = b[o];
-                return obj;
-            });
-            pipeline.run(operations);
-            pipeline.resume('_branch' + branchID);
-        })
-        branchID++;
-    }
-
-    $p.readResult = pipeline.result;
-
-    pipeline.getResult = function (d) {
+    api.getResult = function (d) {
         return $p.getResult(d);
     }
 
-    pipeline.readPixels = function(arg) {
-        var options = arg || {},
-            offset = options.offset || [0, 0],
-            resultSize = options.size || $p.dataDimension[0]* $p.dataDimension[1],
-            rowSize = Math.min(resultSize, $p.dataDimension[0]),
-            colSize = Math.ceil(resultSize/$p.dataDimension[0]);
-
-        $p.bindFramebuffer(null);
-        var gl = $p.ctx,
-            result = new Uint8Array(rowSize * colSize * 4);
-
-        gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, result);
-        return result.filter(function(d, i){ return i%4===3;} );
-    }
-
-    pipeline.clearViews = function() {
-        $p.bindFramebuffer("offScreenFBO");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer("visStats");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer(null);
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-    }
-
-    pipeline.runSpec = function(specs) {
-        pipeline.head();
-        pipeline.clearViews();
+    api.runSpec = function(specs) {
+        api.head();
+        api.clearViews();
         $p.interactions = [];
-        response = {};
-        $p.pipeline = [];
+        $p.responses = {};
         $p.crossfilters = [];
         $p.uniform.uFilterFlag.data = 0;
         // $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
@@ -234,66 +66,19 @@ export default function pipeline(options) {
                 arg = spec[opt];
 
             opt = opt.slice(1);
-            if(typeof pipeline[opt] == 'function') {
-                pipeline[opt](arg);
+            if(typeof api[opt] == 'function') {
+                api[opt](arg);
             }
         })
-        return pipeline;
+        return api;
     }
 
-    pipeline.head = function() {
-        pipeline.resume('__init__');
-        return pipeline;
+    api.head = function() {
+        api.resume('__init__');
+        return api;
     }
-
-    pipeline.run = function(opts) {
-        var operations = opts || $p.pipeline;
-        operations.forEach(function(p, i){
-            var opt = Object.keys(p)[0];
-            pipeline[opt](p[opt]);
-        })
-
-        return pipeline;
-    }
-
-    pipeline.visualize = function(vmap) {
-        var optID = addToPipeline('visualize', vmap);
-        var viewIndex = 0,
-            filters = {};
-        if(typeof vmap.id == 'string') {
-            viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
-            if(viewIndex == -1) {
-                //find the next available view slot in all views
-                for(var vi = 0; vi < $p.views.length; vi++){
-                    if(!$p.views[vi].id) {
-                        viewIndex = vi;
-                        $p.views[viewIndex].id = vmap.id;
-                        break;
-                    }
-                }
-            }
-        }
-        if(vmap.mark == 'bar') vmap.zero = true;
-        $p.views[viewIndex].vmap = vmap;
-        var encoding = vmap,
-            viewTag = $p.views[viewIndex].id;
-
-        if($p._update && response.hasOwnProperty(viewTag)) {
-            if(response[viewTag].hasOwnProperty($p._responseType)) {
-                encoding = Object.assign({}, vmap, response[viewTag][$p._responseType]);
-            }
-        }
-        if(encoding.opacity != 0){
-            operation.visualize({
-                vmap: encoding,
-                viewIndex: viewIndex
-            });
-            pipeline.interact();
-        }
-        return pipeline;
-    }
-
-    pipeline.interact = function(spec) {
+  
+    api.interact = function(spec) {
         if(typeof(spec) != 'undefined') $p.interactions.push(spec);
         $p.interactions.forEach(function(interaction){
             interact($p, {
@@ -301,7 +86,7 @@ export default function pipeline(options) {
                 view: interaction.from,
                 condition: interaction.condition,
                 callback: function(selection) {
-                    response = interaction.response;
+                    $p.responses = interaction.response;
                     if(!$p._update) {
                         $p._update = true;
                         $p.crossfilters = {};
@@ -323,10 +108,10 @@ export default function pipeline(options) {
                         $p._responseType = 'unselected';
                         $p.uniform.uFilterLevel.data = 0.2;
                         $p.uniform.uVisLevel.data = 0.1;
-                        pipeline.head().run();
+                        api.head().run();
                         $p._responseType = 'selected';
                         $p.uniform.uVisLevel.data = 0.2;
-                        pipeline.head().filter({}).run();
+                        api.head().match({}).run();
                         $p._responseType = 'unselected';
                         $p._update = false;
                         $p.uniform.uFilterLevel.data = 0.1;
@@ -336,30 +121,23 @@ export default function pipeline(options) {
             })
         })
     }
+    $p.respond = api.interact;
 
-    pipeline.updateData = function(newData) {
-        pipeline.head();
+    api.updateData = function(newData) {
+        api.head();
         for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
             let buf = new Float32Array(newData[ai]);
             $p.texture.tData.update(
                 buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
             );
         }
-        return pipeline;
+        return api;
     }
 
-    pipeline.exportImage = function(beforeExport) {
-        var beforeExport = beforeExport || function() { pipeline.head().run() };
-        if(typeof operation.visualize.chart.exportImage === 'function') {
-            return operation.visualize.chart.exportImage(beforeExport);
-        } else {
-            return pipeline;
-        }
-    }
 
     if(options.hasOwnProperty('data')) {
-        pipeline.data(options.data);
+        api.data(options.data);
     }
 
-    return pipeline;
+    return api;
 }

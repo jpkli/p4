@@ -9,7 +9,7 @@ import testTS from './test-timeseries';
 
 let precision = 1e-6;
 
-let babies = new Babies(1000);
+let babies = new Babies(10000);
 
 let testInput = {
     data: babies.data,
@@ -17,9 +17,9 @@ let testInput = {
     precision
 }
 
-// testCheck(testInput);
+testCheck(testInput);
 
-testTS();
+// testTS();
 
 // mocha.setup('bdd');
 

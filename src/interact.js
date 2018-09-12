@@ -13,7 +13,7 @@ export default function interact($p, options) {
 
     viewTags.forEach(function(viewTag){
         var vis = $p.views.filter(v=>v.id == viewTag)[0];
-
+        console.log(vis)
         if(!Array.isArray(actions)) {
             actions = [actions];
         }

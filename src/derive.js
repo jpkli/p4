@@ -80,11 +80,15 @@ export default function derive($p, spec) {
         gl.enable( gl.BLEND );
         gl.blendFunc( gl.ONE, gl.ONE );
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
-        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
-        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
-
-        // $p.uniform.uDeriveCount = deriveFieldCount;
+        
+        if($p.indexes.length > 0)
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+       
+        if($p.indexes.length > 1)
+            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
+        $p.uniform.uOptMode = 0.0;
+        // $p.uniform.uDeriveCount = derivedFields.length;
         var deriveDomains = [];
         derivedFields.forEach(function(d, i){
             $p.uniform.uDeriveId = i;
@@ -144,8 +148,7 @@ export default function derive($p, spec) {
                 $p.fieldDomains[fieldId] = d;
                 $p.fieldWidths[fieldId] = d[1] - d[0] + 1;
             });
-
-            $p.uniform.uFieldDomains.data = $p.fieldDomains;
+            $p.uniform.uFieldDomains.value($p.fieldDomains);
             $p.uniform.uFieldWidths.data = $p.fieldWidths;
         }
     }

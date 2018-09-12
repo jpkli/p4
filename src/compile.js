@@ -6,20 +6,20 @@ import match from './match';
 import extent from './extent';
 import visualize from './visualize';
 
-export default function compile(fxgl, fields, spec) {
+export default function compile($p, fields, spec) {
 
     // if(spec.hasOwnProperty('perceptual'))
-    //     operations.perceptual = kernels.perceptual(fxgl);
+    //     operations.perceptual = kernels.perceptual($p);
     //
     // if(spec.hasOwnProperty('derive'))
-    //     operations.derive = kernels.derive(fxgl, spec.derive);
+    //     operations.derive = kernels.derive($p, spec.derive);
 
     return {
-        aggregate : aggregate(fxgl),
-        cache     : cache(fxgl),
-        match     : match(fxgl, fields),
-        extent    : extent(fxgl),
-        visualize : visualize(fxgl)
+        aggregate : aggregate($p),
+        cache     : cache($p),
+        match     : match($p, fields),
+        extent    : extent($p),
+        visualize : visualize($p)
         // perceive  : kernels.reveal(fxgl)
     }
 }
