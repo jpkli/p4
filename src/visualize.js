@@ -47,11 +47,9 @@ export default function visualize($p) {
 
     $p.framebuffer('offScreenFBO', 'float', $p.viewport);
     $p.framebuffer('visStats', 'float', [1, 1]);
-
     // $p.framebuffer.enableRead('offScreenFBO');
-    $p.renderMode = 'instancedXY';
 
-    var renderer = render($p);
+    render($p);
 
     function updateInstancedAttribute(vm) {
         if(Array.isArray(vm)){
@@ -65,12 +63,11 @@ export default function visualize($p) {
         }
     }
 
-    var viz = function(options) {
+    return function(options) {
         $p.renderMode = 'instancedXY';
         $p.revealDensity = false;
         var vmap = options.vmap || {},
             mark = options.mark || vmap.mark || 'line',
-            data = options.data || null,
             interaction = options.interaction,
             viewIndex = options.viewIndex,
             viewTag = $p.views[viewIndex].id;
@@ -189,7 +186,6 @@ export default function visualize($p) {
             if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function') {
                 pv.chart.svg.remove();
             }
-            console.log(pv)
             pv.chart = vis.addChart(viewSetting);
         } else {
             $p.uniform.uVisDomains = $p.views[viewIndex].domains;
@@ -248,7 +244,4 @@ export default function visualize($p) {
             })
         }
     }
-    viz.chart = vis;
-
-    return viz;
 }

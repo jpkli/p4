@@ -55,6 +55,7 @@ export default function($p) {
             kernels.aggregate = programs.aggregate($p, spec);
         }
         kernels.aggregate.execute(spec);
+        return kernels.aggregate.result;
         // console.log(JSON.stringify(result('row')));
 
     }
@@ -69,7 +70,7 @@ export default function($p) {
 
     operations.cache = function(tag) {
         if (!kernels.hasOwnProperty('cache')) {
-            kernels.cache = programs.cache($p, spec);
+            kernels.cache = programs.cache($p);
         }
         kernels.cache.execute(tag);
         return kernels.cache.result;

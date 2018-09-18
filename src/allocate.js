@@ -1,8 +1,8 @@
 import {seqFloat} from './utils';
+import {unique} from './arrays';
 const vecId = ['x', 'y', 'z'];
 export default function($p, dataProps) {
     var data = dataProps || [];
-    console.log(data);
     $p.indexes = data.indexes || [];
     $p.categoryIndex = data.strHashes || {};
     $p.categoryLookup = data.strLists || {};
@@ -78,7 +78,7 @@ export default function($p, dataProps) {
     } else {
 
         $p.indexes.forEach(function(id, i) {
-            var indexAttrData = arrays.unique(data[id]).sort(function(a, b) {
+            var indexAttrData = unique(data[id]).sort(function(a, b) {
                 return a - b;
             });
             $p.attribute("aDataVal" + vecId[i], "float", new Float32Array(indexAttrData));
@@ -116,12 +116,9 @@ export default function($p, dataProps) {
         .concat(new Array($p.deriveMax).fill([0, 1]));
 
         $p.uniform("uFieldDomains", "vec2",  $p.fieldDomains);
-        console.log($p.fieldDomains, $p.fields);
     } else {
         $p.uniform("uFieldDomains", "vec2",  $p.fields.map(f => [0, 1]));
     }
-
-    console.log($p.fieldDomains, $p.fields, $p.fieldCount)
 
     let filterControls = new Array($p.fieldCount).fill(0);
     //setup all attribute, uniform, texture, varying needed by all the shaders
@@ -142,7 +139,6 @@ export default function($p, dataProps) {
     $p.uniform("uDeriveCount", "int", $p.deriveMax);
     // $p.uniform("uDeriveDomains", "vec2", $p.deriveDomains);
     // $p.uniform("uDeriveWidths", "float", $p.deriveWidths);
-
     $p.uniform("uFilterLevel", "float", 0.1)
     $p.uniform('uVisLevel',    "float", 0.1)
 

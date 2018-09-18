@@ -1,7 +1,6 @@
 import allocate  from './allocate';
 import output    from './output';
 import initialize    from './initialize';
-import compile   from './compile';
 import interact  from './interact';
 import control from './control';
 import pipeline from './pipeline';
@@ -133,11 +132,5 @@ export default function p4(options) {
         }
         return api;
     }
-
-
-    if(options.hasOwnProperty('data')) {
-        api.data(options.data);
-    }
-
     return api;
 }

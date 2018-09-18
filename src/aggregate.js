@@ -2,7 +2,8 @@ import {seqFloat} from './utils';
 
 const vecId = ['x', 'y', 'z'];
 const aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
-
+const smallest = -Math.pow(2, 128);
+const largest = Math.pow(2, 127);
 export default function aggregate($p) {
     var aggregate = {};
 
@@ -98,12 +99,9 @@ export default function aggregate($p) {
         resultFieldCount = resultFieldIds.length;
         var gl = $p.program("group");
         $p.bindFramebuffer("fGroupResults");
-        if($p.deriveCount > 0) {
-            $p.framebuffer.enableRead("fDerivedValues");
-        }
-        if($p.uniform.uFilterFlag.value() === 1) {
-            $p.framebuffer.enableRead("fFilterResults");
-        }
+        $p.framebuffer.enableRead("fDerivedValues");
+        $p.framebuffer.enableRead("fFilterResults");
+
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
@@ -132,6 +130,15 @@ export default function aggregate($p) {
             if (opt == 0) gl.blendEquation(gl.MIN_EXT);
             else if (opt == 1) gl.blendEquation(gl.MAX_EXT);
             else gl.blendEquation(gl.FUNC_ADD);
+
+            // if(!$p._progress) {
+            //     let initValue = 0.0;
+            //     if(opt === 0) initValue = largest;
+            //     if(opt === 1) initValue = smallest;
+            //     gl.clearColor(0.0, 0.0, 0.0, initValue);
+            //     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            // }
+
             $p.uniform.uFieldId = f;
             $p.uniform.uAggrOpt = opt;
             gl.ext.drawArraysInstancedANGLE(
@@ -223,7 +230,6 @@ export default function aggregate($p) {
             });
 
         if (!$p._update && !$p._progress) {
-            console.log('allocate new framework for aggregation result')
             $p.framebuffer(
                 "fGroupResults",
                 "float", [$p.resultDimension[0], $p.resultDimension[1] * resultFields.length]
@@ -259,7 +265,7 @@ export default function aggregate($p) {
         var newFieldWidths = oldFieldIds.map(function(f) {
             return $p.fieldWidths[f];
         });
-
+        
         $p.fieldDomains = newFieldDomains;
         $p.fieldWidths = newFieldWidths;
         // $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
@@ -334,7 +340,7 @@ export default function aggregate($p) {
 
         gl.readPixels(offset[0], offset[1], rowTotal, colTotal * resultFieldCount, gl.RGBA, gl.FLOAT, result);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        console.log(result.filter((d,i) => i % 4 ===3)); 
+        // console.log(result.filter((d,i) => i % 4 ===3)); 
         return result.filter(function(d, i) {
             return i % 4 === 3;
         });

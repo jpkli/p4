@@ -75,7 +75,6 @@ instancedXY.fs = function() {
             discard;
         }
     }
-
 }
 
 var interleave = {};

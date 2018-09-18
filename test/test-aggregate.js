@@ -23,9 +23,9 @@ export default function({
     let spec = [
         {
             $aggregate: {
-                $group: ['MotherRace', 'Gender'],
+                $group: ['MotherRace', 'BabyGender'],
                 $reduce: {
-                    sumWeight: {$sum: 'Weight'},
+                    sumWeight: {$sum: 'BabyWeight'},
                     maxMotherWeight: {$max: 'MotherWeight'},
                     count: {$count: '*'},
                     // avergeAge: {$avg: 'MotherAge'},
@@ -36,8 +36,8 @@ export default function({
 
     let gpu = p4(config).data(db.data());
     let cpu = p3.pipeline(data);
-
-    let c = data.filter(d=>d.MotherRace == 'Black' && d.Gender == 'F').map(d=>d.Weight).reduce((a,b) => a+b);
+    
+    let c = data.filter(d=>d.MotherRace == 'Black' && d.BabyGender == 'F').map(d=>d.BabyWeight).reduce((a,b) => a+b);
 
     describe('GPU-based aggregation', function() {
         
