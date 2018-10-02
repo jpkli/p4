@@ -2,7 +2,7 @@ import colors from './color';
 import render from './render';
 import reveal from './reveal';
 import encode from './encode';
-import Layout from './metavis/layout';
+import Layout from './layout';
 
 const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
 const userActions = ['click', 'hover', 'brush', 'zoom', 'pan'];
@@ -215,7 +215,7 @@ export default function visualize($p) {
             }
         }
         if(!$p.skipRender) draw();
-        
+
         if($p.revealDensity) enhance({
             viewIndex: viewIndex,
             dim: [width, height],

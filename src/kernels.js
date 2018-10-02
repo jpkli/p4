@@ -1,9 +1,9 @@
-import aggregate from './aggregate';
-import cache  from './cache';
-import derive from './derive';
-import extent from './extent';
-import match from './match';
-import visualize from './visualize';
+import aggregate  from './ops/aggregate';
+import cache      from './ops/cache';
+import derive     from './ops/derive';
+import extent     from './ops/extent';
+import match      from './ops/match';
+import visualize  from './vis/visualize';
 
 export default {
     aggregate,

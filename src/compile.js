@@ -1,10 +1,10 @@
-import derive from './derive';
-import reveal from './reveal';
-import aggregate from './aggregate';
-import cache  from './cache';
-import match from './match';
-import extent from './extent';
-import visualize from './visualize';
+import aggregate  from './ops/aggregate';
+import cache      from './ops/cache';
+import derive     from './ops/derive';
+import extent     from './ops/extent';
+import match      from './ops/match';
+import visualize  from './vis/visualize';
+import reveal     from './vis/reveal';
 
 export default function compile($p, fields, spec) {
 

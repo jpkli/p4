@@ -1,5 +1,5 @@
 
-import Brush from './metavis/brush';
+import Brush from './vis/brush';
 export default function interact($p, options) {
     var viewTags = options.view || [$p.views[0].id];
 

@@ -1,4 +1,4 @@
-import {seqFloat} from './utils';
+import {seqFloat} from '../utils';
 
 const vecId = ['x', 'y', 'z'];
 const aggrOpts = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];
