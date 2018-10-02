@@ -16,6 +16,7 @@ export default function p4(options) {
     $p.deriveMax = options.deriveMax || 4;
     $p._responseType = 'unselected';
     $p._update = false;
+    $p.skipRender= false;
 
     $p.getResult = function() {};
     let api = pipeline($p);

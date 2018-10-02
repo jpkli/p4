@@ -10,7 +10,7 @@ export default function pipeline($p) {
 
     pipeline.addToQueue = function (opt, arg) {
         if(!$p._update) {
-            var spec = {};
+            let spec = {};
             spec[opt] = arg;
             queue.push(spec);
             return optID++;
@@ -26,9 +26,7 @@ export default function pipeline($p) {
                 $p.getResult = operation(arg);
                 return pipeline;
             }
-        }
-        
-        
+        }   
     }
 
     pipeline.clearQueue = function() {

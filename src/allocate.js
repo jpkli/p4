@@ -70,13 +70,20 @@ export default function($p, dataProps) {
     $p.deriveWidths = new Array($p.deriveMax).fill(1);
     $p.deriveFieldCount = 0;
 
+    $p.getFieldId = function (fieldName) {
+        let fieldId = $p.fields.indexOf(fieldName);
+        if($p.indexes.length > 0 && fieldId >= $p.indexes.length) {
+            fieldId -= $p.indexes.length; 
+        }
+        return fieldId; 
+    }
+
     if ($p.indexes.length === 0) {
         $p.attribute("aDataIdx", "float", seqFloat(0, $p.dataDimension[0] - 1));
         $p.attribute("aDataIdy", "float", seqFloat(0, $p.dataDimension[1] - 1));
         $p.attribute("aDataValx", "float", seqFloat(0, $p.dataDimension[0] - 1));
         $p.attribute("aDataValy", "float", seqFloat(0, $p.dataDimension[1] - 1));
     } else {
-
         $p.indexes.forEach(function(id, i) {
             var indexAttrData = unique(data[id]).sort(function(a, b) {
                 return a - b;

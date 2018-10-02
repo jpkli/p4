@@ -21,7 +21,6 @@ function vertexShaderFilter(){
                 }
                 visSelect = true;
             }
-
         }
     }
     this.vResult = 0.1;
@@ -123,7 +122,7 @@ export default function match($p) {
             gl.blendEquation(gl.MIN_EXT);
 
             matchFields.forEach(function(k){
-                var fieldId = fields.indexOf(k);
+                var fieldId = $p.fields.indexOf(k);
                 var inSelections = (spec.hasOwnProperty(k)) ? spec[k].$in :  $p.crossfilters[k].$in;
                 if($p.categoryIndex.hasOwnProperty(k)) {
                     inSelections = inSelections
@@ -155,7 +154,7 @@ export default function match($p) {
             filterControls = new Array(fieldCount).fill(0);
 
             filterSelections.forEach(function(k){
-                var fieldId = fields.indexOf(k);
+                var fieldId = $p.fields.indexOf(k);
 
                 if(fieldId === -1) {
                     console.log('Skipped: Matching on invalid data field ' + k);
@@ -169,7 +168,8 @@ export default function match($p) {
             });
 
             viewSelections.forEach(function(k){
-                var fieldId = fields.indexOf(k);
+                
+                var fieldId = $p.fields.indexOf(k);
                 if(fieldId === -1) {
                     console.log('Skipped: Matching on invalid data field ' + k);
                     return;

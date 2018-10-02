@@ -30,10 +30,10 @@ export default function visualize($p) {
         .uniform('uVisMark',        'int',   1)
         .uniform('uInterleaveX',    'int',   0)
         .uniform('uVisDomains',     'vec2',  $p.fieldDomains.map(d=>d.slice()))
-        .uniform('uVisScale',       'vec2', [1.0, 1.0])
-        .uniform('uPosOffset',      'vec2', [0.0, 0.0])
+        .uniform('uVisScale',       'vec2',  [1.0, 1.0])
+        .uniform('uPosOffset',      'vec2',  [0.0, 0.0])
         .uniform('uFeatureCount',   'int',   0)
-        .uniform('uMarkSize',       'float', 10.0)
+        .uniform('uMarkSize',       'float', 16.0)
         .uniform('uMarkSpace',      'vec2',  [0.02, 0.02])
         .uniform('uDefaultAlpha',   'float', 1.0)
         .uniform('uDefaultWidth',   'float', 1.0 / $p.viewport[0])
@@ -208,17 +208,14 @@ export default function visualize($p) {
                 gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
             } else {
                 if(primitive == gl.LINE_STRIP) {
-                    console.log($p.dataDimension, $p.renderMode);
                     gl.lineWidth(1.0);
-                    gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
-                    // gl.drawArrays(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
-                } else {
-                    gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
-                }
+                } 
+                gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
+               
             }
         }
-
-        if(mark!='stack') draw();
+        if(!$p.skipRender) draw();
+        
         if($p.revealDensity) enhance({
             viewIndex: viewIndex,
             dim: [width, height],

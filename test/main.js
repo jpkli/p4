@@ -7,24 +7,27 @@ import testCache from './test-cache';
 import testAggregate from './test-aggregate';
 import testTS from './test-timeseries';
 
+let url = new URL(window.location.href);
 let precision = 1e-6;
 
-// let babies = new Babies(1000);
+let babies = new Babies(1000);
 
-// let testInput = {
-//     data: babies.data,
-//     schema: babies.schema,
-//     precision
-// }
+let testInput = {
+    data: babies.data,
+    schema: babies.schema,
+    precision
+}
 
-// testCheck(testInput);
+if (url.searchParams.get('check') !== null) {
+    testCheck(testInput);
+} else if (url.searchParams.get('ts') !== null) {
+    testTS();
+} else {
+    mocha.setup('bdd');
 
-testTS();
+    testCache(testInput);
+    testAggregate(testInput);
 
-// mocha.setup('bdd');
-
-// testCache(testInput);
-// testAggregate(testInput);
-
-// mocha.checkLeaks();
-// mocha.run();
+    mocha.checkLeaks();
+    mocha.run();
+}
