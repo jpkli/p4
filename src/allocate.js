@@ -10,10 +10,6 @@ export default function($p, dataProps) {
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
 
-    $p.crossfilters = {};
-    $p.deriveCount = 0;
-    
-    $p.dataSize = 0;
 
     var dkeys = $p.dkeys,
         dtypes = $p.dtypes,
@@ -25,7 +21,7 @@ export default function($p, dataProps) {
         $p.dataSize = Math.max(...data.map(d => d.length));
     }
 
-    var rowSize = Math.min($p.dataSize, 8192),
+    var rowSize = Math.min($p.dataSize, $p.rowSize),
         colSize = Math.ceil($p.dataSize / rowSize);
 
     $p.dataDimension = [rowSize, colSize];

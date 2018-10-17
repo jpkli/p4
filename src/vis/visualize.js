@@ -216,6 +216,18 @@ export default function visualize($p) {
         }
         if(!$p.skipRender) draw();
 
+        console.log($p.extensions)
+
+        $p.extensions.forEach((ext) => {
+            if(ext.condition.call(null, vmap)) {
+                let data;
+                if(ext.exportData) {
+                    console.log($p.exportResult('row'));
+                } 
+                ext.procedure.call();
+            }
+        })
+
         if($p.revealDensity) enhance({
             viewIndex: viewIndex,
             dim: [width, height],

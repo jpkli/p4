@@ -9,11 +9,18 @@ import kernels from './kernels';
 
 export default function p4(options) {
     var $p = initialize(options);
+    
     $p.views = [];
     $p.interactions = [];
+    $p.extensions = [];
     $p.responses = {};
-
+    $p.crossfilters = {};
+    
+    $p.dataSize = 0;
+    $p.rowSize = 8192;
     $p.deriveMax = options.deriveMax || 4;
+    $p.deriveCount = 0;
+    
     $p._responseType = 'unselected';
     $p._update = false;
     $p.skipRender= false;
@@ -21,17 +28,24 @@ export default function p4(options) {
     $p.getResult = function() {};
     let api = pipeline($p);
     api.ctx = $p;
-    api.data = function(dataOptions) {
-        allocate($p, dataOptions);
+    api.addModule(control);
+    api.addModule(output);
+
+    $p.exportResult = api.result;
+
+    function configPipeline($p) {
         $p.extent = kernels.extent($p);
         // $p.operations = compile($p);
-        api.addModule(control);
-        api.addModule(output);
         let operations = operate($p);
         for(let optName of Object.keys(operations)) {
-            api.addOperation(optName, operations[optName])
+            api.addOperation(optName, operations[optName]);
         }
         api.register('__init__');
+    }
+
+    api.data = function(dataOptions) {
+        allocate($p, dataOptions);
+        configPipeline($p);
         return api;
     }
 
@@ -132,6 +146,26 @@ export default function p4(options) {
             );
         }
         return api;
+    }
+
+    api.extend = function({
+        name,
+        skipDefault = false,
+        exportData = false,
+        condition,
+        procedure,
+    }) {
+        
+        if(name != undefined && typeof procedure === 'function') {
+            console.log(name)
+            $p.extensions.push({
+                name,
+                skipDefault,
+                exportData,
+                condition,
+                procedure
+            });
+        }
     }
     return api;
 }
