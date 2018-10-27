@@ -89,7 +89,7 @@ export default function visualize($p) {
         if(!$p._update){
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
-                if(vmap.zero && (f == vmap.height || f == vmap.width ) && visDomain[f][0]>0) visDomain[f][0] = 0;
+                if(vmap.zero  && visDomain[f][0]>0) visDomain[f][0] = 0;
             });
         }
 
@@ -131,11 +131,11 @@ export default function visualize($p) {
         //     $p.uniform.uDataInput = $p.framebuffer[data].texture;
         var viewSetting = {
             domain: visDomain,
-            width: width,
-            height: height,
+            // width: width,
+            // height: height,
             fields: $p.fields,
             vmap: vmap,
-            onclick: interaction,
+            // onclick: interaction,
             categories: $p.categoryLookup,
             padding: padding,
             left: offset[0],
@@ -145,6 +145,7 @@ export default function visualize($p) {
         };
 
         viewSetting = Object.assign(viewSetting, dimSetting);
+        viewSetting = Object.assign(viewSetting, $p.views[viewIndex]);
 
         if($p.revealDensity) {
             $p.bindFramebuffer('offScreenFBO');
@@ -169,14 +170,6 @@ export default function visualize($p) {
         gl.disable(gl.DEPTH_TEST);
         gl.enable( gl.BLEND );
         gl.blendEquation(gl.FUNC_ADD);
-
-        if(mark == 'stack') {
-            var result = $p.readResult('row');
-            viewSetting.data = result.filter(d=>d[vmap.y]>0);
-            viewSetting.fields = $p.fields;
-            if($p.intervals.hasOwnProperty(vmap.x))
-                viewSetting.isHistogram = true;
-        }
 
         //TODO: Maybe just save the needed data domains instead of copying all
         if(!$p._update) {
@@ -214,20 +207,41 @@ export default function visualize($p) {
                
             }
         }
-        if(!$p.skipRender) draw();
-
-        console.log($p.extensions)
-
+        
         $p.extensions.forEach((ext) => {
             if(ext.condition.call(null, vmap)) {
-                let data;
+                $p.skipRender = ext.skipDefault;
+                let data = {
+                    json: null, 
+                    array: null,
+                    texture: null,
+                    domains: visDomain
+                };
+                let view = {
+                    width: width - padding.left - padding.right,
+                    height: height - padding.top - padding.bottom,
+                    encodings: vmap,
+                    padding: $p.views[viewIndex].padding,
+                    svg: $p.views[viewIndex].chart.svg, 
+                    canvas: $p.canvas
+                };
+
                 if(ext.exportData) {
-                    console.log($p.exportResult('row'));
+                    data.json = $p.exportResult('row');
                 } 
-                ext.procedure.call();
+                
+                if(ext.restartOnUpdate) {
+                    ext.procedure.call(null,  data, view);
+                } else {
+                    if(!$p._update) {
+                        ext.procedure.call(null, data, view);
+                    }
+                }
             }
         })
 
+        if(!$p.skipRender) draw();
+        $p.skipRender = false;
         if($p.revealDensity) enhance({
             viewIndex: viewIndex,
             dim: [width, height],

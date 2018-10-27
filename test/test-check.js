@@ -17,11 +17,8 @@ export default function({
         schema: schema
     });
 
-    let db2 = cstore();
-    db2.import({
-        data: data.slice(100, 200),
-        schema: schema
-    });
+    let db2 = cstore({schema: schema});
+    db2.import({schema: schema, data: data.slice(100, 200)});
 
     let config = {
         container: "p4",
@@ -39,8 +36,20 @@ export default function({
     } else {
         gpu.view(defaultViews);
     }
-   
+
+
+    // gpu.extend({
+    //     name: 'animate',
+    //     exportData: true,
+    //     condition: function(vmap) { return vmap.mark}, 
+    //     procedure: function() {
+    //         console.log('testing');
+    //     },
+    // })
+
     gpu.runSpec(spec.operations)
+
+
 
     // gpu.updateData(db2.data())
 }

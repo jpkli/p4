@@ -9,7 +9,7 @@ export default function($p, dataProps) {
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
-
+    $p.uniqueValues = data.uniqueValues;
 
     var dkeys = $p.dkeys,
         dtypes = $p.dtypes,

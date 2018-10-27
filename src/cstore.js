@@ -1,31 +1,39 @@
 import * as ctypes from './ctypes';
-export default function ColumnStore(arg){
-    var cstore   = (this instanceof ColumnStore) ? this : {},
-        options = arg || {},
-        columns  = [],                  // column-based binary data
-        size     = options.size  || 0,   // max size
-        count    = options.count || 0,   // number of entries stored
-        types    = options.types || [],  // types of the columns
-        attributes = options.attributes || options.keys || options.names || [],  // column attributes
-        struct   = options.struct|| options.schema || {},
-        strHashes     = options.strHashes  || {},  // content access memory
-        strLists     = options.strLists  || {},  // table lookaside buffer
-        colStats = {},
-        colAlloc = {},
-        colRead  = {},                  // functions for reading values
-        skip     = options.skip  || 0;
+import {unique} from './arrays';
 
-    if(options.struct) initStruct(options.struct);
+export default function ColumnStore(arg){
+    var cstore     = (this instanceof ColumnStore) ? this : {},
+        options    = arg || {},
+        columns    = [],                  // column-based binary data
+        size       = options.size  || 0,   // max size
+        count      = options.count || 0,   // number of entries stored
+        types      = options.types || [],  // types of the columns
+        attributes = options.attributes || options.keys || options.names || [],  // column attributes
+        struct     = options.struct || options.schema || null,
+        strHashes  = options.strHashes || {},  // content access memory
+        strLists   = options.strLists  || {},  // table lookaside buffer
+        intervals  = {},
+        indexes    = options.indexes || {},
+        colStats   = {},
+        colAlloc   = {},
+        colRead    = {},                  // functions for reading values
+        skip       = options.skip  || 0;
+
+    if(typeof(struct) === 'object') initStruct(struct);
 
     function initCStore() {
         if(size && types.length === attributes.length && types.length > 0) {
             attributes.forEach(function(c, i){
                 configureColumn(i);
                 columns[i] = new colAlloc[c](size);
-                if(!columns.hasOwnProperty(c))
+                if(!columns.hasOwnProperty(c)) {
                     Object.defineProperty(columns, c, {
                         get: function() { return columns[i]; }
                     });
+                }
+                if(intervals.hasOwnProperty(c)) {
+                    cstore.intervalize(c, intervals[c]);
+                }
             });
             columns.attributes = attributes;
             columns.keys = attributes;
@@ -33,6 +41,7 @@ export default function ColumnStore(arg){
             columns.struct = struct;
             columns.strLists = strLists;
             columns.strHashes = strHashes;
+            columns.uniqueValues = indexes;
             columns.size = size;
             columns.get = function(c) {
                 var index = attributes.indexOf(c);
@@ -97,6 +106,10 @@ export default function ColumnStore(arg){
     }
 
     cstore.addRows = function(rowArray) {
+        if(size === 0) {
+            size = rowArray.length;
+            initCStore();
+        }
         if(count === 0 && skip > 0) {
             for(var j = 0; j<skip; j++)
                 rowArray.shift();
@@ -107,6 +120,7 @@ export default function ColumnStore(arg){
             });
             count++;
         });
+
         return count;
     }
 
@@ -187,6 +201,7 @@ export default function ColumnStore(arg){
         data.strHashes = strHashes;
         data.strLists = strLists;
         data.dtypes = types;
+        data.export = cstore.export;
         return data;
     }
 
@@ -267,13 +282,68 @@ export default function ColumnStore(arg){
         }
     }
 
-    cstore.import = function(arg) {
-        var data = arg.data || [],
-            schema = arg.schema || {};
+    cstore.import = function({
+        data,
+        schema = null
+    }) {
         size = data.length;
-        initStruct(schema);
+        if(typeof(schema == 'object')) initStruct(schema);
         initCStore();
         cstore.addObjects(data);
+        return cstore;
+    }
+
+    cstore.scale = function(attr, factor) {
+        let len = columns[attr].length;
+        for(var i = 0; i < len; i++) {
+            columns[attr] *= factor;
+        }
+        return cstore;
+    }
+
+    cstore.normalize = function(attr) {
+        if(!colStats.hasOwnProperty(attr)) {
+            cstore.stats();
+        }
+        let fid = attributes.indexOf(attr);
+        let len = columns[attr].length;
+        let max = colStats[f].max;
+        let min = colStats[f].min;
+
+        if(types[fid] === 'float') {
+            for(var i = 0; i < len; i++) {
+                columns[attr][i] = (columns[attr][i] - min) / (max - min);
+            }
+        } 
+        return cstore;
+    }
+
+    cstore.intervalize = function(attr, interval) {
+        intervals[attr] = interval;
+        if(!colStats.hasOwnProperty(attr)) {
+            cstore.stats([attr]);
+        }
+        let fid = attributes.indexOf(attr);
+        let len = columns[attr].length;
+        let min = colStats[f].min;
+
+        if(types[fid] === 'int' || types[fid] === 'float') {
+            for(var i = 0; i < len; i++) {
+                columns[attr][i] = (columns[attr][i] - min) / interval;
+            }
+        } 
+        return cstore;
+    }
+
+    cstore.index = function(attr) {
+        indexes[attr] = unique(columns[attr]).sort(function(a, b) {
+            return a - b;
+        });
+        let len = columns[attr].length;
+        for(var i = 0; i < len; i++) {
+            columns[attr][i] = indexes[attr].indexOf(columns[attr][i]); 
+        }
+        return cstore;
     }
 
     return initCStore();

@@ -3,9 +3,10 @@ import format from './format';
 import scale from './scale';
 import legend from './legend';
 
-export default function chart(svg, arg) {
+export default function chart(frontSvg, backSvg, arg) {
     var options = arg || {},
-        plot = svg.append('g'),
+        plot = frontSvg.append('g'),
+        metavis = backSvg.append('g'),
         width = options.width,
         height = options.height,
         top = options.top || 0,
@@ -22,6 +23,8 @@ export default function chart(svg, arg) {
         tickOffset = options.axisOffset || [0, 0],
         padding = options.padding || {left: 0, right: 0, top: 0, bottom: 0},
         marks = [],
+        frameBorder = options.frameBorder || false,
+        gridlines = options.gridlines || {x: false, y: false},
         colors = options.colors;
 
     var scaleX = options.scaleX || 'linear',
@@ -33,20 +36,20 @@ export default function chart(svg, arg) {
     height -= padding.top + padding.bottom;
 
     var xAxisOption = {
-        container: plot,
+        container: metavis,
         dim: "x",
         width: width,
         height: height,
         domain: domainX,
         scale:  scaleX,
         align: "bottom",
-        // ticks: 5,
-        // grid: 1,
+        // ticks: 15,
+        grid: gridlines.x,
         format: format(".3s"),
     };
 
     var yAxisOption = {
-        container: plot,
+        container: metavis,
         dim: "y",
         domain: domainY,
         scale: scaleY,
@@ -54,13 +57,14 @@ export default function chart(svg, arg) {
         height: height,
         align: "left",
         // labelPos: {x: -5, y: -5},
-        // grid: 1,
+        // ticks: 8,
+        grid: gridlines.y,
         format: format(".3s"),
     };
 
     if(showLegend && features.indexOf(vmap.color) !== -1){
         legend({
-            container: plot,
+            container: metavis,
             width: 20,
             height: 180,
             dim: "y",
@@ -203,21 +207,25 @@ export default function chart(svg, arg) {
                 .text(yAxisTitle);
         }
     }
-    // plot.append("line")
-    //     .attr('x1', 0)
-    //     .attr('x2', width)
-    //     .attr('y1', 0)
-    //     .attr('y2', 0)
-    //     .css('stroke', '#000')
-    // plot.append("line")
-    //     .attr('x1', width)
-    //     .attr('x2', width)
-    //     .attr('y1', 0)
-    //     .attr('y2', height)
-    //     .css('stroke', '#000')
-        // .css('stroke-opacity', 0.5)
+    
+    if(frameBorder) {
+        plot.append("line")
+            .attr('x1', 0)
+            .attr('x2', width)
+            .attr('y1', 0)
+            .attr('y2', 0)
+            .css('stroke', '#000')
+        plot.append("line")
+            .attr('x1', width)
+            .attr('x2', width)
+            .attr('y1', 0)
+            .attr('y2', height)
+            .css('stroke', '#000')
+            .css('stroke-opacity', 0.5)
+    }
 
     plot.translate(padding.left+left, padding.top+top);
+    metavis.translate(padding.left+left, padding.top+top);
 
     var chartLayer = {};
 

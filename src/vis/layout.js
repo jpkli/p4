@@ -138,7 +138,7 @@ export default function layout(arg){
     }
 
     this.addChart = function(options) {
-        return chart(frontSVG, options)
+        return chart(frontSVG, backSVG, options)
     };
 
     this.exportImage = function(beforeExport) {

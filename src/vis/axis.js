@@ -242,7 +242,7 @@ export default function axis(arg) {
                     {
                         "stroke": color,
                         // "stroke-width": 0.5,
-                        "stroke-opacity": 0.33
+                        "stroke-opacity": 0.15
                     });
             }
         }

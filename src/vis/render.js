@@ -176,20 +176,20 @@ polygon.fs = function() {
         discard;
 }
 
-export default function render(fxgl) {
-    fxgl.subroutine('visMap', 'float', visMap);
-    fxgl.program("instancedXY",
-        fxgl.shader.vertex(instancedXY.vs),
-        fxgl.shader.fragment(instancedXY.fs)
+export default function render($p) {
+    $p.subroutine('visMap', 'float', visMap);
+    $p.program("instancedXY",
+        $p.shader.vertex(instancedXY.vs),
+        $p.shader.fragment(instancedXY.fs)
     );
-    fxgl.program(
+    $p.program(
         "interleave",
-        fxgl.shader.vertex(interleave.vs),
-        fxgl.shader.fragment(interleave.fs)
+        $p.shader.vertex(interleave.vs),
+        $p.shader.fragment(interleave.fs)
     );
-    fxgl.program(
+    $p.program(
         "polygon",
-        fxgl.shader.vertex(polygon.vs),
-        fxgl.shader.fragment(polygon.fs)
+        $p.shader.vertex(polygon.vs),
+        $p.shader.fragment(polygon.fs)
     );
 }

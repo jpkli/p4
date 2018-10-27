@@ -1,5 +1,6 @@
 import allocate  from './allocate';
-import output    from './output';
+import input    from './io/input';
+import output    from './io/output';
 import initialize    from './initialize';
 import interact  from './interact';
 import control from './control';
@@ -17,7 +18,7 @@ export default function p4(options) {
     $p.crossfilters = {};
     
     $p.dataSize = 0;
-    $p.rowSize = 8192;
+    $p.rowSize = options.dimX || 4096;
     $p.deriveMax = options.deriveMax || 4;
     $p.deriveCount = 0;
     
@@ -40,13 +41,64 @@ export default function p4(options) {
         for(let optName of Object.keys(operations)) {
             api.addOperation(optName, operations[optName]);
         }
+        
+        for(let ext of $p.extensions) {
+            if(ext.getContext === true) {
+                ext.procedure = ext.procedure($p);
+            }
+            // if(typeof ext.compute === true) {
+            //     ext.preprocess = function(spec) {
+            //         api.register('compute_' + ext.name);
+
+            //         for(let comp in spec) {
+            //             if(typeof operations[comp.slice(1)] === 'function') {
+            //                 operations[comp.slice(1)](spec[comp]);
+            //             }
+            //         }
+            //         api.resume('compute_' + ext.name);
+            //     }
+            // }
+        }
+
         api.register('__init__');
     }
 
     api.data = function(dataOptions) {
         allocate($p, dataOptions);
         configPipeline($p);
+        $p.getResult = dataOptions.export;
+        $p.getRawData = dataOptions.export;
         return api;
+    }
+
+    api.index = function(indexes) {
+        data.indexes = indexes;
+        return api;
+    }
+
+    api.input = function(arg) {
+        let asyncPipeline = {};
+        let asyncQueue = [];
+        for(let program of Object.keys(api).concat(Object.keys(kernels))) {
+            asyncPipeline[program] = function(spec) {
+                asyncQueue.push({program, spec});
+                return asyncPipeline;
+            }
+        }
+
+        if(arg.dimX) $p.rowSize = arg.dimX;
+
+        input(arg).then(function(data){
+            if(Array.isArray(arg.indexes)) {
+                data.indexes = arg.indexes;
+            }   
+            api.data(data);
+            console.log(data);
+            for(let call of asyncQueue) {
+                api[call.program].call(null, call.spec);
+            } 
+        })
+        return asyncPipeline;
     }
 
     api.view = function(views) {
@@ -76,10 +128,10 @@ export default function p4(options) {
         $p.uniform.uFilterFlag.data = 0;
         // $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
         specs.forEach(function(spec){
-            var opt = Object.keys(spec)[0],
-                arg = spec[opt];
+            let opt = Object.keys(spec)[0];
+            let arg = spec[opt];
 
-            opt = opt.slice(1);
+            opt = opt.slice(1); // ignore $ sign 
             if(typeof api[opt] == 'function') {
                 api[opt](arg);
             }
@@ -89,6 +141,7 @@ export default function p4(options) {
 
     api.head = function() {
         api.resume('__init__');
+        $p.getResult = $p.getRawData;
         return api;
     }
   
@@ -148,23 +201,16 @@ export default function p4(options) {
         return api;
     }
 
-    api.extend = function({
-        name,
-        skipDefault = false,
-        exportData = false,
-        condition,
-        procedure,
-    }) {
-        
-        if(name != undefined && typeof procedure === 'function') {
-            console.log(name)
-            $p.extensions.push({
-                name,
-                skipDefault,
-                exportData,
-                condition,
-                procedure
-            });
+    api.extend = function(arg) {
+        let extOptions = Object.assign({
+            restartOnUpdate: true,
+            skipDefault: false,
+            exportData: false,
+            getContext: false,
+        }, arg)
+
+        if(extOptions.name != undefined && typeof extOptions.procedure === 'function') {
+            $p.extensions.push(extOptions);
         }
     }
     return api;

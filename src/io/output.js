@@ -7,7 +7,7 @@ export default function($p) {
             res = {},
             offset = 0,
             rs = 0;
-
+        if(typeof buf.subarray !== 'function') return buf;
         var rs = 0;
         if($p.indexes.length > 0) {
             if ($p.resultDimension[0] > 1) {
@@ -53,6 +53,8 @@ export default function($p) {
                         obj[f] = $p.categoryLookup[f][res[f][i]-1];
                     } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
                         obj[f] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
+                    // } else if ($p.uniqueValues.hasOwnProperty(f)) {
+                    //     obj[f] = $p.uniqueValues[f][res[f][i]];
                     } else {
                         obj[f] = res[f][i];
                     }

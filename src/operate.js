@@ -1,8 +1,9 @@
 import programs from './kernels';
+import compile from './compile';
 
 export default function($p) {
     let operations = {};
-    let kernels = {};
+    let kernels = compile($p);
     let bin = function (spec) {
         var deriveSpec = {},
             binAttr,
