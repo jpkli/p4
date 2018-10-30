@@ -215,6 +215,7 @@ export default function visualize($p) {
                     json: null, 
                     array: null,
                     texture: null,
+                    vmap: vmap,
                     domains: visDomain
                 };
                 let view = {
@@ -222,7 +223,7 @@ export default function visualize($p) {
                     height: height - padding.top - padding.bottom,
                     encodings: vmap,
                     padding: $p.views[viewIndex].padding,
-                    svg: $p.views[viewIndex].chart.svg, 
+                    svg: $p.views[viewIndex].chart.svg.svg, 
                     canvas: $p.canvas
                 };
 

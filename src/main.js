@@ -93,7 +93,6 @@ export default function p4(options) {
                 data.indexes = arg.indexes;
             }   
             api.data(data);
-            console.log(data);
             for(let call of asyncQueue) {
                 api[call.program].call(null, call.spec);
             } 

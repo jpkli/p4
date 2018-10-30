@@ -79,6 +79,6 @@ export default function input({
         return ajax.get({url: source, dataType: type})
             .then(response)
     } else {
-        return response();
+        return response(source);
     }
 }
