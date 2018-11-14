@@ -46,7 +46,6 @@ export default function () {
         compute: true,
         condition: function(vmap) { return vmap.mark == 'spline'}, 
         procedure: function(data, view) {
-            console.log(data)
             // let collection = {};
             // collection[view.encodings.y] =  {$avg: view.encodings.y};
 
@@ -55,15 +54,15 @@ export default function () {
             //     $reduce: collection
             // }).execute(data.json)
 
-            var s = d3.select(view.svg.svg);
+            var s = d3.select(view.svg);
 
             var x = d3.scaleLinear()
                 .domain(data.domains[view.encodings.x])
-                .range([0, view.width - view.padding.left - view.padding.right]);
+                .range([0, view.width]);
             
             var y = d3.scaleLinear()
                 .domain(data.domains[view.encodings.y])
-                .range([view.height - view.padding.top - view.padding.bottom, 0]);
+                .range([view.height, 0]);
             
             var line = d3.line()
                 .curve(d3.curveBasis)
@@ -76,7 +75,9 @@ export default function () {
                 .style("fill", "none")
                 .style("stroke", "red")
                 .style("stroke-width", 3)
-            }
+
+
+        }
     })
 
 
@@ -88,6 +89,7 @@ export default function () {
         restartOnUpdate: false,
         condition: function(vmap) { return vmap.mark === 'area'}, 
         procedure: function(data, view) {
+
             let x = d3.scaleLinear()
                 .domain(data.domains[view.encodings.x])
                 .range([0, view.width]);
@@ -102,78 +104,25 @@ export default function () {
                 .y0(view.height)
                 .y1(function(d, i) { return y(d[view.encodings.y]); });
     
-            view.svg.append("path")
+            d3.select(view.svg).append("path")
                 .attr("d", area(data.json))
                 .style("fill", view.encodings.color)
                 .style("stroke", view.encodings.color)
                 .style("stroke-width", 3)
+            view.svg.onclick = function() {
+                console.log(pp.ctx.animation)
+            }
         }
     })
 
 
+    document.getElementById('abutton').onclick = function(){
+        pp.ctx.animation.stop = !pp.ctx.animation.stop;
+
+        if(!pp.ctx.animation.stop) {
+            
+            pp.ctx.animation.start();
+        }
+    }
     testSpec(pp);
-    // pp.input({
-    //     type: 'text',
-    //     method: 'http',
-    //     source: '/data/ross-stats-rt-kps.fb',
-    //     schema: {
-    //         KP_ID: 'int',
-    //         PE_ID: 'int',
-    //         real_TS: 'float',
-    //         current_GVT: 'float',
-    //         time_ahead_GVT: 'float',
-    //         total_rollbacks: 'int',
-    //         secondary_rollbacks: 'int'
-    //     },
-    //     uniqueKeys: ['real_TS'],
-    //     dimX: 13
-    //     // indexes: ['real_TS', 'KP_ID']
-    // })
-    // .aggregate({
-    //     $group: [ 'real_TS'],
-    //     $reduce: {
-    //         'time_ahead_GVT': {$avg: 'time_ahead_GVT'}
-    //     }
-    // })
-    // .visualize({
-    //     id: "c2",
-    //     mark: 'area',
-    //     x: 'real_TS',
-    //     y: 'time_ahead_GVT',
-    //     opacity: 0.9,
-    //     test: true,
-    //     zero: true,
-    //     brush: {
-    //         condition: {x: true, y: false},
-    //     },
-    // })
-    // .head()
-    // .visualize({
-    //     id: "c1",
-    //     mark: 'circle',
-    //     y: 'time_ahead_GVT',
-    //     // color: 'steelblue',
-    //     x: 'KP_ID',
-    //     size: 10,
-    //     color: 'total_rollbacks',
-    //     animate: true,
-    //     opacity: 0.9
-    // })
-    // .interact({
-    //     from: 'c2',
-    //     event: 'brush',
-    //     condition: {x: true, y: false},
-    //     response : {
-    //         "c1": {
-    //             "unselected": {"color": "gray"}
-    //         },
-    //         "c2": {
-    //             "selected": {"color": "orange"}
-    //         }
-    //     }
-    // })
-
-    // let gpuResult = gpu.runSpec(spec);
-
-    // console.log(gpuResult);
 }

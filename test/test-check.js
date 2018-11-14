@@ -1,10 +1,11 @@
 import cstore from '../src/cstore';
 import p4 from '..';
-import spec from '../examples/cross-scatter.json';
+// import spec from '../examples/scatter-plot.json';
+// import spec from '../examples/cross-scatter.json';
 // import spec from '../examples/parallel-coordinates.json';
 // import spec from '../examples/brush-link.json';
 // import spec from '../examples/derive-match-group.json';
-// import spec from '../examples/heatmap.json';
+import spec from '../examples/hoverbars.json';
 
 export default function({
     data,
@@ -37,19 +38,6 @@ export default function({
         gpu.view(defaultViews);
     }
 
-
-    // gpu.extend({
-    //     name: 'animate',
-    //     exportData: true,
-    //     condition: function(vmap) { return vmap.mark}, 
-    //     procedure: function() {
-    //         console.log('testing');
-    //     },
-    // })
-
     gpu.runSpec(spec.operations)
-
-
-
     // gpu.updateData(db2.data())
 }

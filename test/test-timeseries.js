@@ -5,7 +5,7 @@ import TimeSeries from './data-timeseries';
 export default function () {
     let dataset = TimeSeries({
         timesteps: 128,
-        series: 3,
+        series: 128,
         interval: 100,
         props: [
             {name: 'traffic', dtype: 'int',  dist: 'normal', min: 0, max: 10000, mean: 500, std: 180},
@@ -18,7 +18,7 @@ export default function () {
         data: dataset.data,
         schema: dataset.schema,
     });
-    db.index('timestamp')
+    // db.index('timestamp')
     console.log(db.data())
 
     let config = {
@@ -28,7 +28,7 @@ export default function () {
     };
     
     let data = db.data();
-    data.indexes = ['timestamp', 'sid'];
+    // data.indexes = ['timestamp', 'sid'];
     // data.indexes = ['sid', 'timestamp'];
 
     // let views = [
@@ -41,7 +41,8 @@ export default function () {
             "width": 360,
             "height": 360,
             "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
-            "offset": [380, 0]
+            "offset": [380, 0],
+            "gridlines": {x: true, y: true}
         },
         {
             "id": "c2",
@@ -65,52 +66,51 @@ export default function () {
     })
 
     let spec = [
-        // {
-        //     $match: {
-        //         sid: [0, 10]
-        //     }
-        // },
-        // {
-        //     $aggregate: {
-        //         $group: ['timestamp'],
-        //         $reduce: {
-        //             traffic: {$sum: 'traffic'},
-        //             sattime: {$sum: 'sattime'}
-        //         }
-        //     }
-        // },
-        // {
-        //     $derive: {
-        //         "gid": "floor( float(sid) / 4.0)"
-        //     }
-        // },
         {
             $visualize: {
                 id: "c1",
                 mark: 'circle',
-                color: 'sattime',
-                x: 'sid',
+                // color: 'sattime',
+                x: 'sattime',
                 size: 9.0,
                 y: 'traffic',
-                // brush: {
+                brush: {
+                    unselected: {color: '#cccccc'}
+                },
+                // animate: true,
+                // zoom: {
                 //     unselected: {color: '#cccccc'}
                 // },
-                // animate: true,
-                opacity: 0.9
+                color: 'teal',
+                opacity: 'auto'
             }
         },
         {
             $visualize: {
                 id: "c2",
                 mark: 'circle',
-                color: 'sattime',
+                // color: 'sattime',
+                color: 'blue',
                 x: 'sid',
                 size: 'sattime',
                 y: 'traffic',
                 // animate: true,
                 opacity: 0.9
             }
+        },
+        {
+            $interact :{
+                from: 'c1',
+                event: ['zoom', 'pan'],
+                // condition: {y: true},
+                response : {
+                    "c2": {
+                        "unselected": {"color": "gray"}
+                    }
+                }
+            }
         }
+        
     ]
     
     let gpuResult = gpu.runSpec(spec);

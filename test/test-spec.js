@@ -31,32 +31,45 @@ export default function(pp) {
         zero: true,
     })
     .head()
-    // .aggregate({
-    //     $group: ['PE_ID'],
-    //     $reduce: {
-    //         time_ahead_GVT: {$avg: 'time_ahead_GVT'}
-    //     }
-    // })
-    // .visualize({
-    //     id: 'c1',
-    //     mark: 'spline',
-    //     x: 'PE_ID',
-    //     y: 'time_ahead_GVT',
-    //     color: 'red'
-    // })
-    // .head()
+    .aggregate({
+        $group: ['PE_ID'],
+        $reduce: {
+            time_ahead_GVT: {$avg: 'time_ahead_GVT'}
+        }
+    })
+    .visualize({
+        id: 'c1',
+        // append: true,
+        mark: 'spline',
+        x: 'PE_ID',
+        y: 'time_ahead_GVT',
+        color: 'red'
+    })
+    .head()
     .visualize({
         id: "c1",
         mark: 'circle',
         y: 'time_ahead_GVT',
         x: 'PE_ID',
-        size: 'secondary_rollbacks',
+        append: true,
+        // size: 'secondary_rollbacks',
+        size: 10,
         // color: 'secondary_rollbacks',
-        animate: {
-            mode: "auto",
-            // grid: true
-        },
+        opacity: 0.5,
+        animate: true
     })
-
+    .interact({
+        from: 'c2',
+        event: 'brush',
+        condition: {x: true, y: false},
+        response : {
+            "c1": {
+                "unselected": {"color": "gray"}
+            },
+            "c2": {
+                "selected": {"color": "orange"}
+            }
+        }
+    })
 
 }

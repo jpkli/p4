@@ -23,12 +23,14 @@ export default function({
     let spec = [
         {
             $aggregate: {
-                $group: ['MotherRace', 'BabyGender'],
+                $group: ['MotherRace'],
                 $reduce: {
+                    avergeAge: {$avg: 'MotherAge'},
                     sumWeight: {$sum: 'BabyWeight'},
                     maxMotherWeight: {$max: 'MotherWeight'},
+                    avergeHeight: {$avg: 'MotherHeight'},
                     count: {$count: '*'},
-                    // avergeAge: {$avg: 'MotherAge'},
+                    avergeWeight: {$avg: 'MotherWeight'},
                 }
             }
         }
@@ -37,13 +39,12 @@ export default function({
     let gpu = p4(config).data(db.data());
     let cpu = p3.pipeline(data);
     
-    let c = data.filter(d=>d.MotherRace == 'Black' && d.BabyGender == 'F').map(d=>d.BabyWeight).reduce((a,b) => a+b);
-
     describe('GPU-based aggregation', function() {
         
         describe('Group-by categorical attribute', function() {
-            let gpuResult = gpu.runSpec(spec).result('row').sort((a,b)=> a.count-b.count);
-            let cpuResult = cpu.runSpec(spec).sort((a,b)=> a.count-b.count);
+            let sortMethod = (a,b)=> a.count - b.count;
+            let gpuResult = gpu.runSpec(spec).result('row').sort(sortMethod);
+            let cpuResult = cpu.runSpec(spec).sort(sortMethod);
             console.log(gpuResult, cpuResult)
             it('result size should equal ' + cpuResult.length, function() {
                 assert.equal(gpuResult.length, cpuResult.length);

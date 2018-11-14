@@ -26,7 +26,7 @@ export default function({
         .cache('initData')
         .result('row')
 
-    console.log(gpuData[0], data[0])
+
 
     describe('Cache data in system memory', function() {
     
@@ -35,7 +35,6 @@ export default function({
         });
     
         it('result should be closely equal with delta = ' + precision, function() {
-            console.log(data, gpuData)
             validate(data, cpuData, precision);
         });
     
