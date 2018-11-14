@@ -86,10 +86,12 @@ export default function($p) {
     }
     
     operations.visualize = function(vmap) {
+        // if(Object.keys($p.crossfilters).length > 0)
+        //     operations.match({});
+        
         if (!kernels.hasOwnProperty('visualize')) {
             kernels.visualize = programs.visualize($p);
         }
-        
         var viewIndex = 0;
         if(typeof vmap.id == 'string') {
             viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);

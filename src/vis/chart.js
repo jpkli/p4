@@ -229,25 +229,17 @@ export default function chart(frontSvg, backSvg, arg) {
 
     var chartLayer = {};
 
-    chartLayer.update =  function(spec) {
-        var data = spec.data || [];
-
-        if(data.length) {
-            data.forEach(function(d, i){
-                var barHeight = isFinite(y(d[vmap.y])) ? y(d[vmap.y]) : height;
-                if(hMarks[i]) {
-                    hMarks[i].Attr({
-                        y: barHeight,
-                        height: height - barHeight,
-                        fill: "orange"
-                    });
-                }
-            })
-        } else {
-            hMarks.forEach(function(h, i){
-                h.Attr({ y: 0, height: 0 });
-            })
-        }
+    chartLayer.updateAxisX =  function(newDomain) {
+        x.remove();
+        xAxisOption.domain = newDomain;
+        x = axis(xAxisOption)
+        return chartLayer;
+    }
+    chartLayer.updateAxisY =  function(newDomain) {
+        y.remove();
+        yAxisOption.domain = newDomain;
+        y = axis(yAxisOption)
+        return chartLayer;
     }
 
     chartLayer.removeAxis = function() {

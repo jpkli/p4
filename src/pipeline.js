@@ -44,5 +44,9 @@ export default function pipeline($p) {
         return pipeline;
     }
 
+    pipeline.queue = function() {
+        return queue;
+    }
+
     return pipeline;
 }

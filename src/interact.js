@@ -1,5 +1,6 @@
 
 import Brush from './vis/brush';
+import { loadavg } from 'os';
 export default function interact($p, options) {
     var viewTags = options.view || [$p.views[0].id];
 
@@ -10,6 +11,10 @@ export default function interact($p, options) {
         callback = options.callback || function() {};
 
     if($p._update) return;
+
+    if(!condition.x && !condition.y) {
+        condition.x = condition.y = true;
+    }
 
     viewTags.forEach(function(viewTag){
         var vis = $p.views.filter(v=>v.id == viewTag)[0];
@@ -35,17 +40,7 @@ export default function interact($p, options) {
         var svg = interactor.svg,
             box = rect.svg.getBoundingClientRect();
 
-        var sx, sy,
-            tx = 0, ty = 0,
-            dy = 1;
 
-        function updatePos(e) {
-            tx += (e.clientX - sx) / dy;
-            ty += (e.clientY - sy) / dy;
-            sx = e.clientX;
-            sy = e.clientY;
-            $p.uniform.uPosOffset.data = [tx / w, ty / h];
-        }
 
         function getSelection(e) {
             var dx = e.clientX - box.left;
@@ -70,9 +65,7 @@ export default function interact($p, options) {
                 };
 
                 if(!Array.isArray(vmap.x) && !Array.isArray(vmap.y)) {
-                    if(!condition.x && !condition.y) {
-                        condition.x = condition.y = true;
-                    }
+
                     brushOptions.brush = function(d) {
                         var selection = {};
                         if(vmap.x && d.x) selection[vmap.x] = d.x;
@@ -124,45 +117,84 @@ export default function interact($p, options) {
                     }
                 })
             } else if(action == 'zoom') {
+                vis.updateDomain = true;
+                let delta = {x: null, y: null};
+                let scale = 0.05;
                 svg.onmousewheel = function(e) {
-                    sx = e.clientX - box.left;
-                    sy = e.clientY - box.top;
-                    var ny =  dy * Math.exp(e.deltaY / 1000);
-                    var delta = ny - dy;
-                    dy = ny;
-                    $p.uniform.uPosOffset.data = [-sx * delta / w, -sy * delta / h];
-                    $p.uniform.uVisScale.data = [dy, dy];
+                    let dir = (e.deltaY > 0) ? 1 : -1;
+                    let selection = {};
+                    let proportion = {
+                        x: (e.clientX - box.left) / box.width,
+                        y: 1.0 - (e.clientY - box.top) / box.height
+                    }
 
-                    callback();
+                    for (let dim of ['x', 'y']) {
+                        if(condition[dim]) {
+                            let attr = vis.vmap[dim];
+                            let attrId = $p.fields.indexOf(attr);
+                            if(delta[dim] === null ){
+                                delta[dim] =  scale * (vis.domains[attrId][1] - vis.domains[attrId][0]);
+                            }
+      
+                            let domain = vis.domains[attrId];
+                            let newDomain = [domain[0] - dir * delta[dim] * (proportion[dim]), domain[1] + dir * delta[dim] * (1-proportion[dim])];
+                            if(newDomain[1] - newDomain[0] > 1e-9){
+                                selection[attr] = newDomain;
+                                vis.domains[attrId] = newDomain;
+                            } else {
+                                scale *= 0.5;
+                            }
+
+                        }
+                    }
+                    callback(selection);
                 }
 
             } else if(action == 'pan') {
                 svg.style.cursor = 'move';
+                vis.updateDomain = true;
+                let selection = {};
                 svg.onmousedown = function(e) {
-                    sx = e.clientX;
-                    sy = e.clientY;
+                    let sx = e.clientX;
+                    let sy = e.clientY;
                     svg.style.cursor = 'move';
 
-                    svg.onmousemove = function(e) {
-                        tx += (e.clientX - sx) / dy;
-                        ty += (e.clientY - sy);
-
-                        callback();
+                    function onpan(e) {
+                        let delta = {
+                            x: -(e.clientX - sx) / box.width,
+                            y: (e.clientY - sy) / box.height
+                        }
+                        for (let dim of ['x', 'y']) {
+                            if(condition[dim]) {
+                                let attr = vis.vmap[dim];
+                                let attrId = $p.fields.indexOf(attr);
+                                let domain = vis.domains[attrId];
+                                let diff = delta[dim] * (domain[1] - domain[0]);
+                                let newDomain = [domain[0] + diff, domain[1] + diff];
+                                selection[attr] = newDomain;
+                                vis.domains[attrId] = newDomain;
+                            }
+                        }
+                        sx = e.clientX;
+                        sy = e.clientY;
+                        callback(selection);
                     }
 
-                    svg.onmouseup = function(e) {
-                        updatePos(e);
+                    window.addEventListener("mousemove", onpan, false);
+                    window.addEventListener("mouseup", function(){
                         svg.style.cursor = 'default';
-                        svg.onmousemove = null;
-                        svg.onmouseup = null;
-                    }
+                        window.removeEventListener("mousemove", onpan, false);
+                    }, false);
+
                 }
 
             } else if(action == 'click') {
                 svg.onclick = function(e) {
                     callback(getSelection(e));
                 }
-            } else if(action == 'hover') {
+            } 
+            
+            if(action == 'hover') {
                 svg.onmouseover = function(e) {
                     callback(getSelection(e));
                     svg.onmousemove = function(e) {

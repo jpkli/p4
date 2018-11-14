@@ -11,12 +11,12 @@ function vertexShaderFilter(){
             value = this.getData(f, i, j);
 
             if(this.uFilterControls[f] == 1) {
-                if(value < this.uFilterRanges[f].x || value >= this.uFilterRanges[f].y) {
+                if(value < this.uFilterRanges[f].x || value > this.uFilterRanges[f].y) {
                     filter -= 1;
                 }
             }
             if(this.uVisControls[f] == 1) {
-                if(value < this.uVisRanges[f].x || value >= this.uVisRanges[f].y) {
+                if(value < this.uVisRanges[f].x || value > this.uVisRanges[f].y) {
                     sel -= 1;
                 }
                 visSelect = true;
@@ -102,7 +102,7 @@ export default function match($p) {
         }))
 
         $p.bindFramebuffer("fFilterResults");
-
+       
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
         if(matchFields.length) {
@@ -149,7 +149,7 @@ export default function match($p) {
         var viewSelections = Object.keys($p.crossfilters).filter(function(s){
             return !$p.crossfilters[s].hasOwnProperty('$in');
         });;
-
+     
         if(filterSelections.length || viewSelections.length){
             filterControls = new Array(fieldCount).fill(0);
 

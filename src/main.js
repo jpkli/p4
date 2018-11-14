@@ -16,7 +16,7 @@ export default function p4(options) {
     $p.extensions = [];
     $p.responses = {};
     $p.crossfilters = {};
-    
+    $p.primitives = [];
     $p.dataSize = 0;
     $p.rowSize = options.dimX || 4096;
     $p.deriveMax = options.deriveMax || 4;
@@ -32,6 +32,14 @@ export default function p4(options) {
     api.addModule(control);
     api.addModule(output);
 
+    api.addOperation('head', function() {
+        api.resume('__init__');
+        if(Object.keys($p.crossfilters).length > 0)
+            api.match({});
+        $p.getResult = $p.getRawData;
+        return api;
+    });
+    
     $p.exportResult = api.result;
 
     function configPipeline($p) {
@@ -46,23 +54,10 @@ export default function p4(options) {
             if(ext.getContext === true) {
                 ext.procedure = ext.procedure($p);
             }
-            // if(typeof ext.compute === true) {
-            //     ext.preprocess = function(spec) {
-            //         api.register('compute_' + ext.name);
-
-            //         for(let comp in spec) {
-            //             if(typeof operations[comp.slice(1)] === 'function') {
-            //                 operations[comp.slice(1)](spec[comp]);
-            //             }
-            //         }
-            //         api.resume('compute_' + ext.name);
-            //     }
-            // }
         }
-
         api.register('__init__');
     }
-
+    
     api.data = function(dataOptions) {
         allocate($p, dataOptions);
         configPipeline($p);
@@ -129,18 +124,11 @@ export default function p4(options) {
         specs.forEach(function(spec){
             let opt = Object.keys(spec)[0];
             let arg = spec[opt];
-
             opt = opt.slice(1); // ignore $ sign 
             if(typeof api[opt] == 'function') {
                 api[opt](arg);
             }
         })
-        return api;
-    }
-
-    api.head = function() {
-        api.resume('__init__');
-        $p.getResult = $p.getRawData;
         return api;
     }
   
@@ -177,7 +165,7 @@ export default function p4(options) {
                         api.head().run();
                         $p._responseType = 'selected';
                         $p.uniform.uVisLevel.data = 0.2;
-                        api.head().match({}).run();
+                        api.head().run();
                         $p._responseType = 'unselected';
                         $p._update = false;
                         $p.uniform.uFilterLevel.data = 0.1;

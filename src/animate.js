@@ -1,8 +1,4 @@
-function getValue (
-    $int_fieldId,
-    $float_addrX,
-    $float_addrY
-){
+function getValue ({fieldId = 'int', addrX = 'float', addrY = 'float'}){
     var value;
     var d = new Vec2();
     if(fieldId > -1) {
@@ -15,7 +11,7 @@ function getValue (
     return value;
 };
 
-function getVisProps($float_x, $float_y) {
+function getVisProps({x = 'float', y = 'float'}) {
     var posX, posY, size; 
     posX = this.getValue(this.uAnimationEncodings[0], x, y);
     posY = this.getValue(this.uAnimationEncodings[1], x, y);
@@ -26,7 +22,11 @@ function getVisProps($float_x, $float_y) {
     return result;
 }
 
-function interpolateVec3($vec3_v0, $vec3_v1, $float_dv) {
+function interpolateVec3({
+    v0 = 'vec3',
+    v1 = 'vec3',
+    dv = 'float'
+}) {
     var x, y, z;
 
     x = v0.x + dv * (v1.x - v0.x);
@@ -120,35 +120,48 @@ export default function($p) {
         $p.shader.fragment(fShader)
     );
 
-    let elapsed = 0;
-    let interval = 500;
-    let then = 0;
-    let step = 0;
+    let animation = {
+        elapsed : 0,
+        interval : 500,
+        then : 0,
+        step : 0,
+        stop: false,
+    }
+
+    $p.animation = animation;
+
     let animate = function(now) {
-        if (elapsed > interval) {
-            elapsed = 0;
-            step += 1;
+        if (animation.elapsed > animation.interval) {
+            animation.elapsed = 0;
+            animation.step += 1;
+            console.log(animation.step);
         } else {
-            elapsed += now - then; 
+            animation.elapsed += now - animation.then; 
         }
-        then = now;
-        $p.uniform.uAnimationInterval = elapsed / interval;
-        if(step <= $p.dataDimension[0] - 1) {
-            $p.ctx.ext.drawArraysInstancedANGLE($p.ctx.POINTS, step, 1, $p.dataDimension[1]);
-            requestAnimationFrame(animate);
+        animation.then = now;
+        $p.uniform.uAnimationInterval = animation.elapsed / animation.interval;
+        if(animation.step <= $p.dataDimension[0] - 1) {
+            $p.ctx.ext.drawArraysInstancedANGLE($p.ctx.POINTS, animation.step, 1, $p.dataDimension[1]);
+            if(!animation.stop) requestAnimationFrame(animate);
+
         } else {
-            console.log('animation completed with total steps of ' + step)
+            console.log('animation completed with total steps of ' + animation.step)
         }
     }
 
+    animation.start =  function() {
+        requestAnimationFrame(animate);
+    }
+
     return function() {
-        console.log('animating')
         let gl = $p.program('animate');
         $p.uniform.uAnimationEncodings = $p.uniform.uVisualEncodings.data;
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
-        requestAnimationFrame(animate);
+        animation.start();
+
+        return animation;
     }
 }

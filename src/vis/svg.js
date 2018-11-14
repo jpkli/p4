@@ -17,7 +17,7 @@ function setStyle(elem, style) {
 }
 
 export default function Svg(arg){
-    'use strict';
+
     var self = (this instanceof Svg) ? this: {},
         option = arg || {},
         type = option.type || 'svg',
@@ -63,10 +63,13 @@ export default function Svg(arg){
     self.svg = svg;
     self.parent = parent;
 
-    if(self instanceof Svg)
+    self.node = () => svg;
+
+    if(self instanceof Svg) {
         publicMethods(Svg.prototype);
-    else
+    } else {
         publicMethods(self);
+    }
 
     return self;
 };

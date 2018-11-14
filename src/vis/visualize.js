@@ -172,22 +172,23 @@ export default function visualize($p) {
         gl.blendEquation(gl.FUNC_ADD);
 
         //TODO: Maybe just save the needed data domains instead of copying all
+        var pv = $p.views[viewIndex];
         if(!$p._update) {
-            var pv = $p.views[viewIndex];
             pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
             $p.uniform.uVisDomains = pv.domains;
-            if(pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function') {
+            if(vmap.append !== true && pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function') {
                 pv.chart.svg.remove();
             }
+
             pv.chart = vis.addChart(viewSetting);
         } else {
-            $p.uniform.uVisDomains = $p.views[viewIndex].domains;
-            if(mark == 'stack'){
-                var result = $p.readResult('row');
-                $p.views[viewIndex].chart.update({
-                    data: result
-                })
+            $p.uniform.uVisDomains = pv.domains;
+            if(pv.updateDomain === true) {
+                
+                pv.chart.updateAxisX(pv.domains[$p.fields.indexOf(vmap.x)]);
+                pv.chart.updateAxisY(pv.domains[$p.fields.indexOf(vmap.y)]);
             }
+
         }
         var primitive = gl.POINTS;
         if(['rect', 'bar'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
@@ -231,11 +232,15 @@ export default function visualize($p) {
                     data.json = $p.exportResult('row');
                 } 
                 
+                if(typeof ext.onready === 'function') {
+                    ext.onready.call($p, data, view);
+                }
+
                 if(ext.restartOnUpdate) {
-                    ext.procedure.call(null,  data, view);
+                    ext.procedure.call(ext, data, view);
                 } else {
                     if(!$p._update) {
-                        ext.procedure.call(null, data, view);
+                        ext.procedure.call(ext, data, view);
                     }
                 }
             }
