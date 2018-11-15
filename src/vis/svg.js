@@ -85,7 +85,9 @@ function publicMethods(context) {
     };
 
     context.remove = function() {
-        this.parent.removeChild(this.svg);
+        if(this.svg && this.svg.parentNode === this.parent){
+            this.parent.removeChild(this.svg);
+        }
     };
 
     context.attr = function(a, v) {

@@ -171,7 +171,6 @@ export default function visualize($p) {
         gl.enable( gl.BLEND );
         gl.blendEquation(gl.FUNC_ADD);
 
-        //TODO: Maybe just save the needed data domains instead of copying all
         var pv = $p.views[viewIndex];
         if(!$p._update) {
             pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
@@ -184,7 +183,6 @@ export default function visualize($p) {
         } else {
             $p.uniform.uVisDomains = pv.domains;
             if(pv.updateDomain === true) {
-                
                 pv.chart.updateAxisX(pv.domains[$p.fields.indexOf(vmap.x)]);
                 pv.chart.updateAxisY(pv.domains[$p.fields.indexOf(vmap.y)]);
             }
@@ -217,16 +215,15 @@ export default function visualize($p) {
                     array: null,
                     texture: null,
                     vmap: vmap,
-                    domains: visDomain
+                    // domains: visDomain
                 };
-                let view = {
-                    width: width - padding.left - padding.right,
-                    height: height - padding.top - padding.bottom,
-                    encodings: vmap,
-                    padding: $p.views[viewIndex].padding,
-                    svg: $p.views[viewIndex].chart.svg.svg, 
-                    canvas: $p.canvas
-                };
+
+                let view = Object.assign({}, $p.views[viewIndex]);
+                view.width = width - padding.left - padding.right,
+                view.height = height - padding.top - padding.bottom,
+                view.encodings = vmap,
+                view.svg = $p.views[viewIndex].chart.svg.svg, 
+                view.canvas = $p.canvas
 
                 if(ext.exportData) {
                     data.json = $p.exportResult('row');
@@ -236,17 +233,25 @@ export default function visualize($p) {
                     ext.onready.call($p, data, view);
                 }
 
+                let execution = ext.type == 'class' 
+                    ? function(data, view) { return new ext.function(data, view)}
+                    : ext.function;
+
                 if(ext.restartOnUpdate) {
-                    ext.procedure.call(ext, data, view);
+                    execution.call(ext, data, view);
                 } else {
                     if(!$p._update) {
-                        ext.procedure.call(ext, data, view);
+                        execution.call(ext, data, view);
                     }
                 }
             }
         })
 
-        if(!$p.skipRender) draw();
+        if(!$p.skipRender) {
+            draw();
+        } else {
+            pv.chart.removeAxis();
+        }
         $p.skipRender = false;
         if($p.revealDensity) enhance({
             viewIndex: viewIndex,

@@ -52,7 +52,7 @@ export default function p4(options) {
         
         for(let ext of $p.extensions) {
             if(ext.getContext === true) {
-                ext.procedure = ext.procedure($p);
+                ext.function = ext.function($p);
             }
         }
         api.register('__init__');
@@ -74,11 +74,16 @@ export default function p4(options) {
     api.input = function(arg) {
         let asyncPipeline = {};
         let asyncQueue = [];
+        let oncomplete = null;
         for(let program of Object.keys(api).concat(Object.keys(kernels))) {
             asyncPipeline[program] = function(spec) {
                 asyncQueue.push({program, spec});
                 return asyncPipeline;
             }
+        }
+
+        asyncPipeline.then = function(callback) {
+            oncomplete = callback;
         }
 
         if(arg.dimX) $p.rowSize = arg.dimX;
@@ -91,6 +96,9 @@ export default function p4(options) {
             for(let call of asyncQueue) {
                 api[call.program].call(null, call.spec);
             } 
+
+            if(typeof oncomplete === 'function')
+                oncomplete(api.result('row'))
         })
         return asyncPipeline;
     }
@@ -177,14 +185,43 @@ export default function p4(options) {
     }
     $p.respond = api.interact;
 
-    api.updateData = function(newData) {
-        api.head();
-        for (let [ai, attr] of $p.fields.slice($p.indexes.length).entries()) {
-            let buf = new Float32Array(newData[ai]);
+    api.updateData = function(data) {
+        $p.fields.slice($p.indexes.length).forEach((attr, ai) => {
+            let buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
+            for (let i = 0, l = data[attr].length; i < l; i++) {
+                buf[i] = data[attr][i];
+            }
             $p.texture.tData.update(
                 buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
             );
+        });
+        return api;
+    }
+
+    api.updateDataColumn = function(data, attribute) {
+        if($p.fields.indexOf(attribute) === -1) {
+            throw Error('Invalid attribute', attribute);
         }
+        let buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
+        let attrId = $p.fields.indexOf(attribute) - $p.indexes.length;
+        for (let i = 0, l = data[attribute].length; i < l; i++) {
+            buf[i] = data[attr][i];
+        }
+        $p.texture.tData.update(
+            buf, [0, $p.dataDimension[1] * attrId], $p.dataDimension
+        );
+    }
+
+    api.updateDataRow = function(data, rowId) {
+        let dataType = (Array.isArray(data)) ? 'array' : 'json';
+        $p.fields.slice($p.indexes.length).forEach((attr, ai) => {
+            let texPosX = rowId % $p.dataDimension[0];
+            let value = (dataType == 'array') ? data[ai] : data[attr];
+            if(value === undefined) throw Error('Cannot update data due to invalid data value');
+            $p.texture.tData.update(
+                new Float32Array(data[ai]), [texPosX, $p.dataDimension[1] * i], [1,1]
+            );
+        });
         return api;
     }
 
@@ -196,7 +233,10 @@ export default function p4(options) {
             getContext: false,
         }, arg)
 
-        if(extOptions.name != undefined && typeof extOptions.procedure === 'function') {
+        if(extOptions.name != undefined && 
+            (typeof extOptions.function === 'function' 
+            || typeof extOptions.constructor === 'function')
+        ) {
             $p.extensions.push(extOptions);
         }
     }
