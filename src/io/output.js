@@ -14,7 +14,6 @@ export default function($p) {
                 res[$p.fields[rs]] = $p.attribute.aDataValx.data;
                 rs++;
             }
-
             if ($p.resultDimension[1] > 1) {
                 var bx = $p.attribute.aDataValx.data;
                 var by = $p.attribute.aDataValy.data;
@@ -53,8 +52,8 @@ export default function($p) {
                         obj[f] = $p.categoryLookup[f][res[f][i]];
                     } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
                         obj[f] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
-                    // } else if ($p.uniqueValues.hasOwnProperty(f)) {
-                    //     obj[f] = $p.uniqueValues[f][res[f][i]];
+                    } else if ($p.uniqueValues.hasOwnProperty(f)) {
+                        obj[f] = $p.uniqueValues[f][res[f][i]];
                     } else {
                         obj[f] = res[f][i];
                     }

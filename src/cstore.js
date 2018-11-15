@@ -336,6 +336,9 @@ export default function ColumnStore(arg){
     }
 
     cstore.index = function(attr) {
+        let attrId = attributes.indexOf(attr);
+        if(attrId === -1) throw Error('Invalid attribute for indexing');
+        types[attrId] = 'int';
         indexes[attr] = unique(columns[attr]).sort(function(a, b) {
             return a - b;
         });
@@ -343,6 +346,7 @@ export default function ColumnStore(arg){
         for(var i = 0; i < len; i++) {
             columns[attr][i] = indexes[attr].indexOf(columns[attr][i]); 
         }
+        
         return cstore;
     }
 

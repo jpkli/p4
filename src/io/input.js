@@ -11,7 +11,7 @@ const INPUT_TYPES = [
     'cstore',
 ];
 
-const INPUT_METHODS = ['memory', 'http', 'WebSocket', 'file'];
+const INPUT_METHODS = ['memory', 'http', 'websocket', 'file'];
 
 export default function input({
     type = 'cstore',
@@ -20,6 +20,7 @@ export default function input({
     size,
     schema,
     source,
+    onready,
     uniqueKeys = []
 }) {
     if(INPUT_TYPES.indexOf(type) === -1) {
@@ -41,9 +42,9 @@ export default function input({
         })
     }
 
-    let dataHandler = {
+    let dataHandlers = {
         json: function(data) {
-            cache.import(data);
+            cache.import((method == 'websocket') ? JSON.parse(data) : data);
             createIndexes();
             return cache.data();
         },
@@ -61,13 +62,13 @@ export default function input({
         }
     }
 
-    dataHandler.text = dataHandler.csv;
+    dataHandlers.text = dataHandlers.csv;
 
     let response = function(data) {
        
         return new Promise(function(resolve, reject) {
-            if(typeof(dataHandler[type]) === 'function') {
-                resolve(dataHandler[type](data));
+            if(typeof(dataHandlers[type]) === 'function') {
+                resolve(dataHandlers[type](data));
             } else {
                 reject(Error('No handler for data type ', type));
             }
@@ -78,6 +79,19 @@ export default function input({
     if(method === 'http') {
         return ajax.get({url: source, dataType: type})
             .then(response)
+    } else if (method == 'websocket') {
+        return new Promise(function(resolve, reject) {
+            var socket = new WebSocket(source);
+            socket.onopen = function() {
+                if(typeof(onready) === 'function') onready(socket)
+            }
+            socket.onmessage = function(event) {
+                resolve(dataHandlers[type](event.data));
+            }
+            socket.onerror = function(err) {
+                reject(err);
+            }
+        });
     } else {
         return response(source);
     }
