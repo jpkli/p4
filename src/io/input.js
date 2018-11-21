@@ -31,10 +31,7 @@ export default function input({
         throw Error('Unknown method ', method)
     }
 
-    let cache = cstore({
-        schema: schema,
-        size: size,
-    })
+    let cache
 
     function createIndexes() {
         uniqueKeys.forEach(function(uk){
@@ -44,13 +41,15 @@ export default function input({
 
     let dataHandlers = {
         json: function(data) {
+            cache = cstore({schema, size})
             cache.import((method == 'websocket') ? JSON.parse(data) : data);
             createIndexes();
             return cache.data();
         },
         csv: function(text) {
             let data = parse(text, delimiter);
-            data.shift();
+            let fields = data.shift();
+            cache = cstore({keys: fields, types: fields.map(() => 'float')})
             cache.addRows(data);
             createIndexes();
             return cache.data();

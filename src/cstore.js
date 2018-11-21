@@ -248,6 +248,8 @@ export default function ColumnStore(arg){
             attributes.forEach(function(attr, ai) {
                 if(types[ai] == 'string') {
                     dataFrame[attr] = strLists[attr][columns[ai][ri]];
+                } else if(indexes.hasOwnProperty(attr)) {
+                    dataFrame[attr] = indexes[attr][columns[ai][ri]];
                 } else {
                     dataFrame[attr] = columns[ai][ri];
                 }
@@ -263,7 +265,9 @@ export default function ColumnStore(arg){
             var row = new Array(attributes.length);
             attributes.forEach(function(attr, ai) {
                 if(types[ai] == 'string') {
-                    row[ai] = strLists[attr][columns[ai][ri]-1];
+                    row[ai] = strLists[attr][columns[ai][ri]];
+                } else if(indexes.hasOwnProperty(attr)) {
+                    row[ai] = indexes[attr][columns[ai][ri]];
                 } else {
                     row[ai] = columns[ai][ri];
                 }

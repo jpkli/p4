@@ -55,7 +55,7 @@ export default function($p) {
                     } else if ($p.uniqueValues.hasOwnProperty(f)) {
                         obj[f] = $p.uniqueValues[f][res[f][i]];
                     } else {
-                        obj[f] = res[f][i];
+                        obj[f] = Number.isNaN(res[f][i]) ? 0.0 : res[f][i];
                     }
                 });
                 objectArray[i] = obj;
