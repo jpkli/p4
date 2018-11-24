@@ -7,7 +7,7 @@ const largest = Math.pow(2, 127);
 export default function aggregate($p) {
     var aggregate = {};
 
-    $p.uniform('uGroupGetStat', 'float', 0.0)
+    $p.uniform('uFillValue', 'float', 0.0)
         .uniform('uAggrOpt', 'int', 2);
 
     function vertexShader() {
@@ -77,17 +77,22 @@ export default function aggregate($p) {
     var fs2 = $p.shader.fragment(function() {
         var x, y, res;
         $vec4(value);
-        x = (gl_FragCoord.x) / this.uResultDim.x;
-        y = (gl_FragCoord.y) / (uResultDim.y * float(this.uFieldCount));
-        value = texture2D(this.uDataInput, vec2(x, y));
-        if (this.uAggrOpt > 3)
+
+        if (this.uAggrOpt > 3) {
+            x = (gl_FragCoord.x) / this.uResultDim.x;
+            y = (gl_FragCoord.y) / (uResultDim.y * float(this.uFieldCount));
+            value = texture2D(this.uDataInput, vec2(x, y));
             res = value.a / value.b;
-        else
+        } else {
             res = value.a;
+        }
         gl_FragColor = vec4(0.0, 0.0, 0.0, res);
     });
-
+    
     $p.program('group2', vs2, fs2);
+    $p.program('fill', vs2,  $p.shader.fragment(function() {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, this.uFillValue);
+    }));
 
     var resultFieldCount,
         getAvgValues = false,
@@ -97,7 +102,28 @@ export default function aggregate($p) {
     function compute(opts, groupFieldIds, resultFieldIds) {
 
         resultFieldCount = resultFieldIds.length;
-        var gl = $p.program('group');
+        let gl = $p.program('fill');
+        $p.bindFramebuffer('fGroupResults');
+
+        if(!$p._progress) {
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        }
+
+        gl.disable(gl.BLEND);
+        resultFieldIds.forEach(function(f, i) {
+            gl.viewport(0, i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
+            var opt = aggrOpts.indexOf(opts[i]);
+            if (opt == 0) {
+                $p.uniform.uFillValue = largest;
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+            } else if(opt == 1) {
+                $p.uniform.uFillValue = smallest;
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+            }
+        });
+
+        gl = $p.program('group');
       
         $p.framebuffer.enableRead('fDerivedValues');
         $p.framebuffer.enableRead('fFilterResults');
@@ -108,25 +134,21 @@ export default function aggregate($p) {
         gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
 
         $p.uniform.uGroupFields = groupFieldIds;
-        if(!$p._progress) {
-            gl.clearColor(0.0, 0.0, 0.0, 0.0);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        }
+
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.ONE, gl.ONE);
         gl.blendEquation(gl.FUNC_ADD);
-        $p.uniform.uGroupGetStat = 0.0;
         $p.uniform.uResultDim = $p.resultDimension;
 
         let postComputeFieldIds = [];
         
         getAvgValues = false;
         getVarStd = false;
+
         resultFieldIds.forEach(function(f, i) {
             var opt = aggrOpts.indexOf(opts[i]);
-            console.log(opt, opts[i])
             if (opt == -1) throw Error('unknowm operator for aggregation: ' + opts[i]);
 
             if (opt > 3) {
@@ -138,9 +160,13 @@ export default function aggregate($p) {
             }
 
             gl.viewport(0, i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
-            if (opt == 0) gl.blendEquation(gl.MIN_EXT);
-            else if (opt == 1) gl.blendEquation(gl.MAX_EXT);
-            else gl.blendEquation(gl.FUNC_ADD);
+            if (opt == 0) {
+                gl.blendEquation(gl.MIN_EXT);
+            } else if (opt == 1) {
+                gl.blendEquation(gl.MAX_EXT);
+            } else {
+                gl.blendEquation(gl.FUNC_ADD);
+            }
 
             $p.uniform.uFieldId = f;
             $p.uniform.uAggrOpt = opt;
@@ -163,7 +189,7 @@ export default function aggregate($p) {
         $p.bindFramebuffer('fGroupResults');
         $p.uniform.uResultDim = $p.resultDimension;
         $p.framebuffer.enableRead('fAggrStats');
-        gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
+        // gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
         gl.viewport(0, 0, $p.resultDimension[0], $p.resultDimension[1]* resultFieldIds.length);
         gl.disable(gl.BLEND);
 
@@ -197,7 +223,6 @@ export default function aggregate($p) {
         }
 
         let newFieldSpec = spec.$collect || spec.$reduce || spec.$out || null;
-        let twoPassFields = Object.keys(newFieldSpec).filter(f => aggrOpts.indexOf(Object.keys(newFieldSpec[f])[0]) > 2 );
 
         // For backward compatibility, allowing new fields specified without using the $collect or $reduce
         if (newFieldSpec === null) {
@@ -218,7 +243,9 @@ export default function aggregate($p) {
                 : newFieldSpec[newFieldNames[i]]
         });
 
-        if (!$p._update) {
+        let twoPassFields = operators.filter(opt => aggrOpts.indexOf(opt) > 2 );
+
+        if (!$p._update && !$p._progress) {
             $p.framebuffer(
                 'fGroupResults',
                 'float', [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
