@@ -2,9 +2,9 @@ import {seqFloat} from './utils';
 import {unique} from './arrays';
 const vecId = ['x', 'y', 'z'];
 export default function($p, dataProps) {
-    var data = dataProps || [];
+    let data = dataProps || [];
     $p.indexes = data.indexes || [];
-    $p.categoryIndex = data.strHashes || {};
+    $p.categoryIndex = data.strValues || {};
     $p.categoryLookup = data.strLists || {};
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
@@ -21,8 +21,8 @@ export default function($p, dataProps) {
         $p.dataSize = Math.max(...data.map(d => d.length));
     }
 
-    var rowSize = Math.min($p.dataSize, $p.rowSize),
-        colSize = Math.ceil($p.dataSize / rowSize);
+    let rowSize = Math.min($p.dataSize, $p.rowSize);
+    let colSize = Math.ceil($p.dataSize / rowSize);
 
     $p.dataDimension = [rowSize, colSize];
     $p.resultDimension = [rowSize, colSize];
@@ -38,15 +38,6 @@ export default function($p, dataProps) {
             return range + 1;
         } else if (dtypes[fid] == "histogram") {
             return range;
-        } else if (dtypes[fid] == "time") {
-            var interval = stats[$p.fields[fid]].min;
-            if (interval === 0) interval = (data[fid][1] - data[fid][0]) || 1;
-            $p.intervals[dkeys[fid]] = {};
-            $p.intervals[dkeys[fid]].dtype = 'time';
-            $p.intervals[dkeys[fid]].interval = interval;
-            $p.intervals[dkeys[fid]].min = stats[dkeys[fid]].min;
-            $p.intervals[dkeys[fid]].max = stats[dkeys[fid]].max;
-            return range / interval + 1;
         } else if (["nominal", "ordinal", "categorical"].indexOf(dtypes[fid]) > -1) {
             return data.TLB.length;
         } else if (dtypes[fid] in ["float", "double", "numeric"]) {
@@ -81,9 +72,7 @@ export default function($p, dataProps) {
         $p.attribute("aDataValy", "float", seqFloat(0, $p.dataDimension[1] - 1));
     } else {
         $p.indexes.forEach(function(id, i) {
-            var indexAttrData = unique(data[id]).sort(function(a, b) {
-                return a - b;
-            });
+            let indexAttrData = unique(data[id]).sort( (a, b) => b - a );
             $p.attribute("aDataVal" + vecId[i], "float", new Float32Array(indexAttrData));
             $p.attribute("aDataId" + vecId[i], "float", seqFloat(0, indexAttrData.length - 1));
             $p.fieldWidths[i] = indexAttrData.length;
@@ -115,9 +104,7 @@ export default function($p, dataProps) {
     if(stats !== null) {
         $p.fieldDomains = $p.fields.map(function(k, i) {
             return [stats[k].min, stats[k].max];
-        })
-        .concat(new Array($p.deriveMax).fill([0, 1]));
-
+        }).concat(new Array($p.deriveMax).fill([0, 1]));
         $p.uniform("uFieldDomains", "vec2",  $p.fieldDomains);
     } else {
         $p.uniform("uFieldDomains", "vec2",  $p.fields.map(f => [0, 1]));
@@ -176,15 +163,15 @@ export default function($p, dataProps) {
     // $p.texture.tData.sampler = $p.uniform.uDataInput;
     $p.uniform.uDataInput = $p.texture.tData;
 
-    function getFieldWidth($int_fid) {
+    function getFieldWidth({fid = 'int'}) {
         return this.uFieldWidths[fid];
     }
 
-    function getFieldDomain($int_fid) {
+    function getFieldDomain({fid = 'int'}) {
         return this.uFieldDomains[fid];
     }
 
-    function getData($int_fid, $float_r, $float_s) {
+    function getData({fid = 'int', r = 'float', s = 'float'}) {
         var t, value;
         if (fid >= this.uFieldCount + this.uIndexCount) {
             t = (float(fid - this.uFieldCount - this.uIndexCount) + s) /
@@ -201,7 +188,7 @@ export default function($p, dataProps) {
         return value;
     }
 
-    function getNonIndexedData($int_fieldId, $float_addrX, $float_addrY) {
+    function getNonIndexedData({fieldId = 'int', addrX = 'float', addrY = 'float'}) {
         var offsetY, value;
         if (fieldId >= this.uFieldCount + this.uIndexCount) {
             offsetY = (float(fieldId - this.uFieldCount - this.uIndexCount) + addrY) /

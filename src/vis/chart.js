@@ -62,8 +62,9 @@ export default function chart(frontSvg, backSvg, arg) {
         format: format(".3s"),
     };
 
+    let colorLegend;
     if(showLegend && features.indexOf(vmap.color) !== -1){
-        legend({
+        colorLegend = legend({
             container: metavis,
             width: 20,
             height: 180,
@@ -250,6 +251,10 @@ export default function chart(frontSvg, backSvg, arg) {
                 yp.remove();
             })
         }
+    }
+
+    chartLayer.removeLegend = function() {
+        colorLegend.remove()
     }
 
     chartLayer.svg = plot;

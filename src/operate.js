@@ -5,9 +5,8 @@ export default function($p) {
     let operations = {};
     let kernels = compile($p);
     let bin = function (spec) {
-        var deriveSpec = {},
-            binAttr,
-            binCount;
+        let binAttr;
+        let binCount;
     
         if (typeof spec == 'object') {
             binAttr = Object.keys(spec)[0];
@@ -17,35 +16,28 @@ export default function($p) {
             // Apply Sturges' formula for determining the number of bins
             binCount = Math.ceil(Math.log2($p.dataSize)) + 1;
         }
+
+        let binAttrId = $p.fields.indexOf(binAttr);
+        let binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
+        let binInterval = (binDomain[1] - binDomain[0]) / binCount;
     
-        var binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
-        var binInterval = (binDomain[1] - binDomain[0]) / binCount;
-    
-        var histFunction = (function() { max(ceil((binAttr - binMin) / float(binInterval)), 1.0) })
-            .toString()
-            .slice(13, -1) // remove "function () {" from function.toString
-            .replace('binAttr', binAttr)
-            .replace('binMin', binDomain[0] + '.0')
-            .replace('binInterval', binInterval)
-    
-        deriveSpec['bin@'+binAttr] = histFunction;
+        $p.uniform.uBinCount.data = binCount;
+        $p.uniform.uBinIntervals.data = [binInterval, 0.0];
+        
+        $p.fieldWidths[binAttrId] = binCount;    
         $p.intervals[binAttr] = {};
         $p.intervals[binAttr].dtype = 'historgram';
         $p.intervals[binAttr].interval = binInterval;
         $p.intervals[binAttr].min = binDomain[0];
         $p.intervals[binAttr].max = binDomain[1];
         $p.intervals[binAttr].align = 'right';
-        operations.derive(deriveSpec);
-        // var deriveFields = $p.fields.slice(-$p.deriveCount),
-        //     dfid = deriveFields.indexOf('bin@'+binAttr);
-        // $p.deriveDomains[dfid] = [stats[binAttr].min, stats[binAttr].max];
-        return 'bin@'+binAttr;
+
+        return binAttr;
     }
     
     operations.aggregate = function (spec) {
         if(spec.$bin) {
             spec.$group = bin(spec.$bin);
-            delete spec.$bin;
         }
 
         if(Object.keys($p.crossfilters).length) {
@@ -88,41 +80,46 @@ export default function($p) {
     operations.visualize = function(vmap) {
         // if(Object.keys($p.crossfilters).length > 0)
         //     operations.match({});
-        
-        if (!kernels.hasOwnProperty('visualize')) {
-            kernels.visualize = programs.visualize($p);
-        }
-        var viewIndex = 0;
-        if(typeof vmap.id == 'string') {
-            viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
-            if(viewIndex == -1) {
-                //find the next available view slot in all views
-                for(var vi = 0; vi < $p.views.length; vi++){
-                    if(!$p.views[vi].id) {
-                        viewIndex = vi;
-                        $p.views[viewIndex].id = vmap.id;
-                        break;
+        let vmaps = Array.isArray(vmap) ? vmap : [vmap];
+
+        vmaps.forEach( (vmap) => {
+            if (!kernels.hasOwnProperty('visualize')) {
+                kernels.visualize = programs.visualize($p);
+            }
+            let viewIndex = 0;
+            if(typeof vmap.id == 'string') {
+                viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
+                if(viewIndex == -1) {
+                    //find the next available view slot in all views
+                    for(let vi = 0; vi < $p.views.length; vi++){
+                        if(!$p.views[vi].id) {
+                            viewIndex = vi;
+                            $p.views[viewIndex].id = vmap.id;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        if(vmap.mark == 'bar') vmap.zero = true;
-        $p.views[viewIndex].vmap = vmap;
-        var encoding = vmap,
-            viewTag = $p.views[viewIndex].id;
-
-        if($p._update && $p.responses.hasOwnProperty(viewTag)) {
-            if($p.responses[viewTag].hasOwnProperty($p._responseType)) {
-                encoding = Object.assign({}, vmap, $p.responses[viewTag][$p._responseType]);
+            if(vmap.mark == 'bar') vmap.zero = true;
+            $p.views[viewIndex].vmap = vmap;
+            let encoding = vmap,
+                viewTag = $p.views[viewIndex].id;
+    
+            if($p._update && $p.responses.hasOwnProperty(viewTag)) {
+                if($p.responses[viewTag].hasOwnProperty($p._responseType)) {
+                    encoding = Object.assign({}, vmap, $p.responses[viewTag][$p._responseType]);
+                }
             }
-        }
-        if(encoding.opacity != 0){
-            kernels.visualize({
-                vmap: encoding,
-                viewIndex: viewIndex
-            });
-            $p.respond();
-        }
+            if(encoding.opacity != 0){
+                kernels.visualize({
+                    vmap: encoding,
+                    viewIndex: viewIndex
+                });
+                $p.respond();
+            }
+        })
+
+        $p.reset();
         // return pipeline;
     }
 

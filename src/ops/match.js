@@ -110,6 +110,7 @@ export default function match($p) {
             if($p.deriveCount > 0) {
                 $p.framebuffer.enableRead("fDerivedValues");
             }
+
             gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
@@ -135,13 +136,13 @@ export default function match($p) {
                 $p.uniform.uInSelections = Float32Array.from(inSelections);
                 $p.uniform.uFieldId = fieldId;
 
-                gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
+                gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, $p.dataDimension[0], $p.dataDimension[1]);
                 // filterRanges[fieldId*2] = Math.min.apply(null, spec[k].$in);
                 // filterRanges[fieldId*2+1] = Math.max.apply(null, spec[k].$in);
                 filterRanges[fieldId] = [Math.min.apply(null, inSelections), Math.max.apply(null, inSelections)];
             })
         }
-        // console.log($p._responseType, spec);
+
         var filterSelections = Object.keys(spec).filter(function(s){
             return !spec[s].hasOwnProperty('$in');
         });
@@ -155,7 +156,6 @@ export default function match($p) {
 
             filterSelections.forEach(function(k){
                 var fieldId = $p.fields.indexOf(k);
-
                 if(fieldId === -1) {
                     console.log('Skipped: Matching on invalid data field ' + k);
                     return;
@@ -183,7 +183,6 @@ export default function match($p) {
             $p.uniform.uFilterRanges.data = filterRanges;
             $p.uniform.uVisControls.data = visControls;
             $p.uniform.uVisRanges.data = visRanges;
-
             gl = $p.program("filter");
             if($p.deriveCount > 0) {
                 $p.framebuffer.enableRead("fDerivedValues");
@@ -195,17 +194,16 @@ export default function match($p) {
             gl.disable(gl.BLEND);
             // gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
             // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-
-            gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
-            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
+            gl.viewport(0, 0, $p.dataDimension[0], $p.dataDimension[1]);
+            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, $p.dataDimension[0], $p.dataDimension[1]);
         }
         $p.ctx.bindFramebuffer($p.ctx.FRAMEBUFFER, null);
         return filterRanges;
     }
 
     match.execute = function(spec) {
-        filterControls = new Array(fieldCount).fill(0);
-        visControls = new Array(fieldCount).fill(0);
+        filterControls = new Array($p.fields.length).fill(0);
+        visControls = new Array($p.fields.length).fill(0);
         var filterSpec = spec;
 
         Object.keys($p.crossfilters).forEach(function(k, i) {
@@ -222,13 +220,14 @@ export default function match($p) {
 
         $p.uniform.uFilterFlag = 1;
         if(!$p._update) {
+           
+            $p.framebuffer("fFilterResults", "unsigned_byte", $p.dataDimension);
             filterRanges = $p.fieldDomains.slice();
             visRanges = $p.fieldDomains.slice();
         }
         var newDomains = _execute(spec);
 
         if(!$p._update){
-            // console.log('checking filter domains', newDomains);
             newDomains.forEach(function(domain, fid) {
                 var d = domain;
                 if($p.dtypes[fid] == 'int') d[1] -= 1;
@@ -239,6 +238,7 @@ export default function match($p) {
             $p.uniform.uFieldDomains.value($p.fieldDomains);
             $p.uniform.uFieldWidths.data = $p.fieldWidths;
         }
+        $p.getMatchBuffer = match.result;
     }
 
     match.result = function(arg) {
@@ -253,13 +253,12 @@ export default function match($p) {
         var gl = $p.ctx;
         var bitmap = new Uint8Array(rowSize*colSize*4);
         gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
-        // console.log(result.filter(function(d, i){ return i%4===0;} ));
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         // var result = [];
-        // bitmap.forEach(function(d, i){ if(i%3===0 && d!==0) result.push(d);});
+        
         // console.log(result);
         // return result;
-        return  bitmap;
+        return  bitmap.filter((d, i) => i % 4 === 3);
     }
 
     return match;

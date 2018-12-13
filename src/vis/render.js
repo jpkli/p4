@@ -17,18 +17,22 @@ function visMap(
         }
         if(exp != 0.0) {
             value = pow(value, exp);
+            // if(exp == 5.0) {
+            //     value = log(tan( (value / 90.0 + 1.0) * 3.14 / 4.0)) * 180.0 / 3.14;
+            // }
         }
         d = this.uVisDomains[fieldId];
         value = (value - d.x) / (d.y - d.x);
     } else {
         value = defaultValue;
     }
+
     return value;
 };
 
 var instancedXY = {};
 instancedXY.vs  = function() {
-    var i, j, posX, posY, color, alpha, width, height, size;
+    var i, j, posX, posY, color, alpha, size;
     var rgb = new Vec3();
 
     i = (this.aDataIdx+0.5) / this.uDataDim.x;
@@ -45,7 +49,6 @@ instancedXY.vs  = function() {
     color = this.visMap(this.uVisualEncodings[2], i, j, this.aDataValx, this.aDataValy, -1.0,  0.0);
     alpha = this.visMap(this.uVisualEncodings[3], i, j, this.aDataValx, this.aDataValy, this.uDefaultAlpha, 0.0);
     size = this.visMap(this.uVisualEncodings[6], i, j, this.aDataValx, this.aDataValy, 1.0,  0.0);
-
     posX = posX * 2.0 - 1.0;
     posY = posY * 2.0 - 1.0;
 
@@ -63,13 +66,13 @@ instancedXY.fs = function() {
         if (dist > 0.5) discard;
         var delta = 0.15;
         var alpha = this.vColorRGBA.a - smoothstep(0.5-delta, 0.5, dist);
-        if( this.vResult <= this.uVisLevel + 0.01 && this.vResult >= this.uVisLevel - 0.01) {
+        if(valid) {
             gl_FragColor = vec4(this.vColorRGBA.rgb*alpha, alpha);
         } else {
             discard;
         }
     } else {
-        if( this.vResult <= this.uVisLevel + 0.01 && this.vResult >= this.uVisLevel - 0.01) {
+        if(valid) {
             gl_FragColor = vec4(this.vColorRGBA.rgb * this.vColorRGBA.a,  this.vColorRGBA.a);
         } else {
             discard;

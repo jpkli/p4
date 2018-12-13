@@ -175,8 +175,9 @@ export default function visualize($p) {
         if(!$p._update) {
             pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
             $p.uniform.uVisDomains = pv.domains;
-            if(vmap.append !== true && pv.hasOwnProperty('chart') && typeof pv.chart.svg.remove == 'function') {
+            if(vmap.append !== true && pv.hasOwnProperty('chart')) {
                 pv.chart.svg.remove();
+                pv.chart.removeAxis();
             }
 
             pv.chart = vis.addChart(viewSetting);
@@ -200,7 +201,7 @@ export default function visualize($p) {
                 gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
             } else {
                 if(primitive == gl.LINE_STRIP) {
-                    gl.lineWidth(1.0);
+                    gl.lineWidth(vmap.size || 1.0);
                 } 
                 gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
                
@@ -215,6 +216,7 @@ export default function visualize($p) {
                     array: null,
                     texture: null,
                     vmap: vmap,
+                    fields: $p.fields
                     // domains: visDomain
                 };
 
@@ -251,6 +253,7 @@ export default function visualize($p) {
             draw();
         } else {
             pv.chart.removeAxis();
+            if($p.fields.indexOf(vmap.color)!==-1) pv.chart.removeLegend();
         }
         $p.skipRender = false;
         if($p.revealDensity) enhance({

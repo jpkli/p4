@@ -10,7 +10,7 @@ export default function ColumnStore(arg){
         types      = options.types || [],  // types of the columns
         attributes = options.attributes || options.keys || options.names || [],  // column attributes
         struct     = options.struct || options.schema || null,
-        strHashes  = options.strHashes || {},  // content access memory
+        strValues  = options.strValues || {},  // string values 
         strLists   = options.strLists  || {},  // table lookaside buffer
         intervals  = {},
         indexes    = options.indexes || {},
@@ -20,6 +20,8 @@ export default function ColumnStore(arg){
         skip       = options.skip  || 0;
 
     if(typeof(struct) === 'object') initStruct(struct);
+
+
 
     function initCStore() {
         if(size && types.length === attributes.length && types.length > 0) {
@@ -34,13 +36,18 @@ export default function ColumnStore(arg){
                 if(intervals.hasOwnProperty(c)) {
                     cstore.intervalize(c, intervals[c]);
                 }
+
+                if(strValues[c] && Object.keys(strValues[c]).length > 0) {
+                    strLists[c] = Object.keys(strValues[c]);
+                }
+
             });
             columns.attributes = attributes;
             columns.keys = attributes;
             columns.types = types;
             columns.struct = struct;
             columns.strLists = strLists;
-            columns.strHashes = strHashes;
+            columns.strValues = strValues;
             columns.uniqueValues = indexes;
             columns.size = size;
             columns.get = function(c) {
@@ -57,7 +64,7 @@ export default function ColumnStore(arg){
         if(Array.isArray(struct)) {
             struct.forEach(function(s){
                 attributes.push(s.name);
-                types.push(s.type);
+                types.push(s.type || s.dtype);
             })
         } else {
             for(var k in struct){
@@ -74,14 +81,16 @@ export default function ColumnStore(arg){
         colAlloc[f] = ctypes[types[cid]];
 
         if(colAlloc[f] === ctypes.string){
-            strLists[f] = [];
-            strHashes[f] = {};
+            if (!strValues.hasOwnProperty(f)) {
+                strValues[f] = {};
+                strLists[f] = [];
+            }
             colRead[f] = function(value) {
-                if(!strHashes[f].hasOwnProperty(value)){
-                    strHashes[f][value] = strLists[f].length;
+                if(!strValues[f].hasOwnProperty(value)){
+                    strValues[f][value] = strLists[f].length;
                     strLists[f].push(value);
                 }
-                return strHashes[f][value];
+                return strValues[f][value];
             };
         } else if(
             colAlloc[f] === ctypes.int ||
@@ -138,7 +147,6 @@ export default function ColumnStore(arg){
         return count;
     }
 
-
     cstore.addColumn = function(arg) {
         var props = arg || {},
             columnData = props.data || props.array,
@@ -161,9 +169,9 @@ export default function ColumnStore(arg){
             columns[cid] = columnData;
             if(values.length) {
                 strLists[columnName] = values;
-                strHashes[columnName] = {};
+                strValues[columnName] = {};
                 values.forEach(function(value, vi){
-                    strHashes[columnName][value] = vi;
+                    strValues[columnName][value] = vi;
                 })
             }
         } else if(ArrayBuffer.isView(columnData)){
@@ -184,7 +192,7 @@ export default function ColumnStore(arg){
             attributes: attributes,
             types: types,
             strLists: strLists,
-            strHashes: strHashes,
+            strValues: strValues,
             stats: cstore.stats()
         }
     }
@@ -198,7 +206,7 @@ export default function ColumnStore(arg){
         data.stats = cstore.stats();
         data.keys = attributes;
         data.size = size;
-        data.strHashes = strHashes;
+        data.strValues = strValues;
         data.strLists = strLists;
         data.dtypes = types;
         data.export = cstore.export;
@@ -288,12 +296,18 @@ export default function ColumnStore(arg){
 
     cstore.import = function({
         data,
-        schema = null
+        schema = null,
+        type = 'json'
     }) {
         size = data.length;
         if(typeof(schema == 'object')) initStruct(schema);
         initCStore();
-        cstore.addObjects(data);
+        if(type === 'json') {
+            cstore.addObjects(data);
+        } else {
+            cstore.addRows(data);
+        }
+        
         return cstore;
     }
 

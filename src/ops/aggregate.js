@@ -7,14 +7,16 @@ const largest = Math.pow(2, 127);
 export default function aggregate($p) {
     var aggregate = {};
 
-    $p.uniform('uFillValue', 'float', 0.0)
-        .uniform('uAggrOpt', 'int', 2);
+    $p.uniform('uFillValue', 'float', 0.0);
+    $p.uniform('uBinIntervals', 'vec2', [0.0, 0.0]);
+    $p.uniform('uBinCount', 'int', 0);
+    $p.uniform('uAggrOpt', 'int', 2);
 
     function vertexShader() {
         gl_PointSize = 1.0;
 
-        var i, j, k;
-        var x, groupKeyValue;
+        var i, j;
+        var groupKeyValue;
 
         i = (this.aDataIdx + 0.5) / this.uDataDim.x;
         j = (this.aDataIdy + 0.5) / this.uDataDim.y;
@@ -25,8 +27,9 @@ export default function aggregate($p) {
         }
 
         if (this.uFilterFlag == 1) {
-            if (texture2D(this.fFilterResults, vec2(i, j)).a < this.uVisLevel - 0.01)
+            if (texture2D(this.fFilterResults, vec2(i, j)).a < this.uVisLevel - 0.01) {
                 this.vResult = 0.0;
+            }
         }
 
         var pos = new Vec2();
@@ -43,9 +46,18 @@ export default function aggregate($p) {
                 }
                 if (this.uIndexCount == 0 || gid > 1) {
                     var d = new Vec2();
+                    var w = this.getFieldWidth(gid);
+                    var value = this.getData(gid, i, j);
+
                     d = this.getFieldDomain(gid);
-                    groupKeyValue = (this.getData(gid, i, j) - d.x) / (d.y - d.x) * (this.getFieldWidth(gid)) / (this.getFieldWidth(gid) + 1.);
-                    groupKeyValue += 0.5 / this.getFieldWidth(gid);
+
+                    if(this.uBinCount > 0) {
+                        value = max(ceil((value - d[0]) / this.uBinIntervals[ii]), 1.0);
+                        groupKeyValue = value  /  float(this.uBinCount);
+                    } else {
+                        groupKeyValue = (value - d.x) / (d.y - d.x) * w / (w + 1.0);
+                        groupKeyValue += 0.5 / w;
+                    }
                 }
                 pos[ii] = groupKeyValue * 2.0 - 1.0;
             } else {
@@ -272,9 +284,9 @@ export default function aggregate($p) {
         var oldFieldIds = groupFields.concat(resultFields).map( f => $p.fields.indexOf(f));
 
         $p.fields = groupFields
-            .map(function(gf) {
-                return (gf.substring(0, 4) == 'bin@') ? gf.slice(4) : gf;
-            })
+            // .map(function(gf) {
+            //     return (gf.substring(0, 4) == 'bin@') ? gf.slice(4) : gf;
+            // })
             .concat(newFieldNames);
 
         $p.uniform.uDataDim.data = $p.resultDimension;
@@ -287,6 +299,15 @@ export default function aggregate($p) {
         let newFieldDomains = oldFieldIds.map(f => $p.fieldDomains[f]);
         let newFieldWidths = oldFieldIds.map(f => $p.fieldWidths[f]);
         
+        if($p.uniform.uBinCount.data > 0) {
+            oldFieldIds.slice(0, groupFields.length).forEach((fid, fii) => {
+                // Array.from(Array($p.uniform.uBinCount.data).keys())
+                newFieldDomains[fii] = [0, $p.uniform.uBinCount.data-1];
+
+            })
+            $p.uniform.uBinCount.data = 0;
+        }
+
         $p.fieldDomains = newFieldDomains;
         $p.fieldWidths = newFieldWidths;
         // $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
@@ -330,17 +351,20 @@ export default function aggregate($p) {
             // $p.attribute['aDataId' + vecId[i]] = seqFloat(0, $p.resultDimension[i]-1);
             var interval = 1;
             var ifid = $p.fields.indexOf(d);
-            if ($p.intervals.hasOwnProperty(d))
-                interval = $p.intervals[d].interval;
+            // if ($p.intervals.hasOwnProperty(d))
+            //     interval = $p.intervals[d].interval;
 
             $p.attribute['aDataVal' + vecId[i]] = seqFloat(
                 $p.fieldDomains[ifid][0],
                 $p.fieldDomains[ifid][1],
                 interval
             );
+
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataId' + vecId[i]].location, i);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute['aDataVal' + vecId[i]].location, i);
         });
+
+        $p.getResultBuffer = aggregate.result;
     }
 
     aggregate.result = function(arg) {

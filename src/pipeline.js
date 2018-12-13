@@ -1,5 +1,6 @@
 export default function pipeline($p) {    
     let pipeline = {};
+    let async = false;
     let optID = 0;
     let queue = [];
     
@@ -9,7 +10,7 @@ export default function pipeline($p) {
     }
 
     pipeline.addToQueue = function (opt, arg) {
-        if(!$p._update) {
+        if(!$p._update && !$p._progress) {
             let spec = {};
             spec[opt] = arg;
             queue.push(spec);
@@ -22,8 +23,13 @@ export default function pipeline($p) {
     pipeline.addOperation = function(name, operation) {
         if(!pipeline.hasOwnProperty(name)) {
             pipeline[name] = function(arg) {
-                pipeline.addToQueue(name, arg);
-                $p.getResult = operation(arg);
+                if(!async) {
+                    pipeline.addToQueue(name, arg);
+                }
+                let getResult = operation(arg);
+                if(typeof(getResult) === 'function') {
+                    $p.getResult = getResult;
+                }
                 return pipeline;
             }
         }   
@@ -34,18 +40,24 @@ export default function pipeline($p) {
         return pipeline;
     }
 
-    pipeline.run = function() {
-        for (let q of queue) {
+    pipeline.run = function(jobs = queue) {
+
+        for (let q of jobs) {
             let opt = Object.keys(q)[0];
             if(typeof pipeline[opt] === 'function') {
                 pipeline[opt](q[opt]);
             }
         }
+
         return pipeline;
     }
 
     pipeline.queue = function() {
         return queue;
+    }
+
+    pipeline.async = function(isAsync) {
+        async = isAsync;
     }
 
     return pipeline;

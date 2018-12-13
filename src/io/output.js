@@ -3,12 +3,17 @@ export default function($p) {
     let output = {};
     
     output.result = function(format) {
-        var buf = $p.getResult(),
+        var buf = $p.getResultBuffer(),
             res = {},
             offset = 0,
             rs = 0;
         if(typeof buf.subarray !== 'function') return buf;
         var rs = 0;
+        let match = null;
+        if($p.uniform.uFilterFlag.data == 1){
+            match = $p.getMatchBuffer()
+        }
+        
         if($p.indexes.length > 0) {
             if ($p.resultDimension[0] > 1) {
                 res[$p.fields[rs]] = $p.attribute.aDataValx.data;
@@ -40,25 +45,28 @@ export default function($p) {
         };
 
         if (format == 'row') {
-            var objectArray = new Array(arraySize);
+            var objectArray = new Array();
             
             for (var i = 0; i < arraySize; i++) {
-                var obj = {};
-                Object.keys(res).forEach(function(f) {
-                    var kid = $p.dkeys.indexOf(f),
-                        dtype = $p.dtypes[kid];
+                if(match !== null && match[i] != 0) {
+                    var obj = {};
+                    Object.keys(res).forEach(function(f) {
+                        var kid = $p.dkeys.indexOf(f),
+                            dtype = $p.dtypes[kid];
+    
+                        if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
+                            obj[f] = $p.categoryLookup[f][res[f][i]];
+                        } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
+                            obj[f] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
+                        } else if ($p.uniqueValues.hasOwnProperty(f)) {
+                            obj[f] = $p.uniqueValues[f][res[f][i]];
+                        } else {
+                            obj[f] = Number.isNaN(res[f][i]) ? 0.0 : res[f][i];
+                        }
+                    });
+                    objectArray.push(obj);
+                }
 
-                    if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
-                        obj[f] = $p.categoryLookup[f][res[f][i]];
-                    } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
-                        obj[f] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
-                    } else if ($p.uniqueValues.hasOwnProperty(f)) {
-                        obj[f] = $p.uniqueValues[f][res[f][i]];
-                    } else {
-                        obj[f] = Number.isNaN(res[f][i]) ? 0.0 : res[f][i];
-                    }
-                });
-                objectArray[i] = obj;
             }
 
             return objectArray;

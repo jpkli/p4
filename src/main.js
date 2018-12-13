@@ -7,13 +7,14 @@ import control from './control';
 import pipeline from './pipeline';
 import operate from './operate';
 import kernels from './kernels';
+import extensions from './extensions';
 
 export default function p4(options) {
-    var $p = initialize(options);
-    
+    let $p;
+    $p = initialize(options);
     $p.views = [];
     $p.interactions = [];
-    $p.extensions = [];
+    $p.extensions = extensions;
     $p.responses = {};
     $p.crossfilters = {};
     $p.primitives = [];
@@ -24,6 +25,7 @@ export default function p4(options) {
     
     $p._responseType = 'unselected';
     $p._update = false;
+    $p._progress = false;
     $p.skipRender= false;
 
     $p.getResult = function() {};
@@ -34,12 +36,12 @@ export default function p4(options) {
 
     api.addOperation('head', function() {
         api.resume('__init__');
-        if(Object.keys($p.crossfilters).length > 0)
-            api.match({});
+        if(Object.keys($p.crossfilters).length > 0) api.match({});
         $p.getResult = $p.getRawData;
         return api;
     });
     
+    $p.reset = api.head;
     $p.exportResult = api.result;
 
     function configPipeline($p) {
@@ -58,6 +60,38 @@ export default function p4(options) {
         api.register('__init__');
     }
     
+    api.view = function(views) {
+        $p.views.forEach(function(v){
+            if(v.hasOwnProperty('chart')) {
+                v.chart.svg.remove();
+                delete v.chart;
+            }
+            if(!v.hasOwnProperty('padding')) {
+                v.padding = {left: 30, right: 30, top: 30, bottom: 30};
+            }
+        })
+        $p.views = views;
+        return api;
+    }
+
+    api.addView = function(view) {
+        $p.views.push(view);
+    }
+
+    api.updateViews = function(views) {
+        $p.views = views;
+        return api;
+    }
+
+    api.resetViews = function(views) {
+        $p.views.forEach(function(v){
+            if(v.hasOwnProperty('chart')) {
+                v.chart.svg.remove();
+                delete v.chart;
+            }
+        })
+    }
+
     api.data = function(dataOptions) {
         allocate($p, dataOptions);
         configPipeline($p);
@@ -73,48 +107,35 @@ export default function p4(options) {
 
     api.input = function(arg) {
         let asyncPipeline = {};
-        let asyncQueue = [];
-        let oncomplete = null;
+        let inputReady = false;
         for(let program of Object.keys(api).concat(Object.keys(kernels))) {
             asyncPipeline[program] = function(spec) {
-                asyncQueue.push({program, spec});
+                api.addToQueue(program, spec);
                 return asyncPipeline;
             }
         }
 
-        asyncPipeline.then = function(callback) {
-            oncomplete = callback;
+        asyncPipeline.execute = function() {
+            return input(arg).then(function(data){
+                if(Array.isArray(arg.indexes)) {
+                    data.indexes = arg.indexes;
+                }   
+                api.data(data);
+                api.async(true);
+                api.run();
+                api.async(false);
+                inputReady = true;
+                return new Promise(function(resolve, reject){
+                    resolve(api.result('row'))
+                    return api;
+                })
+            })
         }
 
+        asyncPipeline.commit = asyncPipeline.execute;
+
         if(arg.dimX) $p.rowSize = arg.dimX;
-
-        input(arg).then(function(data){
-            if(Array.isArray(arg.indexes)) {
-                data.indexes = arg.indexes;
-            }   
-            api.data(data);
-            for(let call of asyncQueue) {
-                api[call.program].call(null, call.spec);
-            } 
-
-            if(typeof oncomplete === 'function')
-                oncomplete(api.result('row'))
-        })
         return asyncPipeline;
-    }
-
-    api.view = function(views) {
-        $p.views.forEach(function(v){
-            if(v.hasOwnProperty('chart')) {
-                v.chart.svg.remove();
-                delete v.chart;
-            }
-            if(!v.hasOwnProperty('padding')) {
-                v.padding = {left: 30, right: 30, top: 30, bottom: 30};
-            }
-        })
-        $p.views = views;
-        return api;
     }
 
     api.getResult = function (d) {
@@ -186,6 +207,9 @@ export default function p4(options) {
     $p.respond = api.interact;
 
     api.updateData = function(data) {
+        if(data.size > 0) {
+            $p.dataSize = data.size;
+        }
         $p.fields.slice($p.indexes.length).forEach((attr, ai) => {
             let buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
             for (let i = 0, l = data[attr].length; i < l; i++) {
@@ -194,7 +218,25 @@ export default function p4(options) {
             $p.texture.tData.update(
                 buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
             );
+
+            $p.fieldDomains[ai] = [
+                Math.min(data.stats[attr].min, $p.fieldDomains[ai][0]),
+                Math.max(data.stats[attr].max, $p.fieldDomains[ai][1])
+            ]
+
+            $p.fieldWidths[ai] = $p.fieldDomains[ai][1] - $p.fieldDomains[ai][0];
+
+            if(data.strLists.hasOwnProperty(attr)){
+                $p.fieldDomains[ai] = [0, data.strLists[attr].length];
+                $p.categoryLookup[attr] = data.strLists[attr];
+                $p.fieldWidths[ai] = data.strLists[attr].length;
+            }
+
         });
+
+        $p.uniform.uFieldDomains.data = $p.fieldDomains;
+        $p.uniform.uFieldWidths.data = $p.fieldWidths;
+
         return api;
     }
 

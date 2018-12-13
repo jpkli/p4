@@ -64,20 +64,17 @@ export default function input({
     dataHandlers.text = dataHandlers.csv;
 
     let response = function(data) {
-       
         return new Promise(function(resolve, reject) {
             if(typeof(dataHandlers[type]) === 'function') {
                 resolve(dataHandlers[type](data));
             } else {
                 reject(Error('No handler for data type ', type));
             }
-            
         })
     }
 
     if(method === 'http') {
-        return ajax.get({url: source, dataType: type})
-            .then(response)
+        return ajax.get({url: source, dataType: type}).then(response);
     } else if (method == 'websocket') {
         return new Promise(function(resolve, reject) {
             var socket = new WebSocket(source);
