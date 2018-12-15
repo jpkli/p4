@@ -230,7 +230,7 @@ export default function match($p) {
         if(!$p._update){
             newDomains.forEach(function(domain, fid) {
                 var d = domain;
-                if($p.dtypes[fid] == 'int') d[1] -= 1;
+                // if($p.dtypes[fid] == 'int') d[1] -= 1;
                 $p.fieldDomains[fid] = d;
                 $p.fieldWidths[fid] = $p.getDataWidth(fid, d);
             });
@@ -254,10 +254,7 @@ export default function match($p) {
         var bitmap = new Uint8Array(rowSize*colSize*4);
         gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        // var result = [];
-        
-        // console.log(result);
-        // return result;
+
         return  bitmap.filter((d, i) => i % 4 === 3);
     }
 
