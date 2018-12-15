@@ -14,6 +14,7 @@ export default function p4(options) {
     $p = initialize(options);
     $p.views = [];
     $p.interactions = [];
+    $p.histograms = [];
     $p.extensions = extensions;
     $p.responses = {};
     $p.crossfilters = {};

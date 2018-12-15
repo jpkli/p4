@@ -1,4 +1,4 @@
-export default function Scale(arg) {
+export default function scale(arg) {
     var option = arg || {},
         align = option.align || 'center',
         type = option.type || 'linear',
@@ -30,7 +30,7 @@ export default function Scale(arg) {
         } else if(type == "ordinal" || type == "categorical") {
             return function(v) {
                 if(align == 'outer')
-                    return r0 + (domain.indexOf(v)) / (domain.length-1) * r1;
+                    return r0 + (domain.indexOf(v)+0.5) / (domain.length-1) * r1;
                 else
                     return r0 + (domain.indexOf(v)+0.5) / domain.length * r1;
             };

@@ -30,7 +30,8 @@ export default function($p) {
         $p.intervals[binAttr].interval = binInterval;
         $p.intervals[binAttr].min = binDomain[0];
         $p.intervals[binAttr].max = binDomain[1];
-        $p.intervals[binAttr].align = 'right';
+
+        $p.histograms.push(binAttr)
 
         return binAttr;
     }

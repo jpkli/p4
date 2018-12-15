@@ -19,7 +19,7 @@ export default function axis(arg) {
         styles      = {stroke: color, 'stroke-width': 1},
         ticks       = option.ticks,
         tickLength  = option.tickLength || 6,
-        tickPosition = option.tickPosition || false,
+        tickPosition = option.tickPosition || [0, 0],
         tickInterval= option.tickInterval || "auto",
         tickAlign = option.tickAlign || "center",
         skipLast = option.skipLast || false,
@@ -60,7 +60,7 @@ export default function axis(arg) {
             labelPos = option.labelPos || option.labelPosition || {x: 0, y: 0};
             break;
     }
-    if(!tickPosition) tickPosition = [0,0];
+
 
     function getTickInterval(){
         var vDomain = Math.abs(domain[1] - domain[0]),
@@ -81,16 +81,7 @@ export default function axis(arg) {
 
     if (scale == "categorical" || scale == "ordinal") {
         domainIntervals = function() {
-            var len = domain.length,
-                step = Math.ceil(len / ticks),
-                intervals = [],
-                i;
-            for(i = 0; i < len; i += step) {
-                intervals.push(domain[i])
-            }
-            // if(intervals[i] != domain[len-1]) intervals.push(domain[len-1]);
-
-            return intervals;
+            return domain;
         };
     } else {
         var intv;
@@ -185,10 +176,7 @@ export default function axis(arg) {
                 y1 = position + tickPosition[1] + tickLength;
                 y2 = y1 - tickLength;
             } else {
-                if(scale == "categorical" || scale == "ordinal")
-                    y1 = y2 = height - metric(di[i]);
-                else
-                    y1 = y2 = metric(di[i]) + tickPosition[1];
+                y1 = y2 = metric(di[i]) + tickPosition[1];
                 x1 = position + tickPosition[0] ;
                 x2 = x1 - tickLength;
             }
@@ -209,8 +197,7 @@ export default function axis(arg) {
                 .Attr({
                     x: x2 + labelPos.x,
                     y: y2 - labelPos.y,
-                    // class: "labels",
-                    class: "i2v-axis-label",
+                    class: "p4-axis-label",
                     "font-size": "0.9em",
                     textAnchor: tickLabelAlign
                 });

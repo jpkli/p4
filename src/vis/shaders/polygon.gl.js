@@ -33,7 +33,7 @@ export default class Polygon extends Renderer{
     width *= 1.0 - this.uMarkSpace.x * 2.0;
     height *= 1.0 - this.uMarkSpace.y * 2.0;
     posX += this.uMarkSpace.x * width;
-    posY -= this.uMarkSpace.y * height;
+    posY += this.uMarkSpace.y * height;
 
     if (this.aVertexId == 0.0 || this.aVertexId == 3.0) {
       posX = posX * 2.0 - 1.0;

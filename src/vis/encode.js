@@ -43,57 +43,63 @@ export default function encode($p, vmap, colorManager) {
         $p.uniform.uMarkSize = vmap.size;
     }
 
-    var viewSetting = {};
+    var viewSetting = {scale: {}, histogram: {}};
     var isRect = (['rect', 'bar'].indexOf(vmap.mark) !== -1);
     var markSpace = [0, 0];
+    let isXYCategorical = [0, 0];
     if(vmapIndex[0] > -1) {
         var len = $p.fieldWidths[vmapIndex[0]],
             ext = $p.fieldDomains[vmapIndex[0]];
         if($p.categoryLookup.hasOwnProperty(vmap.x)){
-            viewSetting.scaleX = 'categorical';
+            viewSetting.scale.x = 'categorical';
             viewSetting.domainX = new Array(len).fill(0).map(
                 (d,i)=>$p.categoryLookup[vmap.x][i]
             );
          } else if (isRect) {
-            viewSetting.scaleX = 'ordinal';
+            viewSetting.scale.x = 'ordinal';
             viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
          }
          markSpace[0] = 0.02;
+         isXYCategorical[0] = 1;
     }
     if(vmapIndex[1] > -1) {
         var len = $p.fieldWidths[vmapIndex[1]],
             ext = $p.fieldDomains[vmapIndex[1]];
 
         if($p.categoryLookup.hasOwnProperty(vmap.y)){
-            viewSetting.scaleY = 'categorical';
+            viewSetting.scale.y = 'categorical';
             viewSetting.domainY = new Array(len).fill(0).map(
                 (d,i)=>$p.categoryLookup[vmap.y][i]
             ).reverse();
         } else if (isRect) {
-            viewSetting.scaleY = 'ordinal';
+            viewSetting.scale.y = 'ordinal';
             viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
         }
-        markSpace[1] = 0.02;
+        markSpace[1] = 0.1;
+        isXYCategorical[1] = 1;
     }
 
     if(vmapIndex[0] > -1 && vmapIndex[1] > -1) {
         markSpace = [0, 0];
     }
+    let dims = ['x', 'y'];
+    for(let dim of dims) {
+        if($p.histograms.indexOf(vmap[dim]) !== -1) {
+            let histMin = $p.intervals[vmap[dim]].min;
+            let histMax = $p.intervals[vmap[dim]].max;
+            let histIntv = $p.intervals[vmap[dim]].interval;
+            let histBin = (histMax - histMin) / histIntv + 1;
 
-    $p.uniform.uMarkSpace.data = markSpace;
+            viewSetting.histogram[dim] = true;
+            let d = (dim == 'x') ? 'domainX' : 'domainY';
+            viewSetting[d] = new Array(histBin).fill(histMin).map((h, i) => h + i*histIntv);
 
-    if($p.intervals.hasOwnProperty(vmap.x)) {
-        var histDim = vmap.x || vmap.y,
-            histMin = $p.intervals[histDim].min,
-            histMax = $p.intervals[histDim].max,
-            histIntv = $p.intervals[histDim].interval,
-            histBin = (histMax - histMin) / histIntv;
-
-        // viewSetting.fields = $p.fields;
-        viewSetting.isHistogram = true;
-        // viewSetting.domain = {};
-        viewSetting.domainX = new Array(histBin).fill(histMin).map(function(h, i) {return h + i*histIntv});
+            markSpace[dims.indexOf(dim)] = 0.01;
+            
+        }
     }
+    $p.uniform.uMarkSpace.data = markSpace;
+    $p.uniform.uIsXYCategorical.data = isXYCategorical;
 
     if(!$p._update) {
         if(!vmap.width && vmap.x) {

@@ -43,6 +43,7 @@ export default function visualize($p) {
         .uniform('uMaxRGBA',        'vec4',  [0, 0, 0, 0])
         .uniform('uDefaultColor',   'vec3',  [0.8, 0, 0])
         .uniform('uColorMode',      'int',   1)
+        .uniform('uIsXYCategorical','ivec2',   [0, 0])
         .varying('vColorRGBA',      'vec4'   );
 
     var enhance = reveal($p);

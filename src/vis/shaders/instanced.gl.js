@@ -23,6 +23,16 @@ export default class Instanced extends Renderer{
         color = this.visMap(this.uVisualEncodings[2], i, j, this.aDataValx, this.aDataValy, -1.0, 0.0);
         alpha = this.visMap(this.uVisualEncodings[3], i, j, this.aDataValx, this.aDataValy, this.uDefaultAlpha, 0.0);
         size = this.visMap(this.uVisualEncodings[6], i, j, this.aDataValx, this.aDataValy, 1.0, 0.0);
+
+        if(this.uIsXYCategorical[0] == 1) {
+            var width = this.uFieldWidths[this.uVisualEncodings[0]];
+            posX = 0.5 / width + posX * (width-1.0) / width;
+        }
+        if(this.uIsXYCategorical[1] == 1) {
+            var height = this.uFieldWidths[this.uVisualEncodings[1]];
+            posY = 0.5 / height + posY * (height-1.0) / height;
+        }
+
         posX = posX * 2.0 - 1.0;
         posY = posY * 2.0 - 1.0;
 
