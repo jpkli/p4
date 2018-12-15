@@ -39,18 +39,6 @@ export default function encode($p, vmap, colorManager) {
         $p.uniform.uRevealMode.data = 0;
     }
 
-    //Check if need interleaving data attributes(e.g.,parallel coordinates)
-    if(Array.isArray(vmap.x) || Array.isArray(vmap.y)) {
-        $p.renderMode = 'interleave';
-        if(Array.isArray(vmap.x)){
-            // vmap.x = vmap.x.reverse();
-            $p.uniform.uInterleaveX = 0;
-        }
-        if(Array.isArray(vmap.y)) $p.uniform.uInterleaveX = 1;
-    } else if(vmap.mark && ['rect', 'bar'].indexOf(vmap.mark) !== -1) {
-        $p.renderMode = 'polygon';
-    }
-
     if(vmapIndex[6] === -1 && typeof(vmap.size) == 'number') {
         $p.uniform.uMarkSize = vmap.size;
     }
@@ -94,7 +82,7 @@ export default function encode($p, vmap, colorManager) {
 
     $p.uniform.uMarkSpace.data = markSpace;
 
-    if($p.intervals.hasOwnProperty(vmap.x) || $p.intervals.hasOwnProperty(vmap.y)) {
+    if($p.intervals.hasOwnProperty(vmap.x)) {
         var histDim = vmap.x || vmap.y,
             histMin = $p.intervals[histDim].min,
             histMax = $p.intervals[histDim].max,

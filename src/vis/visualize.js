@@ -1,8 +1,13 @@
 import colors from './color';
-import render from './render';
 import reveal from './reveal';
 import encode from './encode';
+import extend from './extend';
+import interpolate from './shaders/interpolate.gl'
+
 import Layout from './layout';
+import Instanced from './shaders/instanced.gl'
+import Polygon from './shaders/polygon.gl'
+import Interleaved from './shaders/interleaved.gl'
 
 const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
 const userActions = ['click', 'hover', 'brush', 'zoom', 'pan'];
@@ -10,14 +15,11 @@ const visMarks = ['dot', 'circle', 'line', 'rect'];
 
 export default function visualize($p) {
 
-    var colorManager = colors($p),
-        chartPadding = $p.padding || {left: 0, right: 0, top: 0, bottom: 0},
-        viewport = [
-            $p.viewport[0],
-            $p.viewport[1],
-        ];
+    let colorManager = colors($p);
+    let chartPadding = $p.padding || {left: 0, right: 0, top: 0, bottom: 0};
+    let viewport = $p.viewport;
 
-    var vis = new Layout({
+    let vis = new Layout({
         container: $p.container,
         width: viewport[0] + chartPadding.left + chartPadding.right,
         height: viewport[1] + chartPadding.top + chartPadding.bottom,
@@ -49,42 +51,28 @@ export default function visualize($p) {
     $p.framebuffer('visStats', 'float', [1, 1]);
     // $p.framebuffer.enableRead('offScreenFBO');
 
-    render($p);
-
-    function updateInstancedAttribute(vm) {
-        if(Array.isArray(vm)){
-            $p.uniform.uFeatureCount = vm.length;
-            var fv = new Float32Array(vm.length*2);
-            vm.forEach(function(f, i) {
-                fv[i*2] = $p.fields.indexOf(f);
-                fv[i*2+1] = i;
-            });
-            $p.attribute.aDataFieldId = fv;
-        }
+    $p.subroutine('visMap', 'float', interpolate.visMap);
+    
+    let renderers = {
+        instanced: new Instanced({context: $p, name: 'instanced'}),
+        polygon: new Polygon({context: $p, name: 'polygon'}),
+        interleave: new Interleaved({context: $p, name: 'interleave'})
     }
 
     return function(options) {
-        $p.renderMode = 'instancedXY';
         $p.revealDensity = false;
-        var vmap = options.vmap || {},
-            mark = options.mark || vmap.mark || 'line',
-            interaction = options.interaction,
-            viewIndex = options.viewIndex,
-            viewTag = $p.views[viewIndex].id;
+        let renderer = 'instanced';
+        let vmap = options.vmap || {};
+        let mark = options.mark || vmap.mark || 'circle';
+        let viewIndex = options.viewIndex;
 
-        // if(!vmap.height && vmap.y) {
-        //     vmap.height = vmap.y;
-        // }
-
-        var visDomain = {},
-            visDimension = vmap.viewport || [$p.views[viewIndex].width, $p.views[viewIndex].height] || viewport;
-
-        var width = visDimension[0],
-            height =  visDimension[1],
-            padding = $p.views[viewIndex].padding || chartPadding,
-            offset = $p.views[viewIndex].offset || [0, 0];
-
-        var dimSetting = encode($p, vmap, colorManager);
+        let visDomain = {};
+        let visDimension = vmap.viewport || [$p.views[viewIndex].width, $p.views[viewIndex].height] || viewport;
+        let width = visDimension[0];
+        let height =  visDimension[1];
+        let padding = $p.views[viewIndex].padding || chartPadding;
+        let offset = $p.views[viewIndex].offset || [0, 0];
+        let dimSetting = encode($p, vmap, colorManager);
 
         if(!$p._update){
             $p.fields.forEach(function(f, i){
@@ -95,37 +83,31 @@ export default function visualize($p) {
 
         $p.uniform.uVisMark.data = visMarks.indexOf(mark);
 
-        var gl = $p.program($p.renderMode);
+        //Check if need interleaving data attributes(e.g.,parallel coordinates)
+        if(Array.isArray(vmap.x) || Array.isArray(vmap.y)) {
+            renderer = 'interleave';
+            if(Array.isArray(vmap.x)){
+                // vmap.x = vmap.x.reverse();
+                $p.uniform.uInterleaveX = 0;
+            } else if(Array.isArray(vmap.y)) {
+                $p.uniform.uInterleaveX = 1;
+            }
+
+            renderers[renderer].updateInstancedAttribute(vmap.x);
+            renderers[renderer].updateInstancedAttribute(vmap.y);
+
+        } else if(vmap.mark && ['rect', 'bar'].indexOf(vmap.mark) !== -1) {
+            renderer = 'polygon';
+        }
+
+        if(renderer == 'interleave') {
+
+        }
+        var gl = renderers[renderer].load();
         $p.framebuffer.enableRead('fFilterResults');
         $p.framebuffer.enableRead('fDerivedValues');
         $p.framebuffer.enableRead('fGroupResults');
-
-        if($p.renderMode == 'instancedXY') {
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
-        } else if($p.renderMode == 'interleave') {
-            updateInstancedAttribute(vmap.x);
-            updateInstancedAttribute(vmap.y);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataFieldId.location, 0);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemId.location, 1);
-        } else {
-            var val0 = new Float32Array($p.dataSize),
-                val1 = new Float32Array($p.dataSize);
-            for(var y = 0; y < $p.dataDimension[1]; y++) {
-                for(var x = 0; x < $p.dataDimension[0]; x++) {
-                    val0[y*$p.dataDimension[0] + x] = $p.attribute.aDataValx.data[x];
-                    val1[y*$p.dataDimension[0] + x] = $p.attribute.aDataValy.data[y];
-                }
-            }
-            $p.attribute.aDataItemVal0 = val0;
-            $p.attribute.aDataItemVal1 = val1;
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aVertexId.location, 0);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemId.location, 1);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemVal0.location, 1);
-            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataItemVal1.location, 1);
-        }
+ 
 
         // if(typeof data == 'string')
         //     $p.uniform.uDataInput = $p.framebuffer[data].texture;
@@ -168,10 +150,12 @@ export default function visualize($p) {
 
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);
-        gl.enable( gl.BLEND );
+        gl.enable(gl.BLEND);
         gl.blendEquation(gl.FUNC_ADD);
 
-        var pv = $p.views[viewIndex];
+        let pv = $p.views[viewIndex];
+        let primitive = gl.POINTS;
+
         if(!$p._update) {
             pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
             $p.uniform.uVisDomains = pv.domains;
@@ -179,7 +163,6 @@ export default function visualize($p) {
                 pv.chart.svg.remove();
                 pv.chart.removeAxis();
             }
-
             pv.chart = vis.addChart(viewSetting);
         } else {
             $p.uniform.uVisDomains = pv.domains;
@@ -187,70 +170,17 @@ export default function visualize($p) {
                 pv.chart.updateAxisX(pv.domains[$p.fields.indexOf(vmap.x)]);
                 pv.chart.updateAxisY(pv.domains[$p.fields.indexOf(vmap.y)]);
             }
-
-        }
-        var primitive = gl.POINTS;
-        if(['rect', 'bar'].indexOf(mark) !== -1) primitive = gl.TRIANGLES;
-        else if(mark == 'line') primitive = gl.LINE_STRIP;
-
-        function draw() {
-            if($p.renderMode == 'interleave') {
-                var count = $p.attribute.aDataFieldId.data.length / $p.attribute.aDataFieldId.size;
-                gl.ext.drawArraysInstancedANGLE(primitive, 0, count, $p.dataSize);
-            } else if($p.renderMode == 'polygon'){
-                gl.ext.drawArraysInstancedANGLE(primitive, 0, 6, $p.dataSize);
-            } else {
-                if(primitive == gl.LINE_STRIP) {
-                    gl.lineWidth(vmap.size || 1.0);
-                } 
-                gl.ext.drawArraysInstancedANGLE(primitive, 0, $p.dataDimension[0], $p.dataDimension[1]);
-               
-            }
         }
         
-        $p.extensions.forEach((ext) => {
-            if(ext.condition.call(null, vmap)) {
-                $p.skipRender = ext.skipDefault;
-                let data = {
-                    json: null, 
-                    array: null,
-                    texture: null,
-                    vmap: vmap,
-                    fields: $p.fields
-                    // domains: visDomain
-                };
+        if(mark == 'line') {
+            primitive = gl.LINE_STRIP;
+            gl.lineWidth(vmap.size || 1.0);
+        }
 
-                let view = Object.assign({}, $p.views[viewIndex]);
-                view.width = width - padding.left - padding.right,
-                view.height = height - padding.top - padding.bottom,
-                view.encodings = vmap,
-                view.svg = $p.views[viewIndex].chart.svg.svg, 
-                view.canvas = $p.canvas
-
-                if(ext.exportData) {
-                    data.json = $p.exportResult('row');
-                } 
-                
-                if(typeof ext.onready === 'function') {
-                    ext.onready.call($p, data, view);
-                }
-
-                let execution = ext.type == 'class' 
-                    ? function(data, view) { return new ext.function(data, view)}
-                    : ext.function;
-
-                if(ext.restartOnUpdate) {
-                    execution.call(ext, data, view);
-                } else {
-                    if(!$p._update) {
-                        execution.call(ext, data, view);
-                    }
-                }
-            }
-        })
+        extend($p, vmap);
 
         if(!$p.skipRender) {
-            draw();
+            renderers[renderer].render(primitive)
         } else {
             pv.chart.removeAxis();
             if($p.fields.indexOf(vmap.color)!==-1) pv.chart.removeLegend();
@@ -269,8 +199,8 @@ export default function visualize($p) {
                 .filter(function(act){ return userActions.indexOf(act) !== -1});
 
             actions.forEach(function(action) {
-                var viewId = vmap.id || $p.views[viewIndex].id,
-                    response = {};
+                let response = {};
+                let viewId = vmap.id || $p.views[viewIndex].id;
                 response[viewId] = vmap[action];
                 $p.interactions.push({
                     event: action,

@@ -164,12 +164,12 @@ export default function chart(frontSvg, backSvg, arg) {
         });
     }
 
-    if(isHistogram) {
-        xAxisOption.tickPosition = [-width / domainX.length /2, 0];
-        xAxisOption.scale = "ordinal";
-        xAxisOption.domain = domainX;
-        xAxisOption.ticks = domainX.length;
-    }
+    // if(isHistogram) {
+    //     xAxisOption.tickPosition = [-width / domainX.length /2, 0];
+    //     xAxisOption.scale = "ordinal";
+    //     xAxisOption.domain = domainX;
+    //     xAxisOption.ticks = domainX.length;
+    // }
 
     if((vmap.x || vmap.width) && !Array.isArray(vmap.x)) x = axis(xAxisOption);
     if((vmap.y || vmap.height) && !Array.isArray(vmap.y)) y = axis(yAxisOption);
