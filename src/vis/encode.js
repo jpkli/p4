@@ -1,8 +1,9 @@
 const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
 
 export default function encode($p, vmap, colorManager) {
-    var opacity = vmap.opacity || vmap.alpha;
-    var vmapIndex = new Int32Array(visualEncodings.length);
+    let opacity = vmap.opacity || vmap.alpha;
+    let vmapIndex = new Int32Array(visualEncodings.length);
+    
     visualEncodings.forEach(function(code, codeIndex){
         vmapIndex[codeIndex] = $p.fields.indexOf(vmap[code]);
     })
@@ -43,28 +44,28 @@ export default function encode($p, vmap, colorManager) {
         $p.uniform.uMarkSize = vmap.size;
     }
 
-    var viewSetting = {scale: {}, histogram: {}};
-    var isRect = (['rect', 'bar'].indexOf(vmap.mark) !== -1);
-    var markSpace = [0, 0];
+    let viewSetting = {scale: {}, histogram: {}};
+    let isRect = (['rect', 'bar'].indexOf(vmap.mark) !== -1);
+    let markSpace = [0, 0];
     let isXYCategorical = [0, 0];
     if(vmapIndex[0] > -1) {
-        var len = $p.fieldWidths[vmapIndex[0]],
-            ext = $p.fieldDomains[vmapIndex[0]];
+        let len = $p.fieldWidths[vmapIndex[0]];
+        let ext = $p.fieldDomains[vmapIndex[0]];
         if($p.categoryLookup.hasOwnProperty(vmap.x)){
             viewSetting.scale.x = 'categorical';
             viewSetting.domainX = new Array(len).fill(0).map(
-                (d,i)=>$p.categoryLookup[vmap.x][i]
+                (d,i) => $p.categoryLookup[vmap.x][i]
             );
          } else if (isRect) {
             viewSetting.scale.x = 'ordinal';
-            viewSetting.domainX = new Array(len).fill(0).map((d,i)=>ext[0] + i);
+            viewSetting.domainX = new Array(len).fill(0).map((d,i) => ext[0] + i);
          }
          markSpace[0] = 0.02;
          isXYCategorical[0] = 1;
     }
     if(vmapIndex[1] > -1) {
-        var len = $p.fieldWidths[vmapIndex[1]],
-            ext = $p.fieldDomains[vmapIndex[1]];
+        let len = $p.fieldWidths[vmapIndex[1]];
+        let ext = $p.fieldDomains[vmapIndex[1]];
 
         if($p.categoryLookup.hasOwnProperty(vmap.y)){
             viewSetting.scale.y = 'categorical';
@@ -89,13 +90,10 @@ export default function encode($p, vmap, colorManager) {
             let histMax = $p.intervals[vmap[dim]].max;
             let histIntv = $p.intervals[vmap[dim]].interval;
             let histBin = (histMax - histMin) / histIntv + 1;
-
-            viewSetting.histogram[dim] = true;
             let d = (dim == 'x') ? 'domainX' : 'domainY';
+            viewSetting.histogram[dim] = true;
             viewSetting[d] = new Array(histBin).fill(histMin).map((h, i) => h + i*histIntv);
-
             markSpace[dims.indexOf(dim)] = 0.01;
-            
         }
     }
     $p.uniform.uMarkSpace.data = markSpace;

@@ -49,7 +49,7 @@ export default function reveal($p) {
         if(this.uRevealMode == 0) {
             gl_FragColor = vec4(this.uDefaultColor*a, a);
         } else {
-            gl_FragColor = vec4(texture2D(this.tColorGraident, vec2(1.-a, 1.0)).rgb*this.uDefaultAlpha, this.uDefaultAlpha);
+            gl_FragColor = vec4(texture2D(this.tColorGradient, vec2(1.-a, 1.0)).rgb*this.uDefaultAlpha, this.uDefaultAlpha);
         }
     });
 

@@ -1,4 +1,9 @@
-export default function ($p, vmap) {
+export default function ($p, vmap, viewIndex) {
+  let chart = $p.views[viewIndex];
+  let width = chart.width;
+  let height = chart.height;
+  let padding = chart.padding;
+
   $p.extensions.forEach((ext) => {
     if (ext.condition.call(null, vmap)) {
       $p.skipRender = ext.skipDefault;
@@ -10,11 +15,11 @@ export default function ($p, vmap) {
         fields: $p.fields
       };
 
-      let view = Object.assign({}, $p.views[viewIndex]);
+      let view = Object.assign({}, chart);
       view.width = width - padding.left - padding.right,
         view.height = height - padding.top - padding.bottom,
         view.encodings = vmap,
-        view.svg = $p.views[viewIndex].chart.svg.svg,
+        view.svg = chart.chart.svg.svg,
         view.canvas = $p.canvas
 
       if (ext.exportData) {

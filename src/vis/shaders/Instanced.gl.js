@@ -1,4 +1,4 @@
-import Renderer from './renderer.gl'
+import Renderer from './Renderer.gl'
 
 export default class Instanced extends Renderer{
     constructor(arg) {

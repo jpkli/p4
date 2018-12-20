@@ -1,6 +1,5 @@
 import axis from './axis';
 import format from './format';
-import scale from './scale';
 import legend from './legend';
 
 export default function chart(frontSvg, backSvg, arg) {
@@ -19,7 +18,7 @@ export default function chart(frontSvg, backSvg, arg) {
         labels = plot.append('g'),
         onclick = options.onclick || null,
         onhover = options.onhover || null,
-        showLegend = options.legend || true,
+        showLegend = options.legend,
         tickOffset = options.axisOffset || [0, 0],
         padding = options.padding || {left: 0, right: 0, top: 0, bottom: 0},
         marks = [],
@@ -60,7 +59,6 @@ export default function chart(frontSvg, backSvg, arg) {
             grid: gridlines.y,
             format: format(".3s"),
         }
-
     };
 
     let colorLegend;
@@ -76,13 +74,11 @@ export default function chart(frontSvg, backSvg, arg) {
         });
     }
 
-
-
-    var x, y, xAxes = [], yAxes = [];
+    let x, y, xAxes = [], yAxes = [];
 
     // For parallel coordinates
     if(Array.isArray(vmap.x)) {
-        var axisDist = height / (vmap.x.length-1);
+        let axisDist = height / (vmap.x.length-1);
 
         vmap.x.forEach(function(d, i) {
             axisOption.x.position = i * axisDist + 1;
@@ -92,7 +88,7 @@ export default function chart(frontSvg, backSvg, arg) {
                 axisOption.x.tickAlign = 'outer';
                 axisOption.x.domain = categories[d].reverse();
             }
-            var labelOffset = 20;
+            let labelOffset = 20;
             if(i === 0) {
                 axisOption.x.tickPosition = [0, -5];
                 axisOption.x.labelPos = {x: 0, y: 2};
@@ -145,14 +141,11 @@ export default function chart(frontSvg, backSvg, arg) {
         });
     }
 
-    
     let histDomain = {
         x: domainX, 
         y: domainY
     };
-    
     for(let dim of ['x', 'y']) {
-
         if(scale[dim] == 'ordinal' || scale[dim] == 'categorical') {
             axisOption[dim].ticks = histDomain[dim].length;
             // while(width / axisOption[dim].ticks < 20) {
@@ -176,7 +169,7 @@ export default function chart(frontSvg, backSvg, arg) {
     if((vmap.y || vmap.height) && !Array.isArray(vmap.y)) y = axis(axisOption.y);
 
     if((vmap.hasOwnProperty('x') || vmap.hasOwnProperty('width')) && !Array.isArray(vmap.x)) {
-        var xAxisTitle = vmap.x || vmap.width;
+        let xAxisTitle = vmap.x || vmap.width;
         // xAxisTitle = xAxisTitle.replace(/_/g, ' ');
         // axisOption.x.grid = 1;
         labels.append("g")
@@ -192,7 +185,7 @@ export default function chart(frontSvg, backSvg, arg) {
 
     }
     if((vmap.hasOwnProperty('y') || vmap.hasOwnProperty('height')) && !Array.isArray(vmap.y)) {
-        var yAxisTitle = vmap.y || vmap.height;
+        let yAxisTitle = vmap.y || vmap.height;
         // yAxisTitle = yAxisTitle.replace(/_/g, ' ');
         // axisOption.y.grid = 1;
         if(!Array.isArray(vmap.y)) {
@@ -229,8 +222,7 @@ export default function chart(frontSvg, backSvg, arg) {
     plot.translate(padding.left+left, padding.top+top);
     metavis.translate(padding.left+left, padding.top+top);
 
-    var chartLayer = {};
-
+    let chartLayer = {};
     chartLayer.updateAxisX =  function(newDomain) {
         x.remove();
         axisOption.x.domain = newDomain;
@@ -243,7 +235,6 @@ export default function chart(frontSvg, backSvg, arg) {
         y = axis(axisOption.y)
         return chartLayer;
     }
-
     chartLayer.removeAxis = function() {
         x.remove();
         y.remove();
@@ -253,11 +244,11 @@ export default function chart(frontSvg, backSvg, arg) {
             })
         }
     }
-
     chartLayer.removeLegend = function() {
-        colorLegend.remove()
+        if(showLegend) {
+            colorLegend.remove();
+        }
     }
-
     chartLayer.svg = plot;
     chartLayer.x = Array.isArray(vmap.x) ? xAxes : x;
     chartLayer.y = Array.isArray(vmap.y) ? yAxes : y;

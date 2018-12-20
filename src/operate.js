@@ -23,16 +23,13 @@ export default function($p) {
     
         $p.uniform.uBinCount.data = binCount;
         $p.uniform.uBinIntervals.data = [binInterval, 0.0];
-        
         $p.fieldWidths[binAttrId] = binCount;    
         $p.intervals[binAttr] = {};
-        $p.intervals[binAttr].dtype = 'historgram';
+        $p.intervals[binAttr].dtype = 'histogram';
         $p.intervals[binAttr].interval = binInterval;
         $p.intervals[binAttr].min = binDomain[0];
         $p.intervals[binAttr].max = binDomain[1];
-
         $p.histograms.push(binAttr)
-
         return binAttr;
     }
     
@@ -40,20 +37,16 @@ export default function($p) {
         if(spec.$bin) {
             spec.$group = bin(spec.$bin);
         }
-
         if(Object.keys($p.crossfilters).length) {
             $p.uniform.uFilterFlag = 1;
         }
-        
         if (!kernels.hasOwnProperty('aggregate')) {
             kernels.aggregate = programs.aggregate($p, spec);
         }
         kernels.aggregate.execute(spec);
         return kernels.aggregate.result;
-        // console.log(JSON.stringify(result('row')));
-
     }
-    
+
     operations.match = function(spec) {
         if (!kernels.hasOwnProperty('match')) {
             kernels.match = programs.match($p);
@@ -77,7 +70,7 @@ export default function($p) {
         kernels.derive.execute(spec);
         return kernels.derive.result;
     }
-    
+
     operations.visualize = function(vmap) {
         // if(Object.keys($p.crossfilters).length > 0)
         //     operations.match({});
@@ -119,9 +112,7 @@ export default function($p) {
                 $p.respond();
             }
         })
-
         $p.reset();
-        // return pipeline;
     }
 
     return operations;

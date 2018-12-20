@@ -5,9 +5,9 @@ import extend from './extend';
 import interpolate from './shaders/interpolate.gl'
 
 import Layout from './layout';
-import Instanced from './shaders/instanced.gl'
-import Polygon from './shaders/polygon.gl'
-import Interleaved from './shaders/interleaved.gl'
+import Instanced from './shaders/Instanced.gl'
+import Polygon from './shaders/Polygon.gl'
+import Interleaved from './shaders/Interleaved.gl'
 
 const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
 const userActions = ['click', 'hover', 'brush', 'zoom', 'pan'];
@@ -43,10 +43,10 @@ export default function visualize($p) {
         .uniform('uMaxRGBA',        'vec4',  [0, 0, 0, 0])
         .uniform('uDefaultColor',   'vec3',  [0.8, 0, 0])
         .uniform('uColorMode',      'int',   1)
-        .uniform('uIsXYCategorical','ivec2',   [0, 0])
+        .uniform('uIsXYCategorical','ivec2', [0, 0])
         .varying('vColorRGBA',      'vec4'   );
 
-    var enhance = reveal($p);
+    let enhance = reveal($p);
 
     $p.framebuffer('offScreenFBO', 'float', $p.viewport);
     $p.framebuffer('visStats', 'float', [1, 1]);
@@ -75,11 +75,59 @@ export default function visualize($p) {
         let offset = $p.views[viewIndex].offset || [0, 0];
         let dimSetting = encode($p, vmap, colorManager);
 
+        let pv = $p.views[viewIndex];
+        let colorInfo = pv.color || vmap.color;
+    
+        if(typeof(colorInfo) === 'object') {
+            let colorMode;
+            let colorMap;
+        
+            if(Array.isArray(colorInfo)) {
+                colorMap = colorInfo;
+            } else {
+                if(colorInfo.hasOwnProperty('interpolate')) {
+                    colorMode = (colorInfo.interpolate) ? 1 : 0;
+                }
+                colorMap = colorInfo.range || colorInfo.values; 
+            }
+            colorManager.updateColors(colorMap, colorMode);
+        }
+
+        let viewSetting = {
+            domain: visDomain,
+            fields: $p.fields,
+            vmap: vmap,
+            // onclick: interaction,
+            categories: $p.categoryLookup,
+            padding: padding,
+            left: offset[0],
+            top: viewport[1] - height - offset[1],
+            colors: colorManager.getColors(),
+        };
+
+        viewSetting = Object.assign(viewSetting, dimSetting);
+        viewSetting = Object.assign(viewSetting, $p.views[viewIndex]);
+
         if(!$p._update){
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
                 if(vmap.zero  && visDomain[f][0]>0) visDomain[f][0] = 0;
             });
+
+            pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
+            $p.uniform.uVisDomains.data = pv.domains;
+            if(vmap.append !== true && pv.hasOwnProperty('chart')) {
+                pv.chart.svg.remove();
+                pv.chart.removeAxis();
+            }
+            pv.chart = vis.addChart(viewSetting);
+
+        } else {
+            $p.uniform.uVisDomains = pv.domains;
+            if(pv.updateDomain === true) {
+                pv.chart.updateAxisX(pv.domains[$p.fields.indexOf(vmap.x)]);
+                pv.chart.updateAxisY(pv.domains[$p.fields.indexOf(vmap.y)]);
+            }
         }
 
         $p.uniform.uVisMark.data = visMarks.indexOf(mark);
@@ -93,42 +141,16 @@ export default function visualize($p) {
             } else if(Array.isArray(vmap.y)) {
                 $p.uniform.uInterleaveX = 1;
             }
-
             renderers[renderer].updateInstancedAttribute(vmap.x);
             renderers[renderer].updateInstancedAttribute(vmap.y);
-
         } else if(vmap.mark && ['rect', 'bar'].indexOf(vmap.mark) !== -1) {
             renderer = 'polygon';
         }
 
-        if(renderer == 'interleave') {
-
-        }
-        var gl = renderers[renderer].load();
+        let gl = renderers[renderer].load();
         $p.framebuffer.enableRead('fFilterResults');
         $p.framebuffer.enableRead('fDerivedValues');
         $p.framebuffer.enableRead('fGroupResults');
- 
-
-        // if(typeof data == 'string')
-        //     $p.uniform.uDataInput = $p.framebuffer[data].texture;
-        var viewSetting = {
-            domain: visDomain,
-            // width: width,
-            // height: height,
-            fields: $p.fields,
-            vmap: vmap,
-            // onclick: interaction,
-            categories: $p.categoryLookup,
-            padding: padding,
-            left: offset[0],
-            top: viewport[1] - height - offset[1],
-            colors: colorManager.getColors(),
-            showLegend: $p.views[viewIndex].legend
-        };
-
-        viewSetting = Object.assign(viewSetting, dimSetting);
-        viewSetting = Object.assign(viewSetting, $p.views[viewIndex]);
 
         if($p.revealDensity) {
             $p.bindFramebuffer('offScreenFBO');
@@ -154,34 +176,17 @@ export default function visualize($p) {
         gl.enable(gl.BLEND);
         gl.blendEquation(gl.FUNC_ADD);
 
-        let pv = $p.views[viewIndex];
         let primitive = gl.POINTS;
 
-        if(!$p._update) {
-            pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
-            $p.uniform.uVisDomains = pv.domains;
-            if(vmap.append !== true && pv.hasOwnProperty('chart')) {
-                pv.chart.svg.remove();
-                pv.chart.removeAxis();
-            }
-            pv.chart = vis.addChart(viewSetting);
-        } else {
-            $p.uniform.uVisDomains = pv.domains;
-            if(pv.updateDomain === true) {
-                pv.chart.updateAxisX(pv.domains[$p.fields.indexOf(vmap.x)]);
-                pv.chart.updateAxisY(pv.domains[$p.fields.indexOf(vmap.y)]);
-            }
-        }
-        
         if(mark == 'line') {
             primitive = gl.LINE_STRIP;
             gl.lineWidth(vmap.size || 1.0);
         }
 
-        extend($p, vmap);
+        extend($p, vmap, viewIndex);
 
         if(!$p.skipRender) {
-            renderers[renderer].render(primitive)
+            renderers[renderer].render(primitive);
         } else {
             pv.chart.removeAxis();
             if($p.fields.indexOf(vmap.color)!==-1) pv.chart.removeLegend();
@@ -196,7 +201,7 @@ export default function visualize($p) {
         $p.bindFramebuffer(null);
 
         if(!$p._update) {
-            var actions = Object.keys(vmap)
+            let actions = Object.keys(vmap)
                 .filter(function(act){ return userActions.indexOf(act) !== -1});
 
             actions.forEach(function(action) {
