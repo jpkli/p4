@@ -78,20 +78,8 @@ export default function visualize($p) {
         let pv = $p.views[viewIndex];
         let colorInfo = pv.color || vmap.color;
     
-        if(typeof(colorInfo) === 'object') {
-            let colorMode;
-            let colorMap;
-        
-            if(Array.isArray(colorInfo)) {
-                colorMap = colorInfo;
-            } else {
-                if(colorInfo.hasOwnProperty('interpolate')) {
-                    colorMode = (colorInfo.interpolate) ? 1 : 0;
-                }
-                colorMap = colorInfo.range || colorInfo.values; 
-            }
-            colorManager.updateColors(colorMap, colorMode);
-        }
+        let colorMode = 1;
+        let colorMap;
 
         let viewSetting = {
             domain: visDomain,
@@ -121,6 +109,19 @@ export default function visualize($p) {
                 pv.chart.removeAxis();
             }
             pv.chart = vis.addChart(viewSetting);
+
+            if(typeof(colorInfo) === 'object') {
+                if(Array.isArray(colorInfo)) {
+                    colorMap = colorInfo;
+                } else {
+                    if(colorInfo.hasOwnProperty('interpolate')) {
+                        colorMode = (colorInfo.interpolate) ? 1 : 0;
+                    }
+                    colorMap = colorInfo.range || colorInfo.values; 
+                }
+                
+            }
+            colorManager.updateColors(colorMap, colorMode);
 
         } else {
             $p.uniform.uVisDomains = pv.domains;

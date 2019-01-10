@@ -147,7 +147,9 @@ export default function chart(frontSvg, backSvg, arg) {
     };
     for(let dim of ['x', 'y']) {
         if(scale[dim] == 'ordinal' || scale[dim] == 'categorical') {
-            axisOption[dim].ticks = histDomain[dim].length;
+            if(width / histDomain[dim].length < 10) {
+                axisOption[dim].ticks = histDomain[dim].length;
+            }
             // while(width / axisOption[dim].ticks < 20) {
             //     axisOption[dim].ticks *= 0.5;
             // }
@@ -236,12 +238,18 @@ export default function chart(frontSvg, backSvg, arg) {
         return chartLayer;
     }
     chartLayer.removeAxis = function() {
-        x.remove();
-        y.remove();
+
         if(yAxes.length) {
             yAxes.forEach(function(yp) {
                 yp.remove();
             })
+        } else if(xAxes.length) {
+            xAxes.forEach(function(xp) {
+                xp.remove();
+            })
+        } else {
+            x.remove();
+            y.remove();
         }
     }
     chartLayer.removeLegend = function() {

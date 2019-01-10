@@ -56,12 +56,13 @@ export default function encode($p, vmap, colorManager) {
             viewSetting.domainX = new Array(len).fill(0).map(
                 (d,i) => $p.categoryLookup[vmap.x][i]
             );
+            isXYCategorical[0] = 1;
          } else if (isRect) {
             viewSetting.scale.x = 'ordinal';
             viewSetting.domainX = new Array(len).fill(0).map((d,i) => ext[0] + i);
          }
          markSpace[0] = 0.02;
-         isXYCategorical[0] = 1;
+
     }
     if(vmapIndex[1] > -1) {
         let len = $p.fieldWidths[vmapIndex[1]];
@@ -72,12 +73,12 @@ export default function encode($p, vmap, colorManager) {
             viewSetting.domainY = new Array(len).fill(0).map(
                 (d,i)=>$p.categoryLookup[vmap.y][i]
             ).reverse();
+            isXYCategorical[1] = 1;
         } else if (isRect) {
             viewSetting.scale.y = 'ordinal';
-            viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i).reverse();
+            viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i);
         }
         markSpace[1] = 0.1;
-        isXYCategorical[1] = 1;
     }
 
     if(vmapIndex[0] > -1 && vmapIndex[1] > -1) {
@@ -93,7 +94,7 @@ export default function encode($p, vmap, colorManager) {
             let d = (dim == 'x') ? 'domainX' : 'domainY';
             viewSetting.histogram[dim] = true;
             viewSetting[d] = new Array(histBin).fill(histMin).map((h, i) => h + i*histIntv);
-            markSpace[dims.indexOf(dim)] = 0.01;
+            // markSpace[dims.indexOf(dim)] = 0.01;
         }
     }
     $p.uniform.uMarkSpace.data = markSpace;
