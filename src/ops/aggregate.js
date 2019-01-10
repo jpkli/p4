@@ -9,8 +9,8 @@ export default function aggregate($p) {
 
     $p.uniform('uFillValue', 'float', 0.0);
     $p.uniform('uBinIntervals', 'vec2', [0.0, 0.0]);
-    $p.uniform('uBinCount', 'int', 0);
-    $p.uniform('uAggrOpt', 'int', 2);
+    $p.uniform('uBinCount', 'ivec2', [0, 0]);
+    $p.uniform('uAggrOpt', 'float', 2.0);
 
     function vertexShader() {
         gl_PointSize = 1.0;
@@ -20,10 +20,15 @@ export default function aggregate($p) {
 
         i = (this.aDataIdx + 0.5) / this.uDataDim.x;
         j = (this.aDataIdy + 0.5) / this.uDataDim.y;
-        this.vResult = this.getData(this.uFieldId, i, j);
 
         if (this.aDataIdy * this.uDataDim.x + this.aDataIdx >= this.uDataSize) {
             this.vResult = 0.0;
+        } else {
+            if(this.uAggrOpt != 2.0) {
+                this.vResult = this.getData(this.uFieldId, i, j);
+            } else {
+                this.vResult = 1.0;
+            }
         }
 
         if (this.uFilterFlag == 1) {
@@ -51,9 +56,9 @@ export default function aggregate($p) {
 
                     d = this.getFieldDomain(gid);
 
-                    if(this.uBinCount > 0) {
+                    if(this.uBinCount[ii] > 0) {
                         value = max(ceil((value - d[0]) / this.uBinIntervals[ii]), 1.0);
-                        groupKeyValue = value  /  float(this.uBinCount);
+                        groupKeyValue = value / float(this.uBinCount[ii]);
                     } else {
                         groupKeyValue = (value - d.x) / (d.y - d.x) * w / (w + 1.0);
                         groupKeyValue += 0.5 / w;
@@ -71,7 +76,7 @@ export default function aggregate($p) {
     function fragmentShader() {
         if (this.vResult == 0.0) discard;
 
-        if (this.uAggrOpt == 2)
+        if (this.uAggrOpt == 2.0)
             gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
         else
             gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
@@ -90,7 +95,7 @@ export default function aggregate($p) {
         var x, y, res;
         $vec4(value);
 
-        if (this.uAggrOpt > 3) {
+        if (this.uAggrOpt > 3.0) {
             x = (gl_FragCoord.x) / this.uResultDim.x;
             y = (gl_FragCoord.y) / (uResultDim.y * float(this.uFieldCount));
             value = texture2D(this.uDataInput, vec2(x, y));
@@ -299,14 +304,13 @@ export default function aggregate($p) {
         let newFieldDomains = oldFieldIds.map(f => $p.fieldDomains[f]);
         let newFieldWidths = oldFieldIds.map(f => $p.fieldWidths[f]);
         
-        if($p.uniform.uBinCount.data > 0) {
-            oldFieldIds.slice(0, groupFields.length).forEach((fid, fii) => {
+        oldFieldIds.slice(0, groupFields.length).forEach((fid, fii) => {
+            if($p.uniform.uBinCount.data[fii] > 0) {
                 // Array.from(Array($p.uniform.uBinCount.data).keys())
-                newFieldDomains[fii] = [0, $p.uniform.uBinCount.data-1];
-
-            })
-            $p.uniform.uBinCount.data = 0;
-        }
+                newFieldDomains[fii] = [0, $p.uniform.uBinCount.data[fii]-1];
+            }
+        })
+        $p.uniform.uBinCount.data = [0,0];
 
         $p.fieldDomains = newFieldDomains;
         $p.fieldWidths = newFieldWidths;
