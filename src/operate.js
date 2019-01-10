@@ -4,7 +4,7 @@ import compile from './compile';
 export default function($p) {
     let operations = {};
     let kernels = compile($p);
-    let bin = function (spec) {
+    let bin = function (spec, binIndex) {
         let binAttr;
         let binCount;
     
@@ -20,22 +20,26 @@ export default function($p) {
         let binAttrId = $p.fields.indexOf(binAttr);
         let binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
         let binInterval = (binDomain[1] - binDomain[0]) / binCount;
-    
-        $p.uniform.uBinCount.data = binCount;
-        $p.uniform.uBinIntervals.data = [binInterval, 0.0];
+        // debugger
+        $p.uniform.uBinCount.data[binIndex] = binCount;
+        $p.uniform.uBinIntervals.data[binIndex] = binInterval;
         $p.fieldWidths[binAttrId] = binCount;    
         $p.intervals[binAttr] = {};
         $p.intervals[binAttr].dtype = 'histogram';
         $p.intervals[binAttr].interval = binInterval;
         $p.intervals[binAttr].min = binDomain[0];
         $p.intervals[binAttr].max = binDomain[1];
-        $p.histograms.push(binAttr)
+        $p.histograms.push(binAttr);
         return binAttr;
     }
     
     operations.aggregate = function (spec) {
         if(spec.$bin) {
-            spec.$group = bin(spec.$bin);
+            let binSpecs = Array.isArray(spec.$bin) ? spec.$bin : [spec.$bin];
+            spec.$group = binSpecs.map((spec, ii) => {
+                return bin(spec, ii);
+            })
+            
         }
         if(Object.keys($p.crossfilters).length) {
             $p.uniform.uFilterFlag = 1;

@@ -49,8 +49,9 @@ export default function p4(options) {
         $p.extent = kernels.extent($p);
         // $p.operations = compile($p);
         let operations = operate($p);
+        api.getOperations = () => Object.keys(operations);
         for(let optName of Object.keys(operations)) {
-            api.addOperation(optName, operations[optName]);
+            api.addOperation(optName, operations[optName], true);
         }
         
         for(let ext of $p.extensions) {
@@ -65,6 +66,8 @@ export default function p4(options) {
         $p.views.forEach(function(v){
             if(v.hasOwnProperty('chart')) {
                 v.chart.svg.remove();
+                v.chart.removeAxis();
+                v.chart.removeLegend();
                 delete v.chart;
             }
             if(!v.hasOwnProperty('padding')) {
@@ -150,6 +153,7 @@ export default function p4(options) {
         $p.responses = {};
         $p.crossfilters = [];
         $p.uniform.uFilterFlag.data = 0;
+        api.clearQueue();
         // $p.uniform.uFilterRanges = $p.fieldDomains.concat($p.deriveDomains);
         specs.forEach(function(spec){
             let opt = Object.keys(spec)[0];
@@ -159,6 +163,7 @@ export default function p4(options) {
                 api[opt](arg);
             }
         })
+ 
         return api;
     }
   
@@ -219,25 +224,24 @@ export default function p4(options) {
             $p.texture.tData.update(
                 buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
             );
-
             $p.fieldDomains[ai] = [
                 Math.min(data.stats[attr].min, $p.fieldDomains[ai][0]),
                 Math.max(data.stats[attr].max, $p.fieldDomains[ai][1])
             ]
-
             $p.fieldWidths[ai] = $p.fieldDomains[ai][1] - $p.fieldDomains[ai][0];
-
             if(data.strLists.hasOwnProperty(attr)){
-                $p.fieldDomains[ai] = [0, data.strLists[attr].length];
+                $p.fieldDomains[ai] = [0, data.strLists[attr].length - 1];
                 $p.categoryLookup[attr] = data.strLists[attr];
                 $p.fieldWidths[ai] = data.strLists[attr].length;
             }
-
         });
 
+        api.updateRegister('__init__', {
+            fieldDomains: $p.fieldDomains,
+            fieldWidths: $p.fieldWidths}
+        )
         $p.uniform.uFieldDomains.data = $p.fieldDomains;
         $p.uniform.uFieldWidths.data = $p.fieldWidths;
-
         return api;
     }
 

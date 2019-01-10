@@ -20,8 +20,8 @@ export default function pipeline($p) {
         }
     }
 
-    pipeline.addOperation = function(name, operation) {
-        if(!pipeline.hasOwnProperty(name)) {
+    pipeline.addOperation = function(name, operation, overwrite = false) {
+        if(!pipeline.hasOwnProperty(name) || overwrite) {
             pipeline[name] = function(arg) {
                 if(!async) {
                     pipeline.addToQueue(name, arg);
@@ -41,14 +41,12 @@ export default function pipeline($p) {
     }
 
     pipeline.run = function(jobs = queue) {
-
         for (let q of jobs) {
             let opt = Object.keys(q)[0];
             if(typeof pipeline[opt] === 'function') {
                 pipeline[opt](q[opt]);
             }
         }
-
         return pipeline;
     }
 

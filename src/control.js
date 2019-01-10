@@ -34,6 +34,15 @@ export default function ($p) {
         }
         return control;
     }
+
+    control.updateRegister = function(tag, props) {
+        if(registers.hasOwnProperty(tag)) {
+            Object.keys(props).forEach(k => {
+                registers[tag][k] = props[k];
+            })
+        }
+        return control;
+    }
     
     control.resume = function(tag) {
         if (!registers.hasOwnProperty(tag))

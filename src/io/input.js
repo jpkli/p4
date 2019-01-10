@@ -31,7 +31,7 @@ export default function input({
         throw Error('Unknown method ', method)
     }
 
-    let cache
+    let cache;
 
     function createIndexes() {
         uniqueKeys.forEach(function(uk){
@@ -53,7 +53,7 @@ export default function input({
             cache.addRows(data);
             createIndexes();
             return cache.data();
-        }, 
+        },
         cstore: function() {
             if(Number.isInteger(source.size) && Array.isArray(source.types)) {
                 return source;
