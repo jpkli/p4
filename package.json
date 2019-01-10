@@ -1,7 +1,7 @@
 {
   "name": "p.4",
-  "version": "0.5.4",
-  "description": "Portable parallel processing pipelines and platform",
+  "version": "0.5.5",
+  "description": "Portable parallel processing pipelines",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -10,8 +10,9 @@
   },
   "scripts": {
     "build": "node build/build.js",
-    "test": "node examples/dev-server",
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.config.js",
+    "test": "webpack-dev-server --inline --progress --config build/webpack.test.config.js",
+    "remote-test": "webpack-dev-server --inline --progress --host 0.0.0.0 --config build/webpack.test.config.js",
+    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.config.js",
     "start": "npm run dev"
   },
   "repository": {

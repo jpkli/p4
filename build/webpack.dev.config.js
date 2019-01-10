@@ -1,5 +1,6 @@
 const path = require('path');
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const package = require(path.resolve(__dirname, '../package.json'));
 
 module.exports = {
     entry: {
@@ -15,7 +16,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, "../dist"),
-        filename: "[name].js"
+        filename: "[name].v" + package.version + ".js"
     },
     module: {
         exprContextCritical: false,
