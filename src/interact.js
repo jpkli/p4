@@ -21,13 +21,16 @@ export default function interact($p, options) {
         if(!Array.isArray(actions)) {
             actions = [actions];
         }
+
+        if(vis === undefined || !vis.hasOwnProperty('chart')) return;
+
         var vmap = vis.vmap,
             p = vis.padding || $p.padding,
             w = vis.width - p.left - p.right,
             h = vis.height - p.top - p.bottom;
-
+        
         var interactor = vis.chart.svg.append("g")
-                .attr("class", "selector")
+            .attr("class", "selector")
 
         var rect = interactor.append("rect")
           .attr("x", 0)
@@ -39,8 +42,6 @@ export default function interact($p, options) {
 
         var svg = interactor.svg,
             box = rect.svg.getBoundingClientRect();
-
-
 
         function getSelection(e) {
             var dx = e.clientX - box.left;
@@ -65,8 +66,8 @@ export default function interact($p, options) {
                 };
 
                 if(!Array.isArray(vmap.x) && !Array.isArray(vmap.y)) {
-
-                    brushOptions.brush = function(d) {
+                    let updateEvent = (condition.lazy) ? 'brushend' : 'brush';
+                    brushOptions[updateEvent] = function(d) {
                         var selection = {};
                         if(vmap.x && d.x) selection[vmap.x] = d.x;
                         if(vmap.y && d.y) selection[vmap.y] = d.y.reverse();
