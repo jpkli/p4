@@ -4,10 +4,12 @@ import output    from './io/output';
 import initialize    from './initialize';
 import interact  from './interact';
 import control from './control';
+import view from './view';
 import pipeline from './pipeline';
 import operate from './operate';
 import kernels from './kernels';
 import extensions from './extensions';
+import Grid from './grid';
 
 export default function p4(options) {
     let $p;
@@ -34,6 +36,7 @@ export default function p4(options) {
     api.ctx = $p;
     api.addModule(control);
     api.addModule(output);
+    // api.addModule(view);
 
     api.addOperation('head', function() {
         api.resume('__init__');
@@ -41,6 +44,16 @@ export default function p4(options) {
         $p.getResult = $p.getRawData;
         return api;
     });
+
+    $p.grid = {views: []};
+    api.view = function(views) {
+        if($p.grid.views.length !== 0) {
+            $p.grid.reset();
+        } 
+        $p.grid = new Grid(views);
+        $p.views = $p.grid.views;
+        return api;
+    }
     
     $p.reset = api.head;
     $p.exportResult = api.result;
@@ -62,40 +75,6 @@ export default function p4(options) {
         api.register('__init__');
     }
     
-    api.view = function(views) {
-        $p.views.forEach(function(v){
-            if(v.hasOwnProperty('chart')) {
-                v.chart.svg.remove();
-                v.chart.removeAxis();
-                v.chart.removeLegend();
-                delete v.chart;
-            }
-            if(!v.hasOwnProperty('padding')) {
-                v.padding = {left: 30, right: 30, top: 30, bottom: 30};
-            }
-        })
-        $p.views = views;
-        return api;
-    }
-
-    api.addView = function(view) {
-        $p.views.push(view);
-    }
-
-    api.updateViews = function(views) {
-        $p.views = views;
-        return api;
-    }
-
-    api.resetViews = function(views) {
-        $p.views.forEach(function(v){
-            if(v.hasOwnProperty('chart')) {
-                v.chart.svg.remove();
-                delete v.chart;
-            }
-        })
-    }
-
     api.data = function(dataOptions) {
         allocate($p, dataOptions);
         configPipeline($p);
@@ -146,9 +125,21 @@ export default function p4(options) {
         return $p.getResult(d);
     }
 
+    api.clearWebGLBuffers = function() {
+        $p.bindFramebuffer("offScreenFBO");
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        $p.bindFramebuffer("visStats");
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        $p.bindFramebuffer(null);
+        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+    }
+
     api.runSpec = function(specs) {
         api.head();
-        api.clearViews();
+        api.clearWebGLBuffers();
         $p.interactions = [];
         $p.responses = {};
         $p.crossfilters = [];
@@ -170,43 +161,45 @@ export default function p4(options) {
     api.interact = function(spec) {
         if(typeof(spec) != 'undefined') $p.interactions.push(spec);
         $p.interactions.forEach(function(interaction){
+            
+            let callback = interaction.callback || function(selection) {
+                $p.responses = interaction.response;
+                if(!$p._update) {
+                    $p._update = true;
+                    $p.crossfilters = {};
+                    if(typeof selection == 'object') {
+                        Object.keys(selection).forEach(function(k) {
+                            if(selection[k].length < 2) {
+                                if($p.intervals.hasOwnProperty(k)) {
+                                    var value = (Array.isArray(selection[k]))
+                                        ? selection[k][0]
+                                        : selection[k];
+                                    selection[k] = [value-$p.intervals[k].interval, value];
+                                } else if(!$p.categoryLookup.hasOwnProperty(k)) {
+                                    selection[k] = [selection[k][0] + selection[k][0] + 1];
+                                }
+                            }
+                            $p.crossfilters[k] = selection[k];
+                        });
+                    }
+                    $p._responseType = 'unselected';
+                    $p.uniform.uFilterLevel.data = 0.2;
+                    $p.uniform.uVisLevel.data = 0.1;
+                    api.head().run();
+                    $p._responseType = 'selected';
+                    $p.uniform.uVisLevel.data = 0.2;
+                    api.head().run();
+                    $p._responseType = 'unselected';
+                    $p._update = false;
+                    $p.uniform.uFilterLevel.data = 0.1;
+                    $p.uniform.uVisLevel.data = 0.1;
+                }
+            }
             interact($p, {
                 actions: interaction.event,
                 view: interaction.from,
                 condition: interaction.condition,
-                callback: function(selection) {
-                    $p.responses = interaction.response;
-                    if(!$p._update) {
-                        $p._update = true;
-                        $p.crossfilters = {};
-                        if(typeof selection == 'object') {
-                            Object.keys(selection).forEach(function(k) {
-                                if(selection[k].length < 2) {
-                                    if($p.intervals.hasOwnProperty(k)) {
-                                        var value = (Array.isArray(selection[k]))
-                                            ? selection[k][0]
-                                            : selection[k];
-                                        selection[k] = [value-$p.intervals[k].interval, value];
-                                    } else if(!$p.categoryLookup.hasOwnProperty(k)) {
-                                        selection[k] = [selection[k][0] + selection[k][0] + 1];
-                                    }
-                                }
-                                $p.crossfilters[k] = selection[k];
-                            });
-                        }
-                        $p._responseType = 'unselected';
-                        $p.uniform.uFilterLevel.data = 0.2;
-                        $p.uniform.uVisLevel.data = 0.1;
-                        api.head().run();
-                        $p._responseType = 'selected';
-                        $p.uniform.uVisLevel.data = 0.2;
-                        api.head().run();
-                        $p._responseType = 'unselected';
-                        $p._update = false;
-                        $p.uniform.uFilterLevel.data = 0.1;
-                        $p.uniform.uVisLevel.data = 0.1;
-                    }
-                }
+                callback: callback  
             })
         })
     }

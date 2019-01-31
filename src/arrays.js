@@ -188,7 +188,7 @@ export function variance(rowArray) {
 }
 
 export function std(rowArray) {
-    return Math.sqrt(array.var(rowArray));
+    return Math.sqrt(variance(rowArray));
 }
 
 export function vectorAdd(a, b) {

@@ -49,9 +49,13 @@ export default function visualize($p) {
     let enhance = reveal($p);
 
     $p.framebuffer('offScreenFBO', 'float', $p.viewport);
-    $p.framebuffer('visStats', 'float', [1, 1]);
+    // $p.framebuffer('visStats', 'float', [1, 1]);
+    // $p.framebuffer("visStats", "float", [$p.views.length, 1]);
     // $p.framebuffer.enableRead('offScreenFBO');
-
+    $p.bindFramebuffer('offScreenFBO');
+    $p.ctx.clearColor( 1.0, 1.0, 1.0, 0.0 );
+    $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+    $p.bindFramebuffer(null);
     $p.subroutine('visMap', 'float', interpolate.visMap);
     
     let renderers = {
@@ -71,8 +75,8 @@ export default function visualize($p) {
         let visDimension = vmap.viewport || [$p.views[viewIndex].width, $p.views[viewIndex].height] || viewport;
         let width = visDimension[0];
         let height =  visDimension[1];
-        let padding = $p.views[viewIndex].padding || chartPadding;
-        let offset = $p.views[viewIndex].offset || [0, 0];
+        let padding = vmap.padding || $p.views[viewIndex].padding || chartPadding;
+        let offset = vmap.offset || $p.views[viewIndex].offset || [0, 0];
         let dimSetting = encode($p, vmap, colorManager);
 
         let pv = $p.views[viewIndex];
@@ -89,7 +93,7 @@ export default function visualize($p) {
             categories: $p.categoryLookup,
             padding: padding,
             left: offset[0],
-            top: viewport[1] - height - offset[1],
+            top:  offset[1],
             colors: colorManager.getColors(),
         };
 
@@ -164,14 +168,12 @@ export default function visualize($p) {
             gl.blendFunc( gl.ONE, gl.ONE_MINUS_SRC_ALPHA );
             // gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
         }
-
         gl.viewport(
             offset[0] + padding.left,
-            offset[1] + padding.bottom,
-            width-padding.left-padding.right,
-            height-padding.top-padding.bottom
+            viewport[1] - height + padding.bottom - offset[1],
+            width - padding.left - padding.right,
+            height - padding.top - padding.bottom
         );
-
         gl.disable(gl.CULL_FACE);
         gl.disable(gl.DEPTH_TEST);
         gl.enable(gl.BLEND);
@@ -213,7 +215,8 @@ export default function visualize($p) {
                     event: action,
                     condition: vmap[action].condition,
                     from: viewId,
-                    response: response
+                    response: response,
+                    callback: vmap[action].callback
                 })
             })
         }

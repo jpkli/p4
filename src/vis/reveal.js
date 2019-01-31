@@ -1,8 +1,5 @@
 
 export default function reveal($p) {
-    var viewport = $p.viewport,
-        padding = $p.padding;
-
     $p.uniform('uRevealMode', 'int', 1)
         .framebuffer("offScreenFBO", "float", $p.viewport)
         .framebuffer("visStats", "float", [1, 1]);
@@ -10,9 +7,8 @@ export default function reveal($p) {
     var aViewX = new Float32Array($p.viewport[0]).map((d, i) => i);
     var aViewY = new Float32Array($p.viewport[1]).map((d, i) => i);
 
-    $p.attribute("aViewX", "float", aViewX)
-        .attribute("aViewY", "float", aViewY);
-
+    $p.attribute("aViewX", "float", aViewX);
+    $p.attribute("aViewY", "float", aViewY);
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aViewX.location, 0);
     $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aViewY.location, 1);
 
@@ -55,6 +51,8 @@ export default function reveal($p) {
 
     $p.program("vis-render", vs2, fs2);
 
+    let isFBOAllocatedFBO = false;
+
     return function(options) {
         var gl,
             viewIndex = options.viewIndex,
@@ -63,27 +61,38 @@ export default function reveal($p) {
             padding = options.padding || {left: 0, right: 0, left: 0, right:0};
 
         if(!$p._update) {
-            $p.framebuffer("visStats", "float", [1, 1]);
+
+            if(!isFBOAllocatedFBO) {
+                isFBOAllocatedFBO = true;
+                $p.framebuffer("visStats", "float", [1, $p.views.length]);
+            }
             gl = $p.program("post-processing");
             $p.framebuffer.enableRead("offScreenFBO");
             $p.bindFramebuffer("visStats");
+
+            $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aViewX.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aViewY.location, 1);
-            gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+            // gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
             gl.enable( gl.BLEND );
             gl.blendFunc( gl.ONE, gl.ONE );
             gl.blendEquation(gl.MAX_EXT);
-            gl.viewport(0, 0, 1, 1);
-            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0,  viewDim[0], viewDim[1]);
+            gl.viewport(0, viewIndex, 1, 1);
+            gl.ext.drawArraysInstancedANGLE(
+                gl.POINTS,
+                0,
+                viewDim[0],
+                viewDim[1]);
 
             var max = new Float32Array(4);
-            gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
-            if(max[3] == 0) {
-                max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
-            }
+            gl.readPixels(0, viewIndex, 1, 1, gl.RGBA, gl.FLOAT, max);
+            // if(max[3] == 0) {
+            //     max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
+            // }
+            console.log(offset, viewDim);
             $p.views[viewIndex].maxRGBA = max;
         }
 
@@ -96,7 +105,8 @@ export default function reveal($p) {
 
         gl.viewport(
             offset[0] + padding.left,
-            offset[1] + padding.bottom,
+            // offset[1] + padding.bottom,
+            $p.viewport[1] - viewDim[1] + padding.bottom - offset[1],
             viewDim[0] - padding.left - padding.right,
             viewDim[1] - padding.top - padding.bottom
         );

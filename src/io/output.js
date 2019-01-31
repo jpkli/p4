@@ -44,25 +44,27 @@ export default function($p) {
             offset += arraySize;
         };
 
-        if (format == 'row') {
+        if (format == 'row' || format == 'array') {
             var objectArray = new Array();
             
             for (var i = 0; i < arraySize; i++) {
                 if(match !== null && match[i] == 0) continue
-
-                var obj = {};
-                Object.keys(res).forEach(function(f) {
+                let fields = Object.keys(res);
+                var obj = (format == 'array') ? new Array(fields.length) : {};
+                fields.forEach(function(f, fi) {
                     var kid = $p.dkeys.indexOf(f),
                         dtype = $p.dtypes[kid];
 
+                    var key = (format == 'array') ? fi : f;
+
                     if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
-                        obj[f] = $p.categoryLookup[f][res[f][i]];
+                        obj[key] = $p.categoryLookup[f][res[f][i]];
                     } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
-                        obj[f] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
+                        obj[key] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
                     } else if ($p.uniqueValues.hasOwnProperty(f)) {
-                        obj[f] = $p.uniqueValues[f][res[f][i]];
+                        obj[key] = $p.uniqueValues[f][res[f][i]];
                     } else {
-                        obj[f] = Number.isNaN(res[f][i]) ? 0.0 : res[f][i];
+                        obj[key] = Number.isNaN(res[f][i]) ? 0.0 : res[f][i];
                     }
                 });
                 objectArray.push(obj);
@@ -86,18 +88,6 @@ export default function($p) {
         $p.ctx.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, result);
         return result.filter(function(d, i){ return i%4===3;} );
     }
-
-    output.clearViews = function() {
-        $p.bindFramebuffer("offScreenFBO");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer("visStats");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer(null);
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-    }
-
+    
     return output;
 }

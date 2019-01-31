@@ -38,6 +38,7 @@ export default function encode($p, vmap, colorManager) {
     ) {
         $p.revealDensity = true;
         $p.uniform.uRevealMode.data = 0;
+        // $p.uniform.uDefaultAlpha.data = 1.0;
     }
 
     if(vmapIndex[6] === -1 && typeof(vmap.size) == 'number') {
@@ -102,13 +103,13 @@ export default function encode($p, vmap, colorManager) {
 
     if(!$p._update) {
         if(!vmap.width && vmap.x) {
-            $p.uniform.uDefaultWidth.data = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)] );
+            $p.uniform.uDefaultWidth.data = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)]);
         } else if(vmapIndex[4] === -1 && typeof(vmap.width) == 'number') {
             $p.uniform.uDefaultWidth.data = vmap.width / width;
         }
 
         if(!vmap.height && vmap.y) {
-            $p.uniform.uDefaultHeight.data = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)] );
+            $p.uniform.uDefaultHeight.data = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.y)]);
         } else if(vmapIndex[5] === -1 && typeof(vmap.width) == 'number') {
             $p.uniform.uDefaultHeight.data = vmap.height / height;
         }

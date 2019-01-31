@@ -1,5 +1,6 @@
 import programs from './kernels';
 import compile from './compile';
+import * as arrayOpt from './arrays';
 
 export default function($p) {
     let operations = {};
@@ -39,7 +40,6 @@ export default function($p) {
             spec.$group = binSpecs.map((spec, ii) => {
                 return bin(spec, ii);
             })
-            
         }
         if(Object.keys($p.crossfilters).length) {
             $p.uniform.uFilterFlag = 1;
@@ -78,13 +78,65 @@ export default function($p) {
     operations.visualize = function(vmap) {
         // if(Object.keys($p.crossfilters).length > 0)
         //     operations.match({});
-        let vmaps = Array.isArray(vmap) ? vmap : [vmap];
+        let vmaps;
+        if(vmap.facets) {
+            let facet = vmap.facets;
+            let sortOpt = Object.keys(facet.sortBy)[0];
+            let sortAttr = facet.sortBy[sortOpt];
+            let result = $p.exportResult('row');
+            let spec = facet.rows || facet.columns;
+            let sorted = spec[sortAttr].map((fields) => {
+                let values = result.map(r => r[fields])
+                let min = 0;
+                let max = Math.max(...values);
+                let normalizedValues = values.map( val => (val - min) / (max - min) )
+                if (sortOpt === 'var') sortOpt = 'variance';
+                let opt = typeof(arrayOpt[sortOpt]) === 'function' ? sortOpt : 'avg'
+                return {
+                    name: fields,
+                    value: arrayOpt[opt](normalizedValues)
+                }
+            })
+            .sort((a, b) => b.value - a.value )
+            .map(r => r.name);
+            spec[sortAttr] = sorted;
 
-        vmaps.forEach( (vmap) => {
+            let encodings = Object.keys(vmap).filter(k => k !== 'facets')
+
+            let variables = Object.keys(spec)
+            let minLoopCount = Math.min(...variables.map(v => spec[v].length))
+
+            vmaps = new Array(minLoopCount)
+            for(let i = 0; i < minLoopCount; i++) {
+                let rule = {}
+                encodings.forEach(code => {
+                    let vi = variables.indexOf(vmap[code])
+                    if(vi < 0) {
+                    rule[code] = vmap[code]     
+                    } else {
+                    rule[code] = spec[variables[vi]][i]
+                    }
+                })
+                vmaps[i] = rule
+            }
+        } else {
+            vmaps = Array.isArray(vmap) ? vmap : [vmap];
+        }
+
+        if($p.grid.views.length < vmaps.length) {
+            $p.grid.reset();
+            $p.views = $p.grid.generateViews({
+                count: vmaps.length, 
+                width: $p.viewport[0],
+                height: $p.viewport[1],
+                padding: $p.padding
+            })
+        }
+        vmaps.forEach( (vmap, vi) => {
             if (!kernels.hasOwnProperty('visualize')) {
                 kernels.visualize = programs.visualize($p);
             }
-            let viewIndex = 0;
+            let viewIndex = vi;
             if(typeof vmap.id == 'string') {
                 viewIndex = $p.views.map(d=>d.id).indexOf(vmap.id);
                 if(viewIndex == -1) {
@@ -98,6 +150,7 @@ export default function($p) {
                     }
                 }
             }
+
             if(vmap.mark == 'bar') vmap.zero = true;
             $p.views[viewIndex].vmap = vmap;
             let encoding = vmap,

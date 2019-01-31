@@ -27,7 +27,7 @@ export default function derive($p, spec) {
         .uniform("uDeriveId", "int", 0)
         .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
 
-
+    console.log(marco)
     function vertexShader() {
         gl_PointSize = 1.0;
 
