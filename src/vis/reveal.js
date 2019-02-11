@@ -89,9 +89,9 @@ export default function reveal($p) {
 
             var max = new Float32Array(4);
             gl.readPixels(0, viewIndex, 1, 1, gl.RGBA, gl.FLOAT, max);
-            // if(max[3] == 0) {
-            //     max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
-            // }
+            if(max[3] == 0) {
+                max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
+            }
             console.log(offset, viewDim);
             $p.views[viewIndex].maxRGBA = max;
         }

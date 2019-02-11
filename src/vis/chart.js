@@ -14,7 +14,7 @@ export default function chart(frontSvg, backSvg, arg) {
         histogram =  options.histogram,
         features = options.fields || [],
         domain = options.domain,
-        categories = options.categories,
+        strLists = options.strLists,
         labels = plot.append('g'),
         onclick = options.onclick || null,
         onhover = options.onhover || null,
@@ -83,10 +83,10 @@ export default function chart(frontSvg, backSvg, arg) {
         vmap.x.forEach(function(d, i) {
             axisOption.x.position = i * axisDist + 1;
             axisOption.x.domain = domain[d];
-            if(categories.hasOwnProperty(d)){
+            if(strLists.hasOwnProperty(d)){
                 axisOption.x.scale = 'ordinal';
                 axisOption.x.tickAlign = 'outer';
-                axisOption.x.domain = categories[d].reverse();
+                axisOption.x.domain = strLists[d].reverse();
             }
             let labelOffset = 20;
             if(i === 0) {
@@ -117,10 +117,10 @@ export default function chart(frontSvg, backSvg, arg) {
         vmap.y.forEach(function(d, i) {
             axisOption.y.position = i * axisDist;
             axisOption.y.domain = domain[d];
-            if(categories.hasOwnProperty(d)){
+            if(strLists.hasOwnProperty(d)){
                 axisOption.y.scale = 'ordinal';
                 axisOption.y.tickAlign = 'outer';
-                axisOption.y.domain = categories[d].reverse();
+                axisOption.y.domain = strLists[d].reverse();
             }
             if(i == vmap.y.length-1) {
                 axisOption.y.tickPosition = [5, 0];

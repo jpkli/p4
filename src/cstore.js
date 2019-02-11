@@ -1,6 +1,8 @@
 import * as ctypes from './ctypes';
 import {unique} from './arrays';
 
+const __VERSION__ = 1.0;
+
 export default function ColumnStore(arg){
     var cstore     = (this instanceof ColumnStore) ? this : {},
         options    = arg || {},
@@ -20,8 +22,6 @@ export default function ColumnStore(arg){
         skip       = options.skip  || 0;
 
     if(typeof(struct) === 'object') initStruct(struct);
-
-
 
     function initCStore() {
         if(size && types.length === attributes.length && types.length > 0) {
@@ -210,6 +210,7 @@ export default function ColumnStore(arg){
         data.strLists = strLists;
         data.dtypes = types;
         data.export = cstore.export;
+        data._p4_cstore_version = __VERSION__;
         return data;
     }
 

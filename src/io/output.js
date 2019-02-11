@@ -57,8 +57,8 @@ export default function($p) {
 
                     var key = (format == 'array') ? fi : f;
 
-                    if (dtype == 'string' && $p.categoryLookup.hasOwnProperty(f)) {
-                        obj[key] = $p.categoryLookup[f][res[f][i]];
+                    if (dtype == 'string' && $p.strLists.hasOwnProperty(f)) {
+                        obj[key] = $p.strLists[f][res[f][i]];
                     } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'historgram') {
                         obj[key] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
                     } else if ($p.uniqueValues.hasOwnProperty(f)) {

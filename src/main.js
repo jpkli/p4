@@ -10,6 +10,7 @@ import operate from './operate';
 import kernels from './kernels';
 import extensions from './extensions';
 import Grid from './grid';
+import cstore from './cstore'
 
 export default function p4(options) {
     let $p;
@@ -175,9 +176,10 @@ export default function p4(options) {
                                         ? selection[k][0]
                                         : selection[k];
                                     selection[k] = [value-$p.intervals[k].interval, value];
-                                } else if(!$p.categoryLookup.hasOwnProperty(k)) {
-                                    selection[k] = [selection[k][0] + selection[k][0] + 1];
-                                }
+                                } 
+                                // else if(!$p.strLists.hasOwnProperty(k)) {
+                                //     selection[k] = [selection[k][0] + selection[k][0] + 1];
+                                // }
                             }
                             $p.crossfilters[k] = selection[k];
                         });
@@ -205,7 +207,24 @@ export default function p4(options) {
     }
     $p.respond = api.interact;
 
-    api.updateData = function(data) {
+    api.updateData = function(newData) {
+        let data;
+        if(newData._p4_cstore_version) {
+            data = newData
+        } else {
+            let cache = cstore({
+                schema: $p.dataSchema,
+                strValues: $p.strValues
+            })
+            cache.addRows(newData)
+            data = cache.data()
+
+            //update and combine all strValues
+            Object.keys(data.strValues).forEach((attr) => {
+                $p.strValues[attr] = Object.assign($p.strValues[attr], data.strValues[attr]);
+            })
+        }
+
         if(data.size > 0) {
             $p.dataSize = data.size;
         }
@@ -221,10 +240,10 @@ export default function p4(options) {
                 Math.min(data.stats[attr].min, $p.fieldDomains[ai][0]),
                 Math.max(data.stats[attr].max, $p.fieldDomains[ai][1])
             ]
-            $p.fieldWidths[ai] = $p.fieldDomains[ai][1] - $p.fieldDomains[ai][0];
+            $p.fieldWidths[ai] = $p.fieldDomains[ai][1] - $p.fieldDomains[ai][0] + 1;
             if(data.strLists.hasOwnProperty(attr)){
                 $p.fieldDomains[ai] = [0, data.strLists[attr].length - 1];
-                $p.categoryLookup[attr] = data.strLists[attr];
+                $p.strLists[attr] = data.strLists[attr];
                 $p.fieldWidths[ai] = data.strLists[attr].length;
             }
         });

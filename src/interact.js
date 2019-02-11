@@ -1,6 +1,5 @@
 
 import Brush from './vis/brush';
-import { loadavg } from 'os';
 export default function interact($p, options) {
     var viewTags = options.view || [$p.views[0].id];
 
@@ -51,6 +50,7 @@ export default function interact($p, options) {
                 selection[vmap.x] = [vis.chart.x.invert(dx)];
             }
             if(vmap.y) {
+                if(!$p.strValues.hasOwnProperty(vmap.y)) dy = h - dy;
                 selection[vmap.y] = [vis.chart.y.invert(dy)];
             }
             return selection;
@@ -70,15 +70,21 @@ export default function interact($p, options) {
                     brushOptions[updateEvent] = function(d) {
                         var selection = {};
                         if(vmap.x && d.x) selection[vmap.x] = d.x;
-                        if(vmap.y && d.y) selection[vmap.y] = d.y.reverse();
+                        if(vmap.y && d.y) selection[vmap.y] =  d.y.reverse();
                         callback(selection);
                     }
                     if(condition.x && typeof(vis.chart.x.invert) == 'function')
                         brushOptions.x = vis.chart.x.invert;
 
-                    if(condition.y && typeof(vis.chart.y.invert) == 'function')
-                        brushOptions.y = vis.chart.y.invert
-
+                    if(condition.y && typeof(vis.chart.y.invert) == 'function') {
+                        brushOptions.y = (y) => { 
+                            if(!$p.strValues.hasOwnProperty(vmap.y)) {
+                                return vis.chart.y.invert(h-y);
+                            }
+                            return vis.chart.y.invert(y);
+                        } 
+                    }
+                    
                     new Brush(brushOptions);
                 }
 

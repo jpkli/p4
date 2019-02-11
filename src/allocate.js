@@ -5,11 +5,13 @@ export default function($p, dataProps) {
     let data = dataProps || [];
     $p.indexes = data.indexes || [];
     $p.categoryIndex = data.strValues || {};
-    $p.categoryLookup = data.strLists || {};
+    $p.strValues = data.strValues || {};
+    $p.strLists = data.strLists || {};
     $p.dkeys =  data.keys || [];
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
     $p.uniqueValues = data.uniqueValues;
+    $p.dataSchema = data.struct;
 
     var dkeys = $p.dkeys,
         dtypes = $p.dtypes,

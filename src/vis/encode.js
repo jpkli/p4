@@ -23,7 +23,7 @@ export default function encode($p, vmap, colorManager) {
             }
         }
     } else {
-        if($p.categoryLookup.hasOwnProperty(vmap.color)) {
+        if($p.strLists.hasOwnProperty(vmap.color)) {
             $p.uniform.uColorMode.data = 0;
         } else {
             $p.uniform.uColorMode.data = 1;
@@ -52,10 +52,10 @@ export default function encode($p, vmap, colorManager) {
     if(vmapIndex[0] > -1) {
         let len = $p.fieldWidths[vmapIndex[0]];
         let ext = $p.fieldDomains[vmapIndex[0]];
-        if($p.categoryLookup.hasOwnProperty(vmap.x)){
+        if($p.strLists.hasOwnProperty(vmap.x)){
             viewSetting.scale.x = 'categorical';
             viewSetting.domainX = new Array(len).fill(0).map(
-                (d,i) => $p.categoryLookup[vmap.x][i]
+                (d,i) => $p.strLists[vmap.x][i]
             );
             isXYCategorical[0] = 1;
          } else if (isRect) {
@@ -69,10 +69,10 @@ export default function encode($p, vmap, colorManager) {
         let len = $p.fieldWidths[vmapIndex[1]];
         let ext = $p.fieldDomains[vmapIndex[1]];
 
-        if($p.categoryLookup.hasOwnProperty(vmap.y)){
+        if($p.strLists.hasOwnProperty(vmap.y)){
             viewSetting.scale.y = 'categorical';
             viewSetting.domainY = new Array(len).fill(0).map(
-                (d,i)=>$p.categoryLookup[vmap.y][i]
+                (d,i)=>$p.strLists[vmap.y][i]
             ).reverse();
             isXYCategorical[1] = 1;
         } else if (isRect) {

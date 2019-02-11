@@ -125,10 +125,10 @@ export default function match($p) {
             matchFields.forEach(function(k){
                 var fieldId = $p.fields.indexOf(k);
                 var inSelections = (spec.hasOwnProperty(k)) ? spec[k].$in :  $p.crossfilters[k].$in;
-                if($p.categoryIndex.hasOwnProperty(k)) {
+                if($p.strValues.hasOwnProperty(k)) {
                     inSelections = inSelections
                         .slice(0, SELECT_MAX)
-                        .map(function(v) { return $p.categoryIndex[k][v]; });
+                        .map(function(v) { return $p.strValues[k][v]; });
                 } else {
                     inSelections = inSelections.slice(0, SELECT_MAX);
                 }
@@ -207,13 +207,19 @@ export default function match($p) {
         var filterSpec = spec;
 
         Object.keys($p.crossfilters).forEach(function(k, i) {
-            if($p.categoryIndex.hasOwnProperty(k) && !$p.crossfilters[k].$in) {
-                $p.crossfilters[k] = {$in: $p.crossfilters[k]};
+            if($p.strValues.hasOwnProperty(k) && !$p.crossfilters[k].$in) {
+                let filterValues = $p.crossfilters[k];
+                if(filterValues.length > 1) {
+                    let startIndex = $p.strLists[k].indexOf($p.crossfilters[k][0]);
+                    let endIndex = $p.strLists[k].indexOf($p.crossfilters[k][1]);
+                    filterValues = $p.strLists[k].slice(startIndex, endIndex + 1);
+                }
+                $p.crossfilters[k] = {$in: filterValues};
             }
         });
 
         Object.keys(filterSpec).forEach(function(k, i) {
-            if($p.categoryIndex.hasOwnProperty(k) && !spec[k].$in) {
+            if($p.strValues.hasOwnProperty(k) && !spec[k].$in) {
                 spec[k] = {$in: spec[k]};
             }
         });

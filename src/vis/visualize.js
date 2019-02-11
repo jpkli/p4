@@ -90,7 +90,7 @@ export default function visualize($p) {
             fields: $p.fields,
             vmap: vmap,
             // onclick: interaction,
-            categories: $p.categoryLookup,
+            strLists: $p.strLists,
             padding: padding,
             left: offset[0],
             top:  offset[1],
@@ -103,8 +103,15 @@ export default function visualize($p) {
         if(!$p._update){
             $p.fields.forEach(function(f, i){
                 visDomain[f] = $p.fieldDomains[i].slice();
-                if(vmap.zero  && visDomain[f][0]>0) visDomain[f][0] = 0;
             });
+            if(vmap.zero) {
+                if($p.fields.indexOf(vmap.width) > -1) {
+                    visDomain[vmap.width][0] = 0;
+                }
+                if($p.fields.indexOf(vmap.height) > -1) {
+                    visDomain[vmap.height][0] = 0;
+                }
+            } 
 
             pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
             $p.uniform.uVisDomains.data = pv.domains;

@@ -20,6 +20,5 @@ export default function compile($p, fields, spec) {
         match     : match($p, fields),
         extent    : extent($p),
         visualize : visualize($p)
-        // perceive  : kernels.reveal(fxgl)
     }
 }
