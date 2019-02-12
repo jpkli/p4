@@ -322,7 +322,8 @@ export default function p4(options) {
             }
         }
         if (mark === 'vline') {
-            position.values.forEach(val => {
+            let values = position[view.vmap.x || view.vmap.width] || position.values;
+            values.forEach(val => {
                 let x = view.chart.x(val);
                 view.chart.svg.append('line')
                     .attr('x1', x)
@@ -333,7 +334,8 @@ export default function p4(options) {
                     .attr('stroke-width', size)
             })
         } else if (mark === 'hline') {
-            position.values.forEach(val => {
+            let values = position[view.vmap.y || view.vmap.height] || position.values;
+            values.forEach(val => {
                 let y = view.chart.y(val);
                 view.chart.svg.append('line')
                     .attr('x1', 0)
@@ -344,8 +346,6 @@ export default function p4(options) {
                     .attr('stroke-width', size)
             }) 
         }
-
     }
-
     return api;
 }
