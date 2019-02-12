@@ -8,8 +8,7 @@ P4 provides a flexible and easy-to-use programming interface for specifying data
 
 #### JavaScript Syntax
 ```javascript
-
-P4.data({...})
+p4.data({...})
   .derive({...})
   .match({...})
   .aggregate({...})
@@ -17,7 +16,7 @@ P4.data({...})
   .interact({...});
 
 ```
-<br />
+<img style="float: right;" height="320" src="/docs/images/barchart.png">
 #### JSON Specification
 ```json
 {
