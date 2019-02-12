@@ -66,7 +66,7 @@ export default function scale(arg) {
             return domain[0] + (r - range[0]) / (range[1] - range[0]) * (domain[1] - domain[0]);
         } else if(type == "ordinal" || type == "categorical") {
             var intv = intv = r / scale.rangeLength();
-            return domain[Math.floor(intv * (domain.length))];
+            return domain[Math.min(Math.floor(intv * (domain.length)), domain.length-1)];
         }
     }
 

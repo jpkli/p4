@@ -50,8 +50,9 @@ export default function interact($p, options) {
                 selection[vmap.x] = [vis.chart.x.invert(dx)];
             }
             if(vmap.y) {
-                if(!$p.strValues.hasOwnProperty(vmap.y)) dy = h - dy;
-                selection[vmap.y] = [vis.chart.y.invert(dy)];
+
+                selection[vmap.y] = [vis.chart.y.invert(h - dy)];
+  
             }
             return selection;
         }
@@ -70,7 +71,13 @@ export default function interact($p, options) {
                     brushOptions[updateEvent] = function(d) {
                         var selection = {};
                         if(vmap.x && d.x) selection[vmap.x] = d.x;
-                        if(vmap.y && d.y) selection[vmap.y] =  d.y.reverse();
+                        if(vmap.y && d.y) {
+                            if (d.y[0] > d.y[1]) {
+                                selection[vmap.y] = d.y.reverse();
+                            } else {
+                                selection[vmap.y] = d.y;
+                            }
+                        }
                         callback(selection);
                     }
                     if(condition.x && typeof(vis.chart.x.invert) == 'function')
@@ -78,7 +85,7 @@ export default function interact($p, options) {
 
                     if(condition.y && typeof(vis.chart.y.invert) == 'function') {
                         brushOptions.y = (y) => { 
-                            if(!$p.strValues.hasOwnProperty(vmap.y)) {
+                            if(vmap.mark === 'rect') {
                                 return vis.chart.y.invert(h-y);
                             }
                             return vis.chart.y.invert(y);

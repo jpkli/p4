@@ -73,7 +73,7 @@ export default function encode($p, vmap, colorManager) {
             viewSetting.scale.y = 'categorical';
             viewSetting.domainY = new Array(len).fill(0).map(
                 (d,i)=>$p.strLists[vmap.y][i]
-            ).reverse();
+            );
             isXYCategorical[1] = 1;
         } else if (isRect) {
             viewSetting.scale.y = 'ordinal';

@@ -11,6 +11,7 @@ import kernels from './kernels';
 import extensions from './extensions';
 import Grid from './grid';
 import cstore from './cstore'
+import Svg from './vis/svg';
 
 export default function p4(options) {
     let $p;
@@ -54,6 +55,10 @@ export default function p4(options) {
         $p.grid = new Grid(views);
         $p.views = $p.grid.views;
         return api;
+    }
+
+    api.getViews = function () {
+        return $p.views;
     }
     
     $p.reset = api.head;
@@ -299,5 +304,48 @@ export default function p4(options) {
             $p.extensions.push(extOptions);
         }
     }
+
+    api.annotate = function ({
+        id = 0,
+        mark = 'vline',
+        color = 'red',
+        size = 3,
+        position = {values: []}
+    }) {
+        let view = $p.views[0];
+        if (Number.isInteger(id) && id < $p.views.length) {
+            view = $p.views[id];
+        } else {
+            $p.views.filter(v => v.id == id);
+            if (view.length > 0) {
+                view = view[0];
+            }
+        }
+        if (mark === 'vline') {
+            position.values.forEach(val => {
+                let x = view.chart.x(val);
+                view.chart.svg.append('line')
+                    .attr('x1', x)
+                    .attr('x2', x)
+                    .attr('y1', 0)
+                    .attr('y2', view.height - view.padding.top - view.padding.bottom)
+                    .attr('stroke', color)
+                    .attr('stroke-width', size)
+            })
+        } else if (mark === 'hline') {
+            position.values.forEach(val => {
+                let y = view.chart.y(val);
+                view.chart.svg.append('line')
+                    .attr('x1', 0)
+                    .attr('x2', view.width - view.padding.left - view.padding.height)
+                    .attr('y1', y)
+                    .attr('y2', y)
+                    .attr('stroke', color)
+                    .attr('stroke-width', size)
+            }) 
+        }
+
+    }
+
     return api;
 }

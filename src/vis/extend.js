@@ -16,11 +16,11 @@ export default function ($p, vmap, viewIndex) {
       };
 
       let view = Object.assign({}, chart);
-      view.width = width - padding.left - padding.right,
-        view.height = height - padding.top - padding.bottom,
-        view.encodings = vmap,
-        view.svg = chart.chart.svg.svg,
-        view.canvas = $p.canvas
+      view.width = width - padding.left - padding.right;
+      view.height = height - padding.top - padding.bottom;
+      view.encodings = vmap;
+      view.svg = chart.chart.svg.svg;
+      view.canvas = $p.canvas;
 
       if (ext.exportData) {
         data.json = $p.exportResult('row');

@@ -113,14 +113,15 @@ export default function visualize($p) {
                 }
             } 
 
-            pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
-            $p.uniform.uVisDomains.data = pv.domains;
+            // pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
+            pv.domains = visDomain;
+            // $p.uniform.uVisDomains.data = pv.domains;
             if(vmap.append !== true && pv.hasOwnProperty('chart')) {
                 pv.chart.svg.remove();
                 pv.chart.removeAxis();
             }
             pv.chart = vis.addChart(viewSetting);
-
+            pv.svg = pv.chart.svg.node();
             if(typeof(colorInfo) === 'object') {
                 if(Array.isArray(colorInfo)) {
                     colorMap = colorInfo;
@@ -135,13 +136,13 @@ export default function visualize($p) {
             colorManager.updateColors(colorMap, colorMode);
 
         } else {
-            $p.uniform.uVisDomains = pv.domains;
+            // $p.uniform.uVisDomains.data = pv.domains;
             if(pv.updateDomain === true) {
-                pv.chart.updateAxisX(pv.domains[$p.fields.indexOf(vmap.x)]);
-                pv.chart.updateAxisY(pv.domains[$p.fields.indexOf(vmap.y)]);
+                pv.chart.updateAxisX(pv.domains[vmap.x]);
+                pv.chart.updateAxisY(pv.domains[vmap.y]);
             }
         }
-
+        $p.uniform.uVisDomains.data = Object.keys(pv.domains).map(f=>pv.domains[f]);
         $p.uniform.uVisMark.data = visMarks.indexOf(mark);
 
         //Check if need interleaving data attributes(e.g.,parallel coordinates)
