@@ -4,14 +4,13 @@ import output    from './io/output';
 import initialize    from './initialize';
 import interact  from './interact';
 import control from './control';
-import view from './view';
 import pipeline from './pipeline';
 import operate from './operate';
 import kernels from './kernels';
 import extensions from './extensions';
 import Grid from './grid';
 import cstore from './cstore'
-import Svg from './vis/svg';
+
 
 export default function p4(options) {
     let $p;

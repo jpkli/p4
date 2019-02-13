@@ -167,8 +167,8 @@ export default function visualize($p) {
 
         if($p.revealDensity) {
             $p.bindFramebuffer('offScreenFBO');
-            gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
-            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+            // gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
+            // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             gl.blendFunc(gl.ONE, gl.ONE );
         } else {
             $p.bindFramebuffer(null);

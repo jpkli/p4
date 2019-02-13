@@ -1,4 +1,4 @@
-
+import {seqFloat} from '../utils';
 export default function reveal($p) {
     $p.uniform('uRevealMode', 'int', 1)
         .framebuffer("offScreenFBO", "float", $p.viewport)
@@ -66,7 +66,27 @@ export default function reveal($p) {
                 isFBOAllocatedFBO = true;
                 $p.framebuffer("visStats", "float", [1, $p.views.length]);
             }
+            console.log(
+                offset[0] + padding.left,
+                // offset[1] + padding.bottom,
+                $p.viewport[1] - viewDim[1] + padding.bottom - offset[1],
+                viewDim[0] - padding.left - padding.right,
+                viewDim[1] - padding.top - padding.bottom
+            );
+
+            let vOffset = [
+                offset[0] + padding.left,
+                $p.viewport[1] - viewDim[1] + padding.bottom - offset[1],
+            ]
+            let vDim = [
+                viewDim[0] - padding.left - padding.right,
+                viewDim[1] - padding.top - padding.bottom
+            ]
+
+            $p.attribute.aViewX = seqFloat(vOffset[0], vOffset[0] + vDim[0] - 1);
+            $p.attribute.aViewY = seqFloat(vOffset[1], vOffset[1] + vDim[1] - 1);
             gl = $p.program("post-processing");
+
             $p.framebuffer.enableRead("offScreenFBO");
             $p.bindFramebuffer("visStats");
 
@@ -84,15 +104,16 @@ export default function reveal($p) {
             gl.ext.drawArraysInstancedANGLE(
                 gl.POINTS,
                 0,
-                viewDim[0],
-                viewDim[1]);
+                vDim[0],
+                vDim[1]);
 
             var max = new Float32Array(4);
             gl.readPixels(0, viewIndex, 1, 1, gl.RGBA, gl.FLOAT, max);
-            if(max[3] == 0) {
-                max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
-            }
-            console.log(offset, viewDim);
+            console.log(max)
+            // if(max[3] == 0) {
+            //     max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
+            // }
+            // console.log(offset, viewDim);
             $p.views[viewIndex].maxRGBA = max;
         }
 
@@ -102,6 +123,8 @@ export default function reveal($p) {
         gl = $p.program("vis-render");
         gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
         $p.framebuffer.enableRead("offScreenFBO");
+
+
 
         gl.viewport(
             offset[0] + padding.left,

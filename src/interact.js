@@ -145,16 +145,15 @@ export default function interact($p, options) {
                     for (let dim of ['x', 'y']) {
                         if(condition[dim]) {
                             let attr = vis.vmap[dim];
-                            let attrId = $p.fields.indexOf(attr);
                             if(delta[dim] === null ){
-                                delta[dim] =  scale * (vis.domains[attrId][1] - vis.domains[attrId][0]);
+                                delta[dim] =  scale * (vis.domains[attr][1] - vis.domains[attr][0]);
                             }
       
-                            let domain = vis.domains[attrId];
+                            let domain = vis.domains[attr];
                             let newDomain = [domain[0] - dir * delta[dim] * (proportion[dim]), domain[1] + dir * delta[dim] * (1-proportion[dim])];
                             if(newDomain[1] - newDomain[0] > 1e-9){
                                 selection[attr] = newDomain;
-                                vis.domains[attrId] = newDomain;
+                                vis.domains[attr] = newDomain;
                             } else {
                                 scale *= 0.5;
                             }
@@ -181,12 +180,11 @@ export default function interact($p, options) {
                         for (let dim of ['x', 'y']) {
                             if(condition[dim]) {
                                 let attr = vis.vmap[dim];
-                                let attrId = $p.fields.indexOf(attr);
-                                let domain = vis.domains[attrId];
+                                let domain = vis.domains[attr];
                                 let diff = delta[dim] * (domain[1] - domain[0]);
                                 let newDomain = [domain[0] + diff, domain[1] + diff];
                                 selection[attr] = newDomain;
-                                vis.domains[attrId] = newDomain;
+                                vis.domains[attr] = newDomain;
                             }
                         }
                         sx = e.clientX;
