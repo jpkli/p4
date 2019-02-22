@@ -1,29 +1,35 @@
 const path = require('path');
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const package = require(path.resolve(__dirname, '../package.json'));
+function resolve (dir) {
+    return path.join(__dirname, '..', dir)
+}  
 
 module.exports = {
     entry: {
-        "p4": "./index.js"
+        "p4": "./index.js",
+        "p4-test": "./test/main.js",
+	    "site": "./docs/main.js"
     },
     devtool: "source-map",
     target: 'web',
     resolve: {
-        modules: [path.resolve(__dirname, '../..'), '../node_modules'],
-        alias: {
-            'p.3$': 'p3'
-        }
+        modules: ['../node_modules', path.resolve(__dirname, '../..')]
     },
     output: {
         path: path.resolve(__dirname, "../dist"),
-        filename: "[name].v" + package.version + ".js"
+        filename: "[name].js"
     },
     module: {
         exprContextCritical: false,
         rules: [
           {
             test: /\.css$/,
-            use: ['style-loader', 'css-loader',]
+            use: ['style-loader', 'css-loader']
+          },
+          {
+            test: /\.yaml$/,
+            loader: 'js-yaml-loader',
+            include: [resolve('docs')]
           }
         ]
     },

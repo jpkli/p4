@@ -4,7 +4,8 @@ const path = require('path');
 module.exports = {
     entry: {
         "p4": "./index.js",
-        "p4-test": "./test/main.js"
+        "p4-test": "./test/main.js",
+        "site": "./docs/site.js"
     },
     devtool: "source-map",
     target: 'web',

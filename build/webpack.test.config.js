@@ -1,6 +1,8 @@
 const path = require('path');
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-
+function resolve (dir) {
+  return path.join(__dirname, '..', dir)
+}  
 module.exports = {
     entry: {
         "p4-test": "./test/main.js"
@@ -14,12 +16,17 @@ module.exports = {
         }
     },
     output: {
-        path: path.resolve(__dirname, "../test"),
+        path: path.resolve(__dirname, "../dist"),
         filename: "[name].js"
     },
     module: {
         exprContextCritical: false,
         rules: [
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            include: [resolve('src'), resolve('dist')]
+          },
           {
             test: /\.css$/,
             use: ['style-loader', 'css-loader',]
@@ -28,7 +35,7 @@ module.exports = {
     },
     devServer: {
         compress: true,
-        publicPath: '/test/',
+        publicPath: '/dist/',
         clientLogLevel: "none",
         historyApiFallback: true,
     },
