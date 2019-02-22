@@ -48,7 +48,7 @@ export default function extent($p) {
         gl.blendFunc(gl.ONE, gl.ONE);
 
         var extents = new Array(fieldIds.length);
-        var start = new Date();
+
         var idCount = $p.uniform.uIndexCount.data;
         fieldIds.forEach(function(d, i) {
             $p.uniform.uFieldId = i + idCount;
@@ -72,6 +72,7 @@ export default function extent($p) {
             //  extents[i] = [minValue, maxValue];
         });
         var extent = new Float32Array(8 * fieldIds.length);
+       
         gl.readPixels(0, 0, 2, fieldIds.length, gl.RGBA, gl.FLOAT, extent);
         fieldIds.forEach(function(d, i) {
             var ext = extent.slice(i * 8, i * 8 + 8);

@@ -66,13 +66,6 @@ export default function reveal($p) {
                 isFBOAllocatedFBO = true;
                 $p.framebuffer("visStats", "float", [1, $p.views.length]);
             }
-            console.log(
-                offset[0] + padding.left,
-                // offset[1] + padding.bottom,
-                $p.viewport[1] - viewDim[1] + padding.bottom - offset[1],
-                viewDim[0] - padding.left - padding.right,
-                viewDim[1] - padding.top - padding.bottom
-            );
 
             let vOffset = [
                 offset[0] + padding.left,
@@ -109,7 +102,6 @@ export default function reveal($p) {
 
             var max = new Float32Array(4);
             gl.readPixels(0, viewIndex, 1, 1, gl.RGBA, gl.FLOAT, max);
-            console.log(max)
             // if(max[3] == 0) {
             //     max[3] = Math.sqrt($p.dataSize) * Math.log2($p.dataSize);
             // }
@@ -123,8 +115,6 @@ export default function reveal($p) {
         gl = $p.program("vis-render");
         gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
         $p.framebuffer.enableRead("offScreenFBO");
-
-
 
         gl.viewport(
             offset[0] + padding.left,

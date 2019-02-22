@@ -1,3 +1,4 @@
+import {getHour, getDayOfWeek, getMonth, getYear} from './datetime'
 
 export default function derive($p, spec) {
 
@@ -7,6 +8,14 @@ export default function derive($p, spec) {
         derivedFields = Object.keys(spec);
 
     var fields = $p.fields;
+    if(derivedFields.length > $p.deriveMax) {
+        throw Error('Error: cannot derive more than ' + $p.deriveMax + ' new attributes');
+    }
+
+    $p.subroutine("hour", "float", getHour);
+    $p.subroutine("month", "float", getMonth);
+    $p.subroutine("year", "float", getYear);
+    $p.subroutine("dayOfWeek", "float", getDayOfWeek);
 
     var marco = "\t";
 
@@ -16,18 +25,20 @@ export default function derive($p, spec) {
         var formula = spec[d].replace(re, function(matched){
             // console.log(matched);
             var index = fields.indexOf(matched);
-            return 'this.getData('  + index + ', pos.x, pos.y)';
+            return 'this.getData ('  + index + ', pos.x, pos.y)';
         });
         marco += 'if (index == ' + i + ') return ' + formula + "; \n \telse ";
     });
 
-    marco += " return 0.0;";
+    marco = marco.replace(/\$/g, 'this.') + " return 0.0;";
 
     $p.uniform("uOptMode", "float", 0)
         .uniform("uDeriveId", "int", 0)
         .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
 
-    console.log(marco)
+
+    console.log(marco);
+
     function vertexShader() {
         gl_PointSize = 1.0;
 

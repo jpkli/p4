@@ -36,9 +36,12 @@ export default function p4(options) {
     let api = pipeline($p);
     api.ctx = $p;
     api.addModule(control);
-    api.addModule(output);
+    // api.addModule(output);
     // api.addModule(view);
 
+
+    let outputs = output($p)
+    api.result = outputs.result;
     api.addOperation('head', function() {
         api.resume('__init__');
         if(Object.keys($p.crossfilters).length > 0) api.match({});
@@ -90,6 +93,16 @@ export default function p4(options) {
 
     api.index = function(indexes) {
         data.indexes = indexes;
+        return api;
+    }
+
+    api.out =  function(outputName) {
+        api.register(outputName);
+        return api;
+    }
+
+    $p.setInput = function(inputName) {
+        api.resume(inputName);
         return api;
     }
 
@@ -166,7 +179,7 @@ export default function p4(options) {
     api.interact = function(spec) {
         if(typeof(spec) != 'undefined') $p.interactions.push(spec);
         $p.interactions.forEach(function(interaction){
-            
+            // console.log(interaction)
             let callback = interaction.callback || function(selection) {
                 $p.responses = interaction.response;
                 if(!$p._update) {
@@ -232,8 +245,11 @@ export default function p4(options) {
         if(data.size > 0) {
             $p.dataSize = data.size;
         }
-        $p.fields.slice($p.indexes.length).forEach((attr, ai) => {
+        $p.fields
+        .slice($p.indexes.length)
+        .forEach((attr, ai) => {
             let buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
+            if(data[attr] === undefined) debugger;
             for (let i = 0, l = data[attr].length; i < l; i++) {
                 buf[i] = data[attr][i];
             }

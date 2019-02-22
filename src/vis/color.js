@@ -38,7 +38,7 @@ export default function color($p) {
 
     colorManager.updateTable = function(colors) {
         colorset = colors;
-        $p.uniform.uColorSet = setColorTable(colors);
+        $p.uniform.uColorSet.data = setColorTable(colors);
     }
 
     colorManager.colorTable = defaultColorSet.map(function(t){

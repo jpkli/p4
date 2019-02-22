@@ -5,7 +5,16 @@ export default function pipeline($p) {
     let queue = [];
     
     pipeline.addModule = function(mod) {
-        Object.assign(pipeline, mod($p));
+        let newModule = mod($p)
+
+        Object.keys(newModule).forEach(name => {
+            if (typeof(newModule[name]) === 'function') {
+                pipeline[name] = function() {
+                    newModule[name].apply(null, arguments);
+                    return pipeline;
+                }
+            }
+        })
         return pipeline;
     }
 

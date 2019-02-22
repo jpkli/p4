@@ -18,19 +18,19 @@ export default class Instanced extends Renderer{
             this.vResult = this.uVisLevel;
         }
 
-        posX = this.visMap(this.uVisualEncodings[0], i, j, this.aDataValx, this.aDataValy, 0.0, 0.0);
-        posY = this.visMap(this.uVisualEncodings[1], i, j, this.aDataValx, this.aDataValy, 0.0, 0.0);
-        color = this.visMap(this.uVisualEncodings[2], i, j, this.aDataValx, this.aDataValy, -1.0, 0.0);
-        alpha = this.visMap(this.uVisualEncodings[3], i, j, this.aDataValx, this.aDataValy, this.uDefaultAlpha, 0.0);
-        size = this.visMap(this.uVisualEncodings[6], i, j, this.aDataValx, this.aDataValy, 1.0, 0.0);
+        posX = this.visMap(0, i, j, this.aDataValx, this.aDataValy, 0.0);
+        posY = this.visMap(1, i, j, this.aDataValx, this.aDataValy, 0.0);
+        color = this.visMap(2, i, j, this.aDataValx, this.aDataValy, -1.0);
+        alpha = this.visMap(3, i, j, this.aDataValx, this.aDataValy, this.uDefaultAlpha);
+        size = this.visMap(6, i, j, this.aDataValx, this.aDataValy, 1.0);
 
         if(this.uIsXYCategorical[0] == 1) {
-            var width = this.uFieldWidths[this.uVisualEncodings[0]];
-            posX = 0.5 / width + posX * (width-1.0) / width;
+            var width = this.uFieldWidths[0];
+            posX = 0.5 / width + posX * (width - 1.0) / width;
         }
         if(this.uIsXYCategorical[1] == 1) {
-            var height = this.uFieldWidths[this.uVisualEncodings[1]];
-            posY = 0.5 / height + posY * (height-1.0) / height;
+            var height = this.uFieldWidths[1];
+            posY = 0.5 / height + posY * (height - 1.0) / height;
         }
 
         posX = posX * 2.0 - 1.0;

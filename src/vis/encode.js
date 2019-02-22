@@ -1,13 +1,22 @@
-const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
+export const EncodingChannels = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size']
 
-export default function encode($p, vmap, colorManager) {
+export function encode($p, vmap, colorManager) {
     let opacity = vmap.opacity || vmap.alpha;
-    let vmapIndex = new Int32Array(visualEncodings.length);
+    let vmapIndex = new Int32Array(EncodingChannels.length);
+    let scaleExponents = new Float32Array(EncodingChannels.length).fill(1.0);
     
-    visualEncodings.forEach(function(code, codeIndex){
-        vmapIndex[codeIndex] = $p.fields.indexOf(vmap[code]);
+    EncodingChannels.forEach((channel, channelIndex) => {
+        let encoding = vmap[channel];
+        if (typeof(encoding) == 'object' && encoding.hasOwnProperty('field')) {
+            if(encoding.exponent !== 1.0) {
+                scaleExponents[channelIndex] = encoding.exponent;
+            }
+            encoding = vmap[channel].field;
+        }
+        vmapIndex[channelIndex] = $p.fields.indexOf(encoding);
     })
     $p.uniform.uVisualEncodings.data = vmapIndex;
+    $p.uniform.uScaleExponents.data = scaleExponents;
     $p.uniform.uDefaultAlpha.data = 1.0;
     if(vmapIndex[2] === -1) {
         if (typeof(vmap.color) === 'string'){
@@ -19,7 +28,7 @@ export default function encode($p, vmap, colorManager) {
             }
         } else {
             if(typeof(vmap.size) == 'number') {
-                $p.uniform.uMarkSize = vmap.size;
+                $p.uniform.uMarkSize.data = vmap.size;
             }
         }
     } else {
@@ -42,7 +51,7 @@ export default function encode($p, vmap, colorManager) {
     }
 
     if(vmapIndex[6] === -1 && typeof(vmap.size) == 'number') {
-        $p.uniform.uMarkSize = vmap.size;
+        $p.uniform.uMarkSize.data = vmap.size;
     }
 
     let viewSetting = {scale: {}, histogram: {}};

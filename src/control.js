@@ -9,9 +9,10 @@ export default function ($p) {
 
     control.register = function(tag) {
         registers[tag] = {
-            indexes: $p.indexes,
+            indexes: $p.indexes.slice(),
             dataSize: $p.dataSize,
-            fields: $p.fields,
+            fields: $p.fields.slice(),
+            fieldCount: $p.fieldCount,
             dataDim: $p.uniform.uDataDim.data.slice(),
             fieldWidths: $p.fieldWidths.slice(),
             fieldDomains: $p.fieldDomains.slice(),
@@ -53,7 +54,7 @@ export default function ($p) {
         $p.indexes = reg.indexes;
         $p.dataSize = reg.dataSize;
         $p.deriveCount = reg.deriveCount;
-        $p.fieldCount = reg.fields.length - reg.indexes.length - reg.deriveCount;
+        $p.fieldCount = reg.fieldCount;
         $p.fields = reg.fields.slice();
         $p.fieldWidths = reg.fieldWidths.slice();
         $p.fieldDomains = reg.fieldDomains.slice();

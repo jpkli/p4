@@ -116,11 +116,11 @@ export default function aggregate($p) {
         getVarStd = false,
         resultDomains;
 
-    function compute(opts, groupFieldIds, resultFieldIds) {
+    function compute(opts, groupFieldIds, resultFieldIds, outputTag) {
 
         resultFieldCount = resultFieldIds.length;
         let gl = $p.program('fill');
-        $p.bindFramebuffer('fGroupResults');
+        $p.bindFramebuffer(outputTag);
 
         if(!$p._progress) {
             gl.clearColor(0.0, 0.0, 0.0, 0.0);
@@ -173,7 +173,7 @@ export default function aggregate($p) {
                 $p.bindFramebuffer('fAggrStats');
                 postComputeFieldIds.push(i);
             } else {
-                $p.bindFramebuffer('fGroupResults');
+                $p.bindFramebuffer(outputTag);
             }
 
             gl.viewport(0, i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
@@ -195,15 +195,15 @@ export default function aggregate($p) {
         });
         $p.uniform.uFieldCount.data = resultFieldIds.length;
         if(getAvgValues) {
-            postCompute(opts, postComputeFieldIds, resultFieldIds);
+            postCompute(opts, postComputeFieldIds, resultFieldIds, outputTag);
         }
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
-    function postCompute(opts, postComputeFieldIds, resultFieldIds) {
+    function postCompute(opts, postComputeFieldIds, resultFieldIds, outputTag) {
         $p.uniform.uDataInput.data = $p.framebuffer.fAggrStats.texture;
         var gl = $p.program('group2');
-        $p.bindFramebuffer('fGroupResults');
+        $p.bindFramebuffer(outputTag);
         $p.uniform.uResultDim = $p.resultDimension;
         $p.framebuffer.enableRead('fAggrStats');
         // gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
@@ -223,11 +223,11 @@ export default function aggregate($p) {
     }
 
     aggregate.execute = function(spec) {
-        let groupFields = spec.$by || spec.$group;
+        let groupFields = spec.$group || spec.group;
         let groupFieldIds = [-1, -1];
-
+        let outputTag = spec.out || 'fGroupResults';
         if (!Array.isArray(groupFields)) groupFields = [groupFields];
-        if (groupFields.length == 2) {
+        if (groupFields.length >= 2) {
             groupFieldIds[0] = $p.fields.indexOf(groupFields[0]);
             groupFieldIds[1] = $p.fields.indexOf(groupFields[1]);
             $p.resultDimension = [
@@ -239,7 +239,7 @@ export default function aggregate($p) {
             $p.resultDimension = [$p.fieldWidths[groupFieldIds[0]], 1];
         }
 
-        let newFieldSpec = spec.$collect || spec.$reduce || spec.$out || null;
+        let newFieldSpec = spec.$collect || spec.$reduce || null;
 
         // For backward compatibility, allowing new fields specified without using the $collect or $reduce
         if (newFieldSpec === null) {
@@ -264,7 +264,7 @@ export default function aggregate($p) {
 
         if (!$p._update && !$p._progress) {
             $p.framebuffer(
-                'fGroupResults',
+                outputTag,
                 'float', [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
             );
 
@@ -276,15 +276,15 @@ export default function aggregate($p) {
             }
         }
 
-        $p.bindFramebuffer('fGroupResults');
+        $p.bindFramebuffer(outputTag);
 
-        compute(operators, groupFieldIds, resultFieldIds);
+        compute(operators, groupFieldIds, resultFieldIds, outputTag);
 
         $p.getResult = aggregate.result;
         $p.indexes = groupFields;
         $p.dataDimension = $p.resultDimension;
 
-        $p.uniform.uDataInput.data = $p.framebuffer.fGroupResults.texture;
+        $p.uniform.uDataInput.data = $p.framebuffer[outputTag].texture;
 
         var oldFieldIds = groupFields.concat(resultFields).map( f => $p.fields.indexOf(f));
 
@@ -296,7 +296,8 @@ export default function aggregate($p) {
 
         $p.uniform.uDataDim.data = $p.resultDimension;
         $p.uniform.uIndexCount.data = $p.indexes.length;
-        $p.uniform.uFieldCount.data = $p.fields.length - $p.indexes.length;
+        $p.fieldCount = $p.fields.length - $p.indexes.length;
+        $p.uniform.uFieldCount.data = $p.fieldCount;
 
         // $p.fieldWidths = $p.fieldWidths.concat($p.deriveWidths);
         // $p.fieldDomains = $p.fieldDomains.concat($p.deriveDomains);
@@ -371,7 +372,7 @@ export default function aggregate($p) {
         $p.getResultBuffer = aggregate.result;
     }
 
-    aggregate.result = function(arg) {
+    aggregate.result = function(arg, outputTag = 'fGroupResults') {
         let options = arg || {};
         let offset = options.offset || [0, 0];
         let resultSize = options.size || $p.resultDimension[0] * $p.resultDimension[1];
@@ -379,7 +380,7 @@ export default function aggregate($p) {
         let colTotal = Math.ceil(resultSize / $p.resultDimension[0]);
         let result = new Float32Array(rowTotal * colTotal * 4 * resultFieldCount);
         
-        $p.bindFramebuffer('fGroupResults');
+        $p.bindFramebuffer(outputTag);
 
         let gl = $p.program('group');
         gl.readPixels(offset[0], offset[1], rowTotal, colTotal * resultFieldCount, gl.RGBA, gl.FLOAT, result);

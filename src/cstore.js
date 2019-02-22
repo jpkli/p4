@@ -79,8 +79,8 @@ export default function ColumnStore(arg){
         if(typeof(cid) == "string") cid = attributes.indexOf(cid);
         var f = attributes[cid];
         colAlloc[f] = ctypes[types[cid]];
-
-        if(colAlloc[f] === ctypes.string){
+        var columnType = types[cid]
+        if(columnType === 'string' || columnType === 'str'){
             if (!strValues.hasOwnProperty(f)) {
                 strValues[f] = {};
                 strLists[f] = [];
@@ -92,23 +92,16 @@ export default function ColumnStore(arg){
                 }
                 return strValues[f][value];
             };
-        } else if(
-            colAlloc[f] === ctypes.int ||
-            colAlloc[f] === ctypes.short ||
-            colAlloc[f] === ctypes.integer
-        ) {
-            colRead[f] = function(value) {  return parseInt(value) || 0; };
-        } else if(
-            colAlloc[f] === ctypes.float ||
-            colAlloc[f] === ctypes.double ||
-            colAlloc[f] === ctypes.numeric
-        ){
-            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
-        } else if(
-                colAlloc[f] === ctypes.time ||
-                colAlloc[f] === ctypes.temporal
-        ) {
-            colRead[f] = function(value) {  return parseFloat(value) || 0.0; };
+        } else if(['int', 'short', 'integer'].includes(columnType)) {
+            colRead[f] = function(value) { return parseInt(value) || 0; };
+        } else if(['float', 'double', 'numeric'].includes(columnType)){
+            colRead[f] = function(value) { return parseFloat(value) || 0.0; };
+        } else if(['date', 'time', 'datetime'].includes(columnType)){
+            colRead[f] = function(value) { 
+                let datetime = new Date(value);
+                let ts = datetime.getTime() / 1000 - datetime.getTimezoneOffset() * 60; 
+                return Math.floor(ts);
+            };
         } else {
             throw new Error("Invalid data type for TypedArray data!")
         }
@@ -140,6 +133,9 @@ export default function ColumnStore(arg){
         }
         objArray.forEach(function(obj, i){
             Object.keys(obj).forEach(function(v,j){
+                if(typeof colRead[attributes[j]] !== 'function') {
+                    console.log(attributes[j], j, v, obj)
+                }
                 columns[j][count] = colRead[attributes[j]](obj[v]);
             });
             count++;

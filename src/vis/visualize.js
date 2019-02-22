@@ -1,6 +1,6 @@
 import colors from './color';
 import reveal from './reveal';
-import encode from './encode';
+import {encode, EncodingChannels} from './encode';
 import extend from './extend';
 import interpolate from './shaders/interpolate.gl'
 
@@ -9,7 +9,6 @@ import Instanced from './shaders/Instanced.gl'
 import Polygon from './shaders/Polygon.gl'
 import Interleaved from './shaders/Interleaved.gl'
 
-const visualEncodings = ['x', 'y', 'color', 'opacity', 'width', 'height', 'size'];
 const userActions = ['click', 'hover', 'brush', 'zoom', 'pan'];
 const visMarks = ['dot', 'circle', 'line', 'rect'];
 
@@ -27,7 +26,8 @@ export default function visualize($p) {
         padding: chartPadding
     });
     
-    $p.uniform('uVisualEncodings',  'int',   new Array(visualEncodings.length).fill(-1))
+    $p.uniform('uVisualEncodings',  'int',   new Array(EncodingChannels.length).fill(-1))
+        .uniform('uScaleExponents', 'float',   new Array(EncodingChannels.length).fill(1.0))
         .uniform('uViewDim',        'vec2',  $p.viewport)
         .uniform('uVisMark',        'int',   1)
         .uniform('uInterleaveX',    'int',   0)
@@ -42,6 +42,7 @@ export default function visualize($p) {
         .uniform('uDefaultHeight',  'float', 1.0 / $p.viewport[1])
         .uniform('uMaxRGBA',        'vec4',  [0, 0, 0, 0])
         .uniform('uDefaultColor',   'vec3',  [0.8, 0, 0])
+        .uniform('uGeoProjection',   'int',  0)
         .uniform('uColorMode',      'int',   1)
         .uniform('uIsXYCategorical','ivec2', [0, 0])
         .varying('vColorRGBA',      'vec4'   );
@@ -57,6 +58,7 @@ export default function visualize($p) {
     $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
     $p.bindFramebuffer(null);
     $p.subroutine('visMap', 'float', interpolate.visMap);
+    $p.subroutine('getEncodingByFieldId', 'float', interpolate.getEncodingByFieldId);
     
     let renderers = {
         instanced: new Instanced({context: $p, name: 'instanced'}),
@@ -144,7 +146,7 @@ export default function visualize($p) {
         }
         $p.uniform.uVisDomains.data = Object.keys(pv.domains).map(f=>pv.domains[f]);
         $p.uniform.uVisMark.data = visMarks.indexOf(mark);
-
+        $p.uniform.uGeoProjection.data = (vmap.projection) ? 1 : 0;
         //Check if need interleaving data attributes(e.g.,parallel coordinates)
         if(Array.isArray(vmap.x) || Array.isArray(vmap.y)) {
             renderer = 'interleave';
@@ -163,12 +165,12 @@ export default function visualize($p) {
         let gl = renderers[renderer].load();
         $p.framebuffer.enableRead('fFilterResults');
         $p.framebuffer.enableRead('fDerivedValues');
-        $p.framebuffer.enableRead('fGroupResults');
+        $p.framebuffer.enableRead(vmap.in || 'fGroupResults');
 
         if($p.revealDensity) {
             $p.bindFramebuffer('offScreenFBO');
-            // gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
-            // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+            gl.clearColor( 1.0, 1.0, 1.0, 0.0 );
+            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
             gl.blendFunc(gl.ONE, gl.ONE );
         } else {
             $p.bindFramebuffer(null);

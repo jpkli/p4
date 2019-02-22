@@ -27,7 +27,6 @@ export default function($p) {
 
                 for (var y = 0; y < $p.resultDimension[1]; y++) {
                     for (var x = 0; x < $p.resultDimension[0]; x++) {
-
                         ax[y * $p.resultDimension[0] + x] = bx[x];
                         ay[y * $p.resultDimension[0] + x] = by[y]
                     }

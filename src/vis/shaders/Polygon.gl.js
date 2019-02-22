@@ -20,13 +20,13 @@ export default class Polygon extends Renderer{
     var val0, val1;
     val0 = this.aDataItemVal0;
     val1 = this.aDataItemVal1;
-    posX = this.visMap(this.uVisualEncodings[0], i, j, val0, val1, 0.0, 0.0);
-    posY = this.visMap(this.uVisualEncodings[1], i, j, val0, val1, 0.0, 0.0);
-    color = this.visMap(this.uVisualEncodings[2], i, j, val0, val1, -1.0, 0.0);
-    alpha = this.visMap(this.uVisualEncodings[3], i, j, val0, val1, this.uDefaultAlpha, 0.0);
-    width = this.visMap(this.uVisualEncodings[4], i, j, val0, val1, this.uDefaultWidth, 0.0);
-    height = this.visMap(this.uVisualEncodings[5], i, j, val0, val1, this.uDefaultHeight, 0.0);
-    size = this.visMap(this.uVisualEncodings[6], i, j, val0, val1, this.uMarkSize, 0.0);
+    posX = this.visMap(0, i, j, val0, val1, 0.0);
+    posY = this.visMap(1, i, j, val0, val1, 0.0);
+    color = this.visMap(2, i, j, val0, val1, -1.0);
+    alpha = this.visMap(3, i, j, val0, val1, this.uDefaultAlpha);
+    width = this.visMap(4, i, j, val0, val1, this.uDefaultWidth);
+    height = this.visMap(5, i, j, val0, val1, this.uDefaultHeight);
+    size = this.visMap(6, i, j, val0, val1, this.uMarkSize);
     posX = posX * (this.uFieldWidths[this.uVisualEncodings[0]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[0]];
     posY = posY * (this.uFieldWidths[this.uVisualEncodings[1]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[1]];
 

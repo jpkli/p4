@@ -17,7 +17,6 @@ export default function($p) {
             // Apply Sturges' formula for determining the number of bins
             binCount = Math.ceil(Math.log2($p.dataSize)) + 1;
         }
-
         let binAttrId = $p.fields.indexOf(binAttr);
         let binDomain = $p.fieldDomains[$p.fields.indexOf(binAttr)];
         let binInterval = (binDomain[1] - binDomain[0]) / binCount;
@@ -35,7 +34,7 @@ export default function($p) {
     }
     
     operations.aggregate = function (spec) {
-        if(spec.$bin) {
+        if(spec.$bin) { 
             let binSpecs = Array.isArray(spec.$bin) ? spec.$bin : [spec.$bin];
             spec.$group = binSpecs.map((spec, ii) => {
                 return bin(spec, ii);
@@ -68,9 +67,11 @@ export default function($p) {
     }
 
     operations.derive = function(spec) {
-        if (!kernels.hasOwnProperty('derive')) {
+        // if (!kernels.hasOwnProperty('derive')) {
+        if(!$p._update) {
             kernels.derive = programs.derive($p, spec);
         }
+        // }
         kernels.derive.execute(spec);
         return kernels.derive.result;
     }
@@ -135,6 +136,13 @@ export default function($p) {
         vmaps.forEach( (vmap, vi) => {
             if (!kernels.hasOwnProperty('visualize')) {
                 kernels.visualize = programs.visualize($p);
+            }
+            if (vmap.in) {
+                console.log('load input', vmap.in)
+                $p.setInput(vmap.in);
+
+                // $p.uniform.uDataInput.data = $p.framebuffer[vmap.in].texture;
+
             }
             let viewIndex = vi;
             if(typeof vmap.id == 'string') {

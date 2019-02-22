@@ -19,13 +19,13 @@ export default class Instanced extends Renderer{
       }
       if(this.uInterleaveX == 1) {
           posX = this.aDataFieldId.y / float(this.uFeatureCount-1);
-          posY = this.visMap(int(this.aDataFieldId.x), i, j, i, j, 1.0,  0.0);
+          posY = this.getEncodingByFieldId(int(this.aDataFieldId.x), i, j);
       } else {
           posY = 1.0 - this.aDataFieldId.y / float(this.uFeatureCount-1);
-          posX = this.visMap(int(this.aDataFieldId.x), i, j, i, j, 1.0,  0.0);
+          posX = this.getEncodingByFieldId(int(this.aDataFieldId.x), i, j);
       }
-      color = this.visMap(this.uVisualEncodings[2], i, j, i, j, -1.0,  0.0);
-      alpha = this.visMap(this.uVisualEncodings[3], i, j, i, j, this.uDefaultAlpha, 0.0);
+      color = this.visMap(2, i, j, i, j, -1.0);
+      alpha = this.visMap(3, i, j, i, j, this.uDefaultAlpha);
   
       posX = posX * 2.0 - 1.0;
       posY = posY * 2.0 - 1.0;
