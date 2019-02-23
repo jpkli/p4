@@ -1,63 +1,4 @@
-function vertexShaderFilter(){
-    var i, j, k, value;
-    var filter = new Int(0);
-    var sel = new Int(0);
-    var visSelect = new Bool(false);
-    i = (this.aDataIdx+0.5) / this.uDataDim.x;
-    j = (this.aDataIdy+0.5) / this.uDataDim.y;
-
-    for(var f = 0; f < $(fieldCount)+$(indexCount); f++) {
-        if(this.uFilterControls[f] == 1 || this.uVisControls[f] == 1) {
-            value = this.getData(f, i, j);
-
-            if(this.uFilterControls[f] == 1) {
-                if(value < this.uFilterRanges[f].x || value > this.uFilterRanges[f].y) {
-                    filter -= 1;
-                }
-            }
-            if(this.uVisControls[f] == 1) {
-                if(value < this.uVisRanges[f].x || value > this.uVisRanges[f].y) {
-                    sel -= 1;
-                }
-                visSelect = true;
-            }
-        }
-    }
-    this.vResult = 0.1;
-    if(filter < 0) {
-        this.vResult = 0.0;
-    } else {
-        if(visSelect)
-            this.vResult = (sel < 0) ? 0.1 : 0.2;
-    }
-    var x = i * 2.0 - 1.0;
-    var y = j * 2.0 - 1.0;
-    gl_PointSize = 1.0;
-    gl_Position = vec4(x, y, 0.0, 1.0);
-}
-
-function vertexShaderSelect() {
-    var i, j, k, value;
-    i = (this.aDataIdx+0.5) / this.uDataDim.x;
-    j = (this.aDataIdy+0.5) / this.uDataDim.y;
-    this.vResult = this.uFilterLevel - 0.1;
-    value = this.getData(this.uFieldId, i, j);
-    for(var l = 0; l < 100; l++){
-        if(l < this.uSelectCount) {
-            if(value == this.uInSelections[l]) {
-                this.vResult = this.uFilterLevel;
-            }
-        }
-    }
-    var x = i * 2.0 - 1.0;
-    var y = j * 2.0 - 1.0;
-    gl_PointSize = 1.0;
-    gl_Position = vec4(x, y, 0.0, 1.0);
-}
-
-function fragmentShader() {
-    gl_FragColor = vec4(0., 0., 0., this.vResult);
-}
+import {NumericalMatch, CategoricalMatch} from './gpgpu/Match.gl.js'
 
 export default function match($p) {
     const SELECT_MAX = 100;
@@ -70,22 +11,22 @@ export default function match($p) {
         visRanges = $p.fieldDomains,
         inSelections = new Array(SELECT_MAX);
 
-    $p.uniform("uInSelections", "float", Float32Array.from(inSelections));
-    $p.uniform("uSelectMax", "int", SELECT_MAX);
-    $p.uniform("uSelectCount", "int", 0);
+    $p.uniform('uInSelections', 'float', Float32Array.from(inSelections));
+    $p.uniform('uSelectMax', 'int', SELECT_MAX);
+    $p.uniform('uSelectCount', 'int', 0);
 
     var filter = {
-        vs: $p.shader.vertex(vertexShaderFilter),
-        fs: $p.shader.fragment(fragmentShader)
+        vs: $p.shader.vertex(NumericalMatch.vertexShader),
+        fs: $p.shader.fragment(NumericalMatch.fragmentShader)
     };
 
     var sel = {
-        vs: $p.shader.vertex(vertexShaderSelect),
-        fs: $p.shader.fragment(fragmentShader)
+        vs: $p.shader.vertex(CategoricalMatch.vertexShader),
+        fs: $p.shader.fragment(CategoricalMatch.fragmentShader)
     };
 
-    $p.program("filter", filter.vs, filter.fs);
-    $p.program("match", sel.vs, sel.fs);
+    $p.program('filter', filter.vs, filter.fs);
+    $p.program('match', sel.vs, sel.fs);
 
     match.control = function(ctrl) {
         // filterControls = ctrl;
@@ -101,14 +42,14 @@ export default function match($p) {
             return $p.crossfilters[s].hasOwnProperty('$in');
         }))
 
-        $p.bindFramebuffer("fFilterResults");
+        $p.bindFramebuffer('fFilterResults');
        
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
         if(matchFields.length) {
-            gl = $p.program("match");
+            gl = $p.program('match');
             if($p.deriveCount > 0) {
-                $p.framebuffer.enableRead("fDerivedValues");
+                $p.framebuffer.enableRead('fDerivedValues');
             }
 
             gl.viewport(0, 0, dataDimension[0], dataDimension[1]);
@@ -183,9 +124,9 @@ export default function match($p) {
             $p.uniform.uFilterRanges.data = filterRanges;
             $p.uniform.uVisControls.data = visControls;
             $p.uniform.uVisRanges.data = visRanges;
-            gl = $p.program("filter");
+            gl = $p.program('filter');
             if($p.deriveCount > 0) {
-                $p.framebuffer.enableRead("fDerivedValues");
+                $p.framebuffer.enableRead('fDerivedValues');
             }
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
             $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
@@ -227,7 +168,7 @@ export default function match($p) {
         $p.uniform.uFilterFlag = 1;
         if(!$p._update) {
            
-            $p.framebuffer("fFilterResults", "unsigned_byte", $p.dataDimension);
+            $p.framebuffer('fFilterResults', 'unsigned_byte', $p.dataDimension);
             filterRanges = $p.fieldDomains.slice();
             visRanges = $p.fieldDomains.slice();
         }
@@ -254,7 +195,7 @@ export default function match($p) {
             rowSize = Math.min(resultSize, $p.dataDimension[0]),
             colSize = Math.ceil(resultSize/$p.dataDimension[0]);
 
-        $p.bindFramebuffer("fFilterResults");
+        $p.bindFramebuffer('fFilterResults');
 
         var gl = $p.ctx;
         var bitmap = new Uint8Array(rowSize*colSize*4);

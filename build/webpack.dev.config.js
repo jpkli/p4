@@ -8,7 +8,7 @@ module.exports = {
     entry: {
         "p4": "./index.js",
         "p4-test": "./test/main.js",
-	    "site": "./docs/main.js"
+	"site": "./docs/main.js"
     },
     devtool: "source-map",
     target: 'web',

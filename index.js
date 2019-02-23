@@ -11,8 +11,6 @@ var root = typeof self == 'object' && self.self === self && self ||
            typeof global == 'object' && global.global === global && global ||
            this;
 
-
-
 p4.ajax = ajax;
 p4.cstore = cstore;
 p4.ctypes = ctypes;
@@ -21,6 +19,3 @@ p4.datasets = {Babies, TimeSeries};
 
 root.p4 = p4;
 export default root.p4;
-
-if(typeof module != 'undefined' && module.exports)
-    module.exports = root.p4;

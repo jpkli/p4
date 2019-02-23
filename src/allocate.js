@@ -126,7 +126,7 @@ export default function($p, dataProps) {
     $p.uniform("uVisControls","int", filterControls);
     $p.uniform("uFilterRanges","vec2", $p.fieldDomains);
     $p.uniform("uVisRanges","vec2", $p.fieldDomains);
-    $p.uniform("uGroupFields", "int",   [0, -1]);
+    // $p.uniform("uGroupFields", "int",   [0, -1]);
     $p.uniform("uDataInput",   "sampler2D");
     $p.uniform("uDeriveCount", "int", $p.deriveMax);
     // $p.uniform("uDeriveDomains", "vec2", $p.deriveDomains);
