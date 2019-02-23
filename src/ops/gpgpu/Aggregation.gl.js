@@ -57,6 +57,13 @@ export const Aggregate = {
         }
     }
 
+    if(this.uGroupFields[2] != -1) {
+        var keyValue = this.getData(this.uGroupFields[2], i, j);
+        if(keyValue != this.uExtraKeyValue) {
+            this.vResult = 0.0;
+        }
+    }
+
     gl_Position = vec4(pos, 0.0, 1.0);
   },
 
@@ -80,7 +87,7 @@ export const GetStats = {
 
     if (this.uAggrOpt > 3.0) {
         x = (gl_FragCoord.x) / this.uResultDim.x;
-        y = (gl_FragCoord.y) / (uResultDim.y * float(this.uFieldCount));
+        y = (gl_FragCoord.y) / (this.uResultDim.y * float(this.uFieldCount));
         value = texture2D(this.uDataInput, vec2(x, y));
         res = value.a / value.b;
     } else {

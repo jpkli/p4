@@ -11,7 +11,9 @@ export default function aggregate($p) {
     $p.uniform('uBinIntervals', 'vec2', [0.0, 0.0]);
     $p.uniform('uBinCount', 'ivec2', [0, 0]);
     $p.uniform('uAggrOpt', 'float', 2.0);
-    $p.uniform("uGroupFields", "int",   [0, -1]);
+    $p.uniform("uGroupFields", "int",   [0, -1, -1]);
+    $p.uniform("uExtraKeyValue", "float",  0.0);
+    $p.extraDimension = 1;
 
     $p.program(
         'AggregateCompute',
@@ -36,7 +38,6 @@ export default function aggregate($p) {
         resultDomains;
 
     function compute(opts, groupFieldIds, resultFieldIds, outputTag) {
-
         resultFieldCount = resultFieldIds.length;
         let gl = $p.program('FillValues');
         $p.bindFramebuffer(outputTag);
@@ -83,35 +84,42 @@ export default function aggregate($p) {
         getAvgValues = false;
         getVarStd = false;
 
-        resultFieldIds.forEach(function(f, i) {
-            var opt = METRICS.indexOf(opts[i]);
-            if (opt == -1) throw Error('unknowm operator for aggregation: ' + opts[i]);
+        for (var ii = 0; ii < $p.extraDimension; ii++) {
+            postComputeFieldIds = [];
+            resultFieldIds.forEach(function(f, i) {
+                var opt = METRICS.indexOf(opts[i]);
+                if (opt == -1) throw Error('unknowm operator for aggregation: ' + opts[i]);
 
-            if (opt > 3) {
-                getAvgValues = true;
-                $p.bindFramebuffer('fAggrStats');
-                postComputeFieldIds.push(i);
-            } else {
-                $p.bindFramebuffer(outputTag);
-            }
+                if (opt > 3) {
+                    getAvgValues = true;
+                    $p.bindFramebuffer('fAggrStats');
+                    postComputeFieldIds.push(i);
+                } else {
+                    $p.bindFramebuffer(outputTag);
+                }
 
-            gl.viewport(0, i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
-            if (opt == 0) {
-                gl.blendEquation(gl.MIN_EXT);
-            } else if (opt == 1) {
-                gl.blendEquation(gl.MAX_EXT);
-            } else {
-                gl.blendEquation(gl.FUNC_ADD);
-            }
+                gl.viewport(ii * $p.resultDimension[0], i * $p.resultDimension[1], $p.resultDimension[0], $p.resultDimension[1]);
+                if (opt == 0) {
+                    gl.blendEquation(gl.MIN_EXT);
+                } else if (opt == 1) {
+                    gl.blendEquation(gl.MAX_EXT);
+                } else {
+                    gl.blendEquation(gl.FUNC_ADD);
+                }
 
-            $p.uniform.uFieldId = f;
-            $p.uniform.uAggrOpt = opt;
-            gl.ext.drawArraysInstancedANGLE(
-                gl.POINTS, 0,
-                $p.dataDimension[0],
-                $p.dataDimension[1]
-            );
-        });
+                $p.uniform.uFieldId = f;
+                $p.uniform.uAggrOpt = opt;
+                if(groupFieldIds[2] !== -1) {
+                    $p.uniform.uExtraKeyValue = seqFloat($p.fieldDomains[groupFieldIds[2]][0], $p.fieldDomains[groupFieldIds[2]][1])[ii];
+                }
+                
+                gl.ext.drawArraysInstancedANGLE(
+                    gl.POINTS, 0,
+                    $p.dataDimension[0],
+                    $p.dataDimension[1]
+                );
+            });
+        }
         $p.uniform.uFieldCount.data = resultFieldIds.length;
         if(getAvgValues) {
             postCompute(opts, postComputeFieldIds, resultFieldIds, outputTag);
@@ -123,18 +131,20 @@ export default function aggregate($p) {
         $p.uniform.uDataInput.data = $p.framebuffer.fAggrStats.texture;
         var gl = $p.program('GetAggrStats');
         $p.bindFramebuffer(outputTag);
-        $p.uniform.uResultDim = $p.resultDimension;
+        $p.uniform.uResultDim = [$p.resultDimension[0] * $p.extraDimension, $p.resultDimension[1]];
         $p.framebuffer.enableRead('fAggrStats');
         // gl.ext.vertexAttribDivisorANGLE($p.attribute._square.location, 0);
-        gl.viewport(0, 0, $p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length);
+        
+        gl.viewport(0, 0, $p.resultDimension[0] * $p.extraDimension, $p.resultDimension[1] * resultFieldIds.length);
         gl.disable(gl.BLEND);
 
         postComputeFieldIds.forEach(function(f) {
             $p.uniform.uAggrOpt = METRICS.indexOf(opts[f]);
             $p.uniform.uFieldId = f;
-            gl.viewport(0, 
+            gl.viewport(
+                0, 
                 f * $p.resultDimension[1], 
-                $p.resultDimension[0], 
+                $p.resultDimension[0] * $p.extraDimension,
                 $p.resultDimension[1]
             );
             gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -144,7 +154,7 @@ export default function aggregate($p) {
     aggregate.execute = function(spec) {
         let newFieldSpec = spec.$collect || spec.$reduce || null;
         let groupFields = spec.$group || spec.group;
-        let groupFieldIds = [-1, -1];
+        let groupFieldIds = [-1, -1, -1];
         let outputTag = spec.out || 'fGroupResults';
         if (!Array.isArray(groupFields)) groupFields = [groupFields];
         if (groupFields.length >= 2) {
@@ -154,6 +164,12 @@ export default function aggregate($p) {
                 $p.fieldWidths[groupFieldIds[0]],
                 $p.fieldWidths[groupFieldIds[1]]
             ];
+            if(groupFields.length === 3) {
+                groupFieldIds[2] = $p.fields.indexOf(groupFields[2]);
+                $p.extraDimension = $p.fieldWidths[groupFieldIds[2]];
+            } else {
+                $p.extraDimension = 1
+            }
         } else {
             groupFieldIds[0] = $p.fields.indexOf(groupFields[0]);
             $p.resultDimension = [$p.fieldWidths[groupFieldIds[0]], 1];
@@ -182,13 +198,13 @@ export default function aggregate($p) {
         if (!$p._update && !$p._progress) {
             $p.framebuffer(
                 outputTag,
-                'float', [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
+                'float', [$p.resultDimension[0] * $p.extraDimension, $p.resultDimension[1] * resultFieldIds.length]
             );
 
             if(twoPassFields.length > 0) {
                 $p.framebuffer(
                     'fAggrStats',
-                    'float', [$p.resultDimension[0], $p.resultDimension[1] * resultFieldIds.length]
+                    'float', [$p.resultDimension[0] * $p.extraDimension, $p.resultDimension[1] * resultFieldIds.length]
                 );
             }
         }

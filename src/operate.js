@@ -36,9 +36,14 @@ export default function($p) {
     operations.aggregate = function (spec) {
         if(spec.$bin) { 
             let binSpecs = Array.isArray(spec.$bin) ? spec.$bin : [spec.$bin];
-            spec.$group = binSpecs.map((spec, ii) => {
+            let binAttrs = binSpecs.map((spec, ii) => {
                 return bin(spec, ii);
             })
+            if(spec.$group) {
+                spec.$group = binAttrs.concat(spec.$group)
+            } else {
+                spec.$group = binAttrs;
+            }
         }
         if(Object.keys($p.crossfilters).length) {
             $p.uniform.uFilterFlag = 1;
