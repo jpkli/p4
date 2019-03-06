@@ -67,12 +67,10 @@ function getDateTime(s) {
   return {year, month, days, hour, minute, second, dayOfWeek}
 }
 
-var t = getDateTime(-5017821871);
-
 
 export function getHour({ts = 'float'}) {
   var hours = floor(ts / 3600.0);
-  return hours - (24.0 * floor(hours / 24.0));
+  return hours - (24.0 * floor(hours / 24.0)) + 1.0;
 }
 
 export function getYear({ts = 'float'}) {
@@ -94,7 +92,7 @@ export function floatMod({a = "float", b = "float"}) {
 
 export function getDayOfWeek({ts = 'float'}) {
   var days = floor(ts / 3600.0 / 24.0) + 4.0;
-  return days - (7.0 * floor(days / 7.0));
+  return days - (7.0 * floor(days / 7.0)) + 1.0;
 } 
 
 export function getMonth({ts = 'float'}) {

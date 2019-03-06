@@ -7,6 +7,7 @@ export default function interact($p, options) {
 
     var actions = options.actions || options.events || [],
         condition = options.condition || {},
+        facet = options.facet || false,
         callback = options.callback || function() {};
 
     if($p._update) return;
@@ -31,11 +32,17 @@ export default function interact($p, options) {
         var interactor = vis.chart.svg.append("g")
             .attr("class", "selector")
 
+        if(facet === 'rows') {
+            h = $p.viewport[1] - p.bottom;
+        } else if(facet === 'columns') {
+            w = $p.viewport[0] - p.right;
+        }
+
         var rect = interactor.append("rect")
           .attr("x", 0)
           .attr("y", 0)
           .attr("width", w)
-          .attr("height", h)
+          .attr("height", h/2)
           .attr("fill-opacity", 0)
           .attr("stroke", "none");
 
@@ -50,9 +57,7 @@ export default function interact($p, options) {
                 selection[vmap.x] = [vis.chart.x.invert(dx)];
             }
             if(vmap.y) {
-
                 selection[vmap.y] = [vis.chart.y.invert(h - dy)];
-  
             }
             return selection;
         }
@@ -78,6 +83,17 @@ export default function interact($p, options) {
                                 selection[vmap.y] = d.y;
                             }
                         }
+
+                        Object.keys(selection).forEach(k => {
+                            if ($p.uniqueValues.hasOwnProperty(k)) {
+                                let values = $p.uniqueValues[k]
+                                let start = Math.floor(selection[k][0]);
+                                let end = Math.floor(selection[k][1]);
+                                if(end === start) start -= 1;
+                                selection[k] = [values[start], values[end]];
+                            } 
+                        })
+
                         callback(selection);
                     }
                     if(condition.x && typeof(vis.chart.x.invert) == 'function')

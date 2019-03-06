@@ -13,9 +13,9 @@ export default function($p, dataProps) {
     $p.uniqueValues = data.uniqueValues;
     $p.dataSchema = data.struct;
 
-    var dkeys = $p.dkeys,
-        dtypes = $p.dtypes,
-        stats =  data.stats || null;
+    let dkeys = $p.dkeys;
+    let dtypes = $p.dtypes;
+    let stats =  data.stats || null;
     
     if (Number.isInteger(data.size)) {
         $p.dataSize = data.size;
@@ -39,7 +39,7 @@ export default function($p, dataProps) {
         if (dtypes[fid] == "index" || dtypes[fid] == "int" || dtypes[fid] == "string") {
             return range + 1;
         } else if (dtypes[fid] == "histogram") {
-            return range;
+            return range + 1;
         } else if (["nominal", "ordinal", "categorical"].indexOf(dtypes[fid]) > -1) {
             return data.TLB.length;
         } else if (dtypes[fid] in ["float", "double", "numeric"]) {

@@ -23,6 +23,16 @@ export default [
         type: 'class',
         function: pplot.AreaChart
     },
+    {
+        name: 'column',
+        exportData: true,
+        skipDefault: true,
+        getContext: false,
+        restartOnUpdate: false,
+        condition: vmap => vmap.mark === 'column', 
+        type: 'class',
+        function: pplot.BarChart
+    },
     // {
     //     name: 'animate',
     //     // exportData: true,

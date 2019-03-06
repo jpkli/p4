@@ -20,6 +20,7 @@ export default function ($p) {
             filterFlag: $p.uniform.uFilterFlag.data,
             filterControls: $p.uniform.uFilterControls.data.slice(),
             dataInput: $p.uniform.uDataInput.data,
+            resultDim: $p.resultDimension.slice(),
             attribute: {
                 aDataIdx: {
                     ids: $p.attribute.aDataIdx.data,
@@ -31,7 +32,8 @@ export default function ($p) {
                 },
                 aDataFieldId: $p.attribute.aDataFieldId.data,
                 aDataItemId: $p.attribute.aDataItemId.data
-            }
+            },
+            extraDim: $p.extraDimension
         }
         return control;
     }
@@ -59,7 +61,8 @@ export default function ($p) {
         $p.fieldWidths = reg.fieldWidths.slice();
         $p.fieldDomains = reg.fieldDomains.slice();
         $p.dataDimension = reg.dataDim.slice();
-    
+        $p.resultDimension = reg.resultDim.slice();
+        $p.extraDimension = reg.extraDim;
         //resume GPU Uniforms
         $p.uniform.uFieldCount.data = $p.fieldCount;
         $p.uniform.uDataSize.data = $p.dataSize;

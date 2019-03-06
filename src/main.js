@@ -38,8 +38,6 @@ export default function p4(options) {
     api.addModule(control);
     // api.addModule(output);
     // api.addModule(view);
-
-
     let outputs = output($p)
     api.result = outputs.result;
     api.addOperation('head', function() {
@@ -65,6 +63,17 @@ export default function p4(options) {
     
     $p.reset = api.head;
     $p.exportResult = api.result;
+
+    $p.setInput = function(inputName) {
+        api.resume(inputName);
+        return api;
+    }
+
+    $p.setOutput = function(outputName) {
+        api.register(outputName);
+        // console.log(api.result({outputTag: outputName, format: 'row'}))
+        return api;
+    }
 
     function configPipeline($p) {
         $p.extent = kernels.extent($p);
@@ -93,16 +102,6 @@ export default function p4(options) {
 
     api.index = function(indexes) {
         data.indexes = indexes;
-        return api;
-    }
-
-    api.out =  function(outputName) {
-        api.register(outputName);
-        return api;
-    }
-
-    $p.setInput = function(inputName) {
-        api.resume(inputName);
         return api;
     }
 
@@ -218,6 +217,7 @@ export default function p4(options) {
                 actions: interaction.event,
                 view: interaction.from,
                 condition: interaction.condition,
+                facet: interaction.facet,
                 callback: callback  
             })
         })
@@ -235,12 +235,12 @@ export default function p4(options) {
             })
             cache.addRows(newData)
             data = cache.data()
-
-            //update and combine all strValues
-            Object.keys(data.strValues).forEach((attr) => {
-                $p.strValues[attr] = Object.assign($p.strValues[attr], data.strValues[attr]);
-            })
         }
+
+        //update and combine all strValues
+        Object.keys(data.strValues).forEach((attr) => {
+            $p.strValues[attr] = Object.assign($p.strValues[attr], data.strValues[attr]);
+        })
 
         if(data.size > 0) {
             $p.dataSize = data.size;

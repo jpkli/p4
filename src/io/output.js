@@ -2,19 +2,20 @@ export default function($p) {
 
     let output = {};
     
-    output.result = function(format) {
+    output.result = function({format = 'row', outputTag = 'fGroupResults'}) {
         let objectArray = new Array();
         let match = null;
         if($p.uniform.uFilterFlag.data == 1){
             match = $p.getMatchBuffer()
         }
+        // $p.setInput(outputTag)
+        // console.log($p.extraDimension)
         for(let edi = 0; edi < $p.extraDimension; edi++) { 
-            let buf = $p.getResultBuffer({offset: [edi * $p.resultDimension[0], 0]});
+            let buf = $p.getResultBuffer({outputTag, offset: [edi * $p.resultDimension[0], 0]});
             let res = {};
             let offset = 0;
             let rs = 0;
             if(typeof buf.subarray !== 'function') return buf;
-
             if($p.indexes.length > 0) {
                 if ($p.resultDimension[0] > 1) {
                     res[$p.fields[rs]] = $p.attribute.aDataValx.data;
@@ -37,7 +38,7 @@ export default function($p) {
                     rs++;
                 }
             }
-
+ 
             var arraySize = $p.resultDimension[0] * $p.resultDimension[1];
             let fields = $p.fields.filter( f => f !== $p.indexes[2]);
             for (var i = rs; i < fields.length; i++) {
@@ -45,20 +46,18 @@ export default function($p) {
                 offset += arraySize;
             };
 
-        
             for (var i = 0; i < arraySize; i++) {
                 if(match !== null && match[i] == 0) continue
     
                 var obj = (format == 'array') ? new Array(fields.length) : {};
                 if($p.extraDimension > 0 && $p.indexes.length === 3) {
                     let fieldName = $p.indexes[2];
-                    obj[fieldName] = ($p.strLists.hasOwnProperty(fieldName)) ?  $p.strLists[fieldName][edi] : edi;
+                    obj[fieldName] = ($p.strLists.hasOwnProperty(fieldName)) ?  $p.strLists[fieldName][edi] : edi + 1;
                 } 
                 fields.forEach(function(f, fi) {
-                    var kid = $p.dkeys.indexOf(f),
-                        dtype = $p.dtypes[kid];
-
-                    var key = (format == 'array') ? fi : f;
+                    let kid = $p.dkeys.indexOf(f);
+                    let dtype = $p.dtypes[kid];
+                    let key = (format == 'array') ? fi : f;
 
                     if (dtype == 'string' && $p.strLists.hasOwnProperty(f)) {
                         obj[key] = $p.strLists[f][res[f][i]];
@@ -67,10 +66,8 @@ export default function($p) {
                     } else if ($p.uniqueValues.hasOwnProperty(f)) {
                         obj[key] = $p.uniqueValues[f][res[f][i]];
                     } else {
-                        obj[key] = Number.isNaN(res[f][i]) ? 0.0 : res[f][i];
+                        obj[key] = res[f][i];
                     }
-
-
                 });
                 objectArray.push(obj);
             }

@@ -40,7 +40,7 @@ export default function($p) {
                 return bin(spec, ii);
             })
             if(spec.$group) {
-                spec.$group = binAttrs.concat(spec.$group)
+                spec.$group = binAttrs.filter(a => spec.$group.indexOf(a) === -1).concat(spec.$group);
             } else {
                 spec.$group = binAttrs;
             }
@@ -52,6 +52,9 @@ export default function($p) {
             kernels.aggregate = programs.aggregate($p, spec);
         }
         kernels.aggregate.execute(spec);
+        if (typeof(spec.out) === 'string') {
+            $p.setOutput(spec.out)
+        }
         return kernels.aggregate.result;
     }
 
@@ -87,28 +90,29 @@ export default function($p) {
         let vmaps;
         if(vmap.facets) {
             let facet = vmap.facets;
-            let sortOpt = Object.keys(facet.sortBy)[0];
-            let sortAttr = facet.sortBy[sortOpt];
-            let result = $p.exportResult('row');
             let spec = facet.rows || facet.columns;
-            let sorted = spec[sortAttr].map((fields) => {
-                let values = result.map(r => r[fields])
-                let min = 0;
-                let max = Math.max(...values);
-                let normalizedValues = values.map( val => (val - min) / (max - min) )
-                if (sortOpt === 'var') sortOpt = 'variance';
-                let opt = typeof(arrayOpt[sortOpt]) === 'function' ? sortOpt : 'avg'
-                return {
-                    name: fields,
-                    value: arrayOpt[opt](normalizedValues)
-                }
-            })
-            .sort((a, b) => b.value - a.value )
-            .map(r => r.name);
-            spec[sortAttr] = sorted;
+            if(facet.sortBy !== undefined) {
+                let sortOpt = Object.keys(facet.sortBy)[0];
+                let sortAttr = facet.sortBy[sortOpt];
+                let result = $p.exportResult('row');
+                let sorted = spec[sortAttr].map((fields) => {
+                    let values = result.map(r => r[fields])
+                    let min = Math.min(...values);
+                    let max = Math.max(...values);
+                    let normalizedValues = values.map( val => (val - min) / (max - min) )
+                    if (sortOpt === 'var') sortOpt = 'variance';
+                    let opt = typeof(arrayOpt[sortOpt]) === 'function' ? sortOpt : 'avg'
+                    return {
+                        name: fields,
+                        value: arrayOpt[opt](normalizedValues)
+                    }
+                })
+                .sort((a, b) => b.value - a.value )
 
+                console.log(sorted)
+                spec[sortAttr] = sorted.map(r => r.name);;
+            }
             let encodings = Object.keys(vmap).filter(k => k !== 'facets')
-
             let variables = Object.keys(spec)
             let minLoopCount = Math.min(...variables.map(v => spec[v].length))
 
@@ -123,19 +127,24 @@ export default function($p) {
                     rule[code] = spec[variables[vi]][i]
                     }
                 })
-                vmaps[i] = rule
+                vmaps[i] = rule;
+                if(facet.brush && i === 0) {
+                    vmaps[i].brush = facet.brush;
+                    vmaps[i].brush.facet = 'rows'
+                }
             }
         } else {
             vmaps = Array.isArray(vmap) ? vmap : [vmap];
         }
 
         if($p.grid.views.length < vmaps.length) {
-            $p.grid.reset();
+            $p.grid.reset();  
             $p.views = $p.grid.generateViews({
                 count: vmaps.length, 
                 width: $p.viewport[0],
                 height: $p.viewport[1],
-                padding: $p.padding
+                padding: $p.padding,
+                gridlines: vmap.gridlines
             })
         }
         vmaps.forEach( (vmap, vi) => {
@@ -143,11 +152,7 @@ export default function($p) {
                 kernels.visualize = programs.visualize($p);
             }
             if (vmap.in) {
-                console.log('load input', vmap.in)
                 $p.setInput(vmap.in);
-
-                // $p.uniform.uDataInput.data = $p.framebuffer[vmap.in].texture;
-
             }
             let viewIndex = vi;
             if(typeof vmap.id == 'string') {
@@ -182,7 +187,7 @@ export default function($p) {
                 $p.respond();
             }
         })
-        $p.reset();
+        // $p.reset();
     }
 
     return operations;

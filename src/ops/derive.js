@@ -25,7 +25,7 @@ export default function derive($p, spec) {
         var formula = spec[d].replace(re, function(matched){
             // console.log(matched);
             var index = fields.indexOf(matched);
-            return 'this.getData ('  + index + ', pos.x, pos.y)';
+            return 'this.getNonIndexedData ('  + index + ', pos.x, pos.y)';
         });
         marco += 'if (index == ' + i + ') return ' + formula + "; \n \telse ";
     });
@@ -35,9 +35,6 @@ export default function derive($p, spec) {
     $p.uniform("uOptMode", "float", 0)
         .uniform("uDeriveId", "int", 0)
         .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
-
-
-    console.log(marco);
 
     function vertexShader() {
         gl_PointSize = 1.0;
@@ -158,6 +155,7 @@ export default function derive($p, spec) {
 
                 $p.fieldDomains[fieldId] = d;
                 $p.fieldWidths[fieldId] = d[1] - d[0] + 1;
+                console.log(derivedFields[i], $p.fieldWidths[fieldId], d[1], d[0])
             });
             $p.uniform.uFieldDomains.value($p.fieldDomains);
             $p.uniform.uFieldWidths.data = $p.fieldWidths;
@@ -171,7 +169,8 @@ export default function derive($p, spec) {
             fid = options.fieldId || options.deriveFieldId || 0,
             rowSize = Math.min(resultSize, $p.dataDimension[0]),
             colSize = Math.ceil(resultSize/$p.dataDimension[0]);
-
+        
+        $p.bindFramebuffer('DerivedValues');
         var result = new Float32Array(rowSize * colSize * 4);
         gl.readPixels(0, dataDimension[1]*fid, rowSize, colSize, gl.RGBA, gl.FLOAT, result);
         return result.filter(function(d, i){ return i%4===3;} ); //return channel alpha in rgba

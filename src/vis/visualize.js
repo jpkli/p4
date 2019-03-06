@@ -86,7 +86,7 @@ export default function visualize($p) {
     
         let colorMode = 1;
         let colorMap;
-
+        
         let viewSetting = {
             domain: visDomain,
             fields: $p.fields,
@@ -112,6 +112,9 @@ export default function visualize($p) {
                 }
                 if($p.fields.indexOf(vmap.height) > -1) {
                     visDomain[vmap.height][0] = 0;
+                }
+                if($p.fields.indexOf(vmap.y) > -1) {
+                    visDomain[vmap.y][0] = 0;
                 }
             } 
 
@@ -196,7 +199,7 @@ export default function visualize($p) {
             gl.lineWidth(vmap.size || 1.0);
         }
 
-        extend($p, vmap, viewIndex);
+        extend($p, vmap, viewIndex, visDomain);
 
         if(!$p.skipRender) {
             renderers[renderer].render(primitive);
@@ -221,13 +224,12 @@ export default function visualize($p) {
                 let response = {};
                 let viewId = vmap.id || $p.views[viewIndex].id;
                 response[viewId] = vmap[action];
-                $p.interactions.push({
+                let interactOptions = Object.assign({
                     event: action,
-                    condition: vmap[action].condition,
                     from: viewId,
                     response: response,
-                    callback: vmap[action].callback
-                })
+                }, vmap[action])
+                $p.interactions.push(interactOptions)
             })
         }
     }

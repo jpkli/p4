@@ -89,8 +89,8 @@ export default function match($p) {
         });
 
         var viewSelections = Object.keys($p.crossfilters).filter(function(s){
-            return !$p.crossfilters[s].hasOwnProperty('$in');
-        });;
+            return !$p.crossfilters[s].hasOwnProperty('$in'); 
+        });
      
         if(filterSelections.length || viewSelections.length){
             filterControls = new Array(fieldCount).fill(0);

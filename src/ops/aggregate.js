@@ -276,10 +276,12 @@ export default function aggregate($p) {
             $p.fieldWidths[ii] = resultDomains[ii - $p.indexes.length][1] - resultDomains[ii - $p.indexes.length][0];
         }
         $p.getResultBuffer = aggregate.result;
+        // console.log(aggregate.result({outputTag}))
     }
 
-    aggregate.result = function(arg, outputTag = 'fGroupResults') {
+    aggregate.result = function(arg) {
         let options = arg || {};
+        let outputTag =  arg.outputTag || 'fGroupResults';
         let offset = options.offset || [0, 0];
         let resultSize = options.size || $p.resultDimension[0] * $p.resultDimension[1];
         let rowTotal = Math.min(resultSize, $p.resultDimension[0]);
