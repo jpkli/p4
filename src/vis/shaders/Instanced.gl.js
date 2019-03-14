@@ -45,7 +45,7 @@ export default class Instanced extends Renderer{
     fragmentShader() {
         var valid = new Bool();
         valid = this.vResult <= this.uVisLevel + 0.01 && this.vResult >= this.uVisLevel - 0.01;
-        if (this.uVisMark == 1) {
+        if (this.uVisMark == 1) { // for circles 
             var dist = length(gl_PointCoord.xy - vec2(0.5, 0.5));
             if (dist > 0.5) discard;
             var delta = 0.15;

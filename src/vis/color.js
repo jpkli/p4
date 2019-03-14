@@ -152,7 +152,7 @@ function mapColorRGB({fieldId = 'int', value = 'float'}) {
             colorRGB = texture2D(this.tColorGradient, vec2(value, 1.0)).rgb;
         } else {
             d = this.uVisDomains[fieldId];
-            intValue = int(value * (d.y - d.x));
+            intValue = int(value * (d.y - d.x+1.0) + d.x);
             if(intValue >= this.uColorCount) {
                 colorRGB = vec3(0.0, 0.0, 0.0);
             } else {

@@ -32,7 +32,7 @@ export function encode($p, vmap, colorManager) {
             }
         }
     } else {
-        if($p.strLists.hasOwnProperty(vmap.color)) {
+        if($p.strLists.hasOwnProperty($p.fields[vmapIndex[2]])) {
             $p.uniform.uColorMode.data = 0;
         } else {
             $p.uniform.uColorMode.data = 1;

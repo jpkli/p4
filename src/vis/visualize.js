@@ -82,7 +82,7 @@ export default function visualize($p) {
         let dimSetting = encode($p, vmap, colorManager);
 
         let pv = $p.views[viewIndex];
-        let colorInfo = pv.color || vmap.color;
+        let colorInfo = (typeof(vmap.colors) === 'object') ? vmap.colors : pv.color;
     
         let colorMode = 1;
         let colorMap;
@@ -136,8 +136,8 @@ export default function visualize($p) {
                     }
                     colorMap = colorInfo.range || colorInfo.values; 
                 }
-                
             }
+
             colorManager.updateColors(colorMap, colorMode);
 
         } else {

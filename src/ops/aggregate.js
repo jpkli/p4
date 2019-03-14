@@ -13,6 +13,7 @@ export default function aggregate($p) {
     $p.uniform('uAggrOpt', 'float', 2.0);
     $p.uniform("uGroupFields", "int",   [0, -1, -1]);
     $p.uniform("uExtraKeyValue", "float",  0.0);
+    $p.varying("vIsFiltered", "float");
     $p.extraDimension = 1;
 
     $p.program(
