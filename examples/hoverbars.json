@@ -20,14 +20,14 @@
             "id": "c1",
             "width": 360,
             "height": 360,
-            "padding": {"left": 120, "right": 10, "top": 10, "bottom":40},
+            "padding": {"left": 120, "right": 10, "top": 50, "bottom":40},
             "offset": [0, 0]
         },
         {
             "id": "c2",
             "width": 360,
             "height": 360,
-            "padding": {"left": 120, "right": 10, "top": 10, "bottom":40},
+            "padding": {"left": 120, "right": 10, "top": 50, "bottom":40},
             "offset": [380, 0]
         }
     ],
@@ -36,8 +36,7 @@
             "$aggregate" : {
                 "$group": "MotherEdu",
                 "$reduce" : {
-                    "Babies": { "$count": "*"},
-                    "AvgWeight": { "$avg": "BabyWeight"}
+                    "Babies": { "$count": "*"}
                 }
             }
         },
@@ -57,8 +56,7 @@
             "$aggregate" : {
                 "$group": "FatherEdu",
                 "$reduce" : {
-                    "Babies": { "$count": "*"},
-                    "AvgWeight": { "$avg": "BabyWeight"}
+                    "Babies": { "$count": "*"}
                 }
             }
         },
@@ -75,6 +73,7 @@
             "$interact": {
                 "event": "hover",
                 "from": ["c1", "c2"],
+                "condition": {"y": true},
                 "response" : {
                     "c1": {
                         "unselected": {"color": "gray"}

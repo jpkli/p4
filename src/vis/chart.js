@@ -172,8 +172,6 @@ export default function chart(frontSvg, backSvg, arg) {
 
     if((vmap.hasOwnProperty('x') || vmap.hasOwnProperty('width')) && !Array.isArray(vmap.x)) {
         let xAxisTitle = vmap.x || vmap.width;
-        // xAxisTitle = xAxisTitle.replace(/_/g, ' ');
-        // axisOption.x.grid = 1;
         labels.append("g")
           .append("text")
             .attr("x", width/2)
@@ -188,8 +186,6 @@ export default function chart(frontSvg, backSvg, arg) {
     }
     if((vmap.hasOwnProperty('y') || vmap.hasOwnProperty('height')) && !Array.isArray(vmap.y)) {
         let yAxisTitle = vmap.y || vmap.height;
-        // yAxisTitle = yAxisTitle.replace(/_/g, ' ');
-        // axisOption.y.grid = 1;
         if(!Array.isArray(vmap.y)) {
             labels.append("g")
               .append("text")
@@ -251,6 +247,8 @@ export default function chart(frontSvg, backSvg, arg) {
             x.remove();
             y.remove();
         }
+
+        labels.remove();
     }
     chartLayer.removeLegend = function() {
         if(showLegend) {

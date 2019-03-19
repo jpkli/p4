@@ -1,5 +1,5 @@
 export default function(pp) {
-    pp.input({
+    let t = pp.input({
         type: 'text',
         method: 'http',
         source: '/data/ross-stats-rt-kps.fb',
@@ -13,8 +13,9 @@ export default function(pp) {
             secondary_rollbacks: 'int'
         },
         uniqueKeys: ['real_TS'],
-        dimX: 13
-        // indexes: ['real_TS', 'KP_ID']
+        // dimX: 13
+        indexes: [ 'real_TS', 'KP_ID']
+        // indexes: [ 'KP_ID', 'real_TS',]
     })
     .aggregate({
         $group: [ 'real_TS'],
@@ -22,17 +23,18 @@ export default function(pp) {
             'AvgValues': {$avg: 'time_ahead_GVT'}
         }
     })
-    .visualize({
+    .visualize([{
         id: 'c2',
         mark: 'area',
         x: 'real_TS',
         y: 'AvgValues',
         color: 'green',
         zero: true,
-    })
-    .head()
-    .aggregate({
-        $group: ['PE_ID'],
+    }]);
+    // .head()
+    
+    t.aggregate({
+        $group: [ 'PE_ID'],
         $reduce: {
             time_ahead_GVT: {$avg: 'time_ahead_GVT'}
         }
@@ -45,31 +47,34 @@ export default function(pp) {
         y: 'time_ahead_GVT',
         color: 'red'
     })
-    .head()
-    .visualize({
-        id: "c1",
-        mark: 'circle',
-        y: 'time_ahead_GVT',
-        x: 'PE_ID',
-        append: true,
-        // size: 'secondary_rollbacks',
-        size: 10,
-        // color: 'secondary_rollbacks',
-        opacity: 0.5,
-        animate: true
-    })
-    .interact({
-        from: 'c2',
-        event: 'brush',
-        condition: {x: true, y: false},
-        response : {
-            "c1": {
-                "unselected": {"color": "gray"}
-            },
-            "c2": {
-                "selected": {"color": "orange"}
-            }
-        }
-    })
+    // .head()
+
+    // t.visualize({
+    //     id: "c1",
+    //     mark: 'circle',
+    //     y: 'time_ahead_GVT',
+    //     x: 'PE_ID',
+    //     append: true,
+    //     // size: 'secondary_rollbacks',
+    //     size: 10,
+    //     color: 'red',
+    //     // color: 'secondary_rollbacks',
+    //     opacity: 0.5,
+    //     animate: true
+    // })
+    // .interact({
+    //     from: 'c2',
+    //     event: 'brush',
+    //     condition: {x: true, y: false},
+    //     response : {
+    //         "c1": {
+    //             "unselected": {"opacity": 0}
+    //         },
+    //         "c2": {
+    //             "selected": {"color": "orange"}
+    //         }
+    //     }
+    // })
+    t.commit()
 
 }

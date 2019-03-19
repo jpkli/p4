@@ -2,6 +2,7 @@
 import {assert} from 'chai';
 import {normal} from 'jStat';
 import cstore from '../src/cstore'
+import * as ctypes from '../src/ctypes'
 
 let equal = assert.equal;
 let closeTo = assert.closeTo;
@@ -63,6 +64,49 @@ export function randomJSONs(arg) {
             }
         });
     }
+    return data;
+}
+
+export function randomArrays(arg) {
+    let options = arg || {};
+    let size = options.size || 0;
+    let props = options.props || [];
+    let data = new Array(size);
+    for(let i = 0; i < size; i++) {
+        data[i] = [];
+        props.forEach(function(prop, pi) {
+            if(prop.hasOwnProperty('values')){
+                let vid = parseInt( Math.round( Math.random() * (prop.values.length - 1) ) );
+                data[i][pi] = prop.values[vid];
+            } else {
+                let value = boundedRandom(prop);
+                data[i][pi] = (prop.dtype == 'float') ? parseFloat(value) : Math.round(value);
+            }
+        });
+    }
+    return data;
+}
+
+export function randomTypedColumns(arg) {
+    let options = arg || {};
+    let size = options.size || 0;
+    let props = options.props || [];
+    let data = new Array(props.length);
+
+    props.forEach(function(prop, pi) {
+        let column = new ctypes[prop.dtype](size);
+        for(let i = 0; i < size; i++) {
+            if(prop.hasOwnProperty('values')){
+                let vid = parseInt( Math.round( Math.random() * (prop.values.length - 1) ) );
+                column[i] = prop.values[vid];
+            } else {
+                let value = boundedRandom(prop);
+                column[i] = (prop.dtype == 'float') ? parseFloat(value) : Math.round(value);
+            }
+        }
+        data[pi] = column;
+    });
+
     return data;
 }
 

@@ -179,7 +179,7 @@ export default function($p) {
                     encoding = Object.assign({}, vmap, $p.responses[viewTag][$p._responseType]);
                 }
             }
-            if(encoding.opacity != 0){
+            if(encoding.opacity !== 0){
                 kernels.visualize({
                     vmap: encoding,
                     viewIndex: viewIndex

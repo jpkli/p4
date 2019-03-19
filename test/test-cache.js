@@ -14,7 +14,7 @@ export default function({
         schema: schema
     });
 
-    let cpuData = db.export();
+    // let cpuData = db.export();
    
     let config = {
         container: "p4",
@@ -26,19 +26,19 @@ export default function({
         .cache('initData')
         .result('row')
 
+    console.log(gpuData)
 
-
-    describe('Cache data in system memory', function() {
+    // describe('Cache data in system memory', function() {
     
-        it('cached data size should equal ' + data.length, function() {
-            assert.equal(cpuData.length, data.length);
-        });
+    //     it('cached data size should equal ' + data.length, function() {
+    //         assert.equal(cpuData.length, data.length);
+    //     });
     
-        it('result should be closely equal with delta = ' + precision, function() {
-            validate(data, cpuData, precision);
-        });
+    //     it('result should be closely equal with delta = ' + precision, function() {
+    //         validate(data, cpuData, precision);
+    //     });
     
-    });
+    // });
 
     describe('Cache data in GPU memory', function() {
     

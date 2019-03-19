@@ -121,7 +121,7 @@ export default function visualize($p) {
             // pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
             pv.domains = visDomain;
             // $p.uniform.uVisDomains.data = pv.domains;
-            if(vmap.append !== true && pv.hasOwnProperty('chart')) {
+            if((vmap.append !== true ) && pv.hasOwnProperty('chart')) {
                 pv.chart.svg.remove();
                 pv.chart.removeAxis();
             }
@@ -201,11 +201,13 @@ export default function visualize($p) {
 
         extend($p, vmap, viewIndex, visDomain);
 
-        if(!$p.skipRender) {
-            renderers[renderer].render(primitive);
-        } else {
+        if($p.skipRender || vmap.project) {
             pv.chart.removeAxis();
             if($p.fields.indexOf(vmap.color)!==-1) pv.chart.removeLegend();
+        }
+        
+        if(!$p.skipRender) {
+            renderers[renderer].render(primitive);
         }
         $p.skipRender = false;
         if($p.revealDensity) enhance({

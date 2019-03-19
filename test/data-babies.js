@@ -1,4 +1,4 @@
-import { randomJSONs } from './utils';
+import { randomJSONs, randomArrays } from './utils';
 
 let educations = ['High School', 'Some College', 'AA/AS', 'Bachelor', 'Master', 'Doctorate']
 let races = ['White', 'Asian', 'Black', 'Mixed'];
@@ -24,9 +24,14 @@ for(let prop of dataProps) {
     schema[prop.name] = prop.dtype;
 }
 
-export default function(n) {
-    return {
-        data: randomJSONs({props: dataProps, size: n}),
-        schema: schema
-    }
+function Babies(arg) {
+    let dataSize = (Number.isInteger(arg)) ? arg : arg.size;
+    let props = arg.props || dataProps;
+    let type = arg.type || 'json';
+    let data = (type === 'json') ? randomJSONs({props: props, size: dataSize}): randomArrays({props: props, size: dataSize});
+    return { data, schema };
 }
+
+Babies.schema = schema;
+
+export default Babies;

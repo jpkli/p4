@@ -4,8 +4,8 @@ import TimeSeries from './data-timeseries';
 
 export default function () {
     let dataset = TimeSeries({
-        timesteps: 128,
-        series: 128,
+        timesteps: 20,
+        series: 512,
         interval: 100,
         props: [
             {name: 'traffic', dtype: 'int',  dist: 'normal', min: 0, max: 10000, mean: 500, std: 180},
@@ -23,12 +23,12 @@ export default function () {
 
     let config = {
         container: "p4",
-        viewport: [800, 600],
+        viewport: [800, 800],
         // async: true
     };
     
     let data = db.data();
-    // data.indexes = ['timestamp', 'sid'];
+    data.indexes = ['timestamp', 'sid'];
     // data.indexes = ['sid', 'timestamp'];
 
     // let views = [
@@ -37,79 +37,79 @@ export default function () {
 
     let views = [
         {
-            "id": "c1",
-            "width": 360,
-            "height": 360,
+            "width": 800,
+            "height": 400,
             "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
-            "offset": [380, 0],
+            "offset": [0, 400],
             "gridlines": {x: true, y: true}
         },
-        {
-            "id": "c2",
-            "width": 360,
-            "height": 360,
-            "padding": {"left": 120, "right": 10, "top": 10, "bottom": 50},
-            "offset": [0, 0]
-        }
+        // {
+        //     "id": "c2",
+        //     "width": 360,
+        //     "height": 360,
+        //     "padding": {"left": 120, "right": 10, "top": 10, "bottom": 50},
+        //     "offset": [0, 360]
+        // }
     ];
 
     let gpu = p4(config).data(data).view(views);
-    let animate = animation(gpu.ctx)
-    gpu.extend({
-        name: 'animate',
-        exportData: false,
-        skipDefault: true,
-        condition: function(vmap) { return vmap.animate === true}, 
-        procedure: function(result) {
-            animate();
-        },
-    })
+    // let animate = animation(gpu.ctx)
+    // gpu.extend({
+    //     name: 'animate',
+    //     exportData: false,
+    //     skipDefault: true,
+    //     condition: function(vmap) { return vmap.animate === true}, 
+    //     procedure: function(result) {
+    //         animate();
+    //     },
+    // })
 
     let spec = [
+        // {
+        //     $visualize: {
+        //         id: "c2",
+        //         mark: 'circle',
+        //         // color: 'sattime',
+        //         x: 'sattime',
+        //         size: 9.0,
+        //         y: 'traffic',
+        //         brush: {
+        //             unselected: {color: '#cccccc'}
+        //         },
+        //         // animate: true,
+        //         // zoom: {
+        //         //     unselected: {color: '#cccccc'}
+        //         // },
+        //         color: 'teal',
+        //         opacity: 'auto'
+        //     }
+        // },
         {
             $visualize: {
-                id: "c1",
-                mark: 'circle',
+                id: 'c1',
+                mark: 'line',
                 // color: 'sattime',
-                x: 'sattime',
-                size: 9.0,
+                color: 'blue',
+                x: 'timestamp',
+                size: 1,
                 y: 'traffic',
-                brush: {
-                    unselected: {color: '#cccccc'}
-                },
                 // animate: true,
-                // zoom: {
-                //     unselected: {color: '#cccccc'}
-                // },
-                color: 'teal',
+                // opacity: 0.25,
                 opacity: 'auto'
             }
         },
-        {
-            $visualize: {
-                id: "c2",
-                mark: 'circle',
-                // color: 'sattime',
-                color: 'blue',
-                x: 'sid',
-                size: 'sattime',
-                y: 'traffic',
-                // animate: true,
-                opacity: 0.9
-            }
-        },
-        {
-            $interact :{
-                from: 'c1',
-                event: ['zoom', 'pan'],
-                // condition: {y: true},
-                response : {
-                    "c2": {
-                        "unselected": {"color": "gray"}
-                    }
-                }
-            }
-        }
+        // {
+        //     $interact :{
+        //         from: 'c1',
+        //         event: ['pan', 'zoom'],
+        //         // condition: {y: true},
+        //         response : {
+        //             "c2": {
+        //                 "unselected": {"color": "gray"}
+        //             }
+        //         }
+        //     }
+        // }
         
     ]
     

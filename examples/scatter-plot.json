@@ -19,7 +19,7 @@
         {
             "$match": {
                 "BabyWeight": [0, 15],
-                "MotherWeight": [70, 370]
+                "MotherWeight": [70, 170]
             }
         },
         {

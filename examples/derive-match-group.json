@@ -41,9 +41,9 @@
         {
             "$visualize": {
                 "mark": "bar",
-                "height": "Babies",
+                "height": "BabyAvgWeight",
                 "x": "AgeDiff",
-                "color": "BabyAvgWeight"
+                "color": "Babies"
             }
         }
     ]
