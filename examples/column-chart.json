@@ -1,13 +1,8 @@
 {
   "operations": [
     {
-      "$derive": {
-        "AgeDiff": "FatherAge - MotherAge"
-      }
-    },
-    {
       "$aggregate": {
-        "$group": "AgeDiff",
+        "$group": "MotherEdu",
         "$collect": {
           "Babies": {"$count": "*"}
         }
@@ -17,8 +12,13 @@
       "$visualize": {
         "mark": "bar",
         "color": "steelblue",
-        "x": "AgeDiff",
-        "height": "Babies"
+        "x": "MotherEdu",
+        "height": "Babies",
+        "hover": {
+          "selected": {
+            "color": "orange"
+          }
+        }
       }
     }
   ]

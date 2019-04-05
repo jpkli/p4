@@ -28,20 +28,14 @@
       }
     },
     {
-      "$aggregate": {
-        "$group": "MotherEdu",
-        "$collect": {
-          "Babies": {"$count": "*"}
-        }
-      }
-    },
-    {
       "$visualize": {
         "id": "c1",
-        "mark": "bar",
-        "color": "steelblue",
-        "y": "MotherEdu",
-        "width": "Babies"
+        "mark": "circle",
+        "size": 8,
+        "color": "orange",
+        "opacity": "auto",
+        "x": "MotherHeight",
+        "y": "MotherWeight"
       }
     },
     {

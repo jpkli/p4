@@ -1,0 +1,29 @@
+{
+  "operations": [
+    {
+      "$aggregate": {
+        "$group": ["MotherEdu"],
+        "$collect": {
+          "Babies": {"$count": "*"},
+          "AvgWeight": {"$avg": "BabyWeight"}
+        }
+      }
+    },
+    {
+      "$visualize": [
+        {
+        "mark": "bar",
+        "color": "steelblue",
+        "x": "MotherEdu",
+        "height": "Babies"
+      },
+      {
+        "mark": "bar",
+        "color": "steelblue",
+        "x": "MotherEdu",
+        "height": "AvgWeight"
+      }
+      ]
+    }
+  ]
+}

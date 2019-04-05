@@ -1,41 +1,23 @@
 {
-    "data" : {
-        "source": "data/NatalityUSA2015.csv",
-        "format": "csv",
-        "schema": {
-            "BirthMonth"   : "int",
-            "BabyGender"   : "string",
-            "BabyWeight"   : "float",
-            "MotherAge"    : "int",
-            "MotherRace"   : "string",
-            "MotherStatus" : "string",
-            "MotherEdu"    : "string",
-            "MotherHeight" : "float",
-            "MotherWeight" : "float",
-            "MotherWgtGain": "float"
-        }
+  "operations": [
+    {
+      "$match": { "MotherAge": [15, 46] }
     },
-    "operations": [
-        {
-            "$match": {
-                "MotherAge": [15, 46]
-            }
-        },
-        {
-            "$aggregate": {
-                "$bin": {"MotherAge": 6},
-                "$reduce" : {
-                    "Babies": { "$count": "*"}
-                }
-            }
-        },
-        {
-            "$visualize": {
-                "mark": "bar",
-                "color": "steelblue",
-                "x": "MotherAge",
-                "height": "Babies"
-            }
+    {
+      "$aggregate": {
+        "$bin": { "MotherAge": 6 },
+        "$collect": {
+          "Babies": { "$count": "*" }
         }
-    ]
+      }
+    },
+    {
+      "$visualize": {
+        "mark": "bar",
+        "color": "steelblue",
+        "x": "MotherAge",
+        "height": "Babies"
+      }
+    }
+  ]
 }

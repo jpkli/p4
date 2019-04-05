@@ -1,50 +1,31 @@
 {
-    "data" : {
-        "source": "data/NatalityUSA2015.csv",
-        "format": "csv",
-        "schema": {
-            "BirthMonth"   : "int",
-            "BabyGender"   : "string",
-            "BabyWeight"   : "float",
-            "MotherAge"    : "int",
-            "MotherRace"   : "string",
-            "MotherStatus" : "string",
-            "MotherEdu"    : "string",
-            "MotherHeight" : "float",
-            "MotherWeight" : "float",
-            "MotherWgtGain": "float",
-            "FatherAge"    : "int",
-            "FatherRace"   : "string",
-            "FatherEdu"    : "string"
-        }
+  "operations": [
+    {
+      "$derive": {
+        "AgeDiff": "abs(FatherAge - MotherAge)"
+      }
     },
-    "operations": [
-        {
-            "$derive": {
-                "AgeDiff": "abs(FatherAge - MotherAge)"
-            }
-        },
-        {
-            "$match": {
-                "AgeDiff": [0, 10]
-            }
-        },
-        {
-            "$aggregate" : {
-                "$group": "AgeDiff",
-                "$reduce" : {
-                    "Babies": { "$count": "*"},
-                    "BabyAvgWeight": { "$avg": "BabyWeight"}
-                }
-            }
-        },
-        {
-            "$visualize": {
-                "mark": "bar",
-                "height": "BabyAvgWeight",
-                "x": "AgeDiff",
-                "color": "Babies"
-            }
+    {
+      "$match": {
+        "AgeDiff": [0, 10]
+      }
+    },
+    {
+      "$aggregate": {
+        "$group": "AgeDiff",
+        "$collect": {
+          "Babies": {"$count": "*"},
+          "BabyAvgWeight": {"$avg": "BabyWeight"}
         }
-    ]
+      }
+    },
+    {
+      "$visualize": {
+        "mark": "bar",
+        "height": "Babies",
+        "x": "AgeDiff",
+        "color": "BabyAvgWeight"
+      }
+    }
+  ]
 }

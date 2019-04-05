@@ -1,12 +1,6 @@
 {
   "operations": [
     {
-      "$match": {
-        "MotherAge": [16, 60],
-        "FatherAge": [16, 60]
-      }
-    },
-    {
       "$aggregate": {
         "$group": ["FatherAge", "MotherAge"],
         "$collect": {
@@ -21,7 +15,13 @@
         "mark": "rect",
         "x": "MotherAge",
         "y": "FatherAge",
-        "color": "Babies"
+        "brush": {
+          "selected": {
+            "color": "red"
+          }
+        },
+        "color": "teal",
+        "opacity": "Babies"
       }
     }
   ]

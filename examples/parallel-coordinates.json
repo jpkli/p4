@@ -1,50 +1,35 @@
 {
-    "data" : {
-        "source": "data/NatalityUSA2015.csv",
-        "format": "csv",
-        "schema": {
-            "BirthMonth"   : "int",
-            "BabyGender"   : "string",
-            "BabyWeight"   : "float",
-            "MotherAge"    : "int",
-            "MotherRace"   : "string",
-            "MotherStatus" : "string",
-            "MotherEdu"    : "string",
-            "MotherHeight" : "float",
-            "MotherWeight" : "float",
-            "MotherWgtGain": "float"
-        }
+  "views": [
+    {
+      "id": "chart",
+      "width": 600,
+      "height": 360,
+      "padding": {"left": 50, "right": 10, "top" : 50, "bottom": 10},
+      "offset": [0, 200]
+    }
+  ],
+  "operations": [
+    {
+      "$match": {
+        "MotherAge": [20, 30]
+      }
     },
-    "views": [
-        {
-            "id": "chart",
-            "width": 600,
-            "height": 360,
-            "padding": {"left": 50, "right": 10, "top" : 50, "bottom": 10}
+    {
+      "$visualize": {
+        "mark": "line",
+        "color": "steelblue",
+        "opacity": 0.15,
+        "y": [
+          "BabyWeight",
+          "MotherWeight",
+          "MotherWgtGain",
+          "MotherHeight"
+        ], "brush": {
+          "unselected": {
+            "color": "lightgrey"
+          }
         }
-    ],
-    "operations": [
-        {
-            "$match": {
-                "MotherAge": [20, 30]
-            }
-        },
-        {
-            "$visualize": {
-                "mark": "line",
-                "color": "steelblue",
-                "opacity": 0.15,
-                "y": [
-                    "BabyWeight",
-                    "MotherWeight",
-                    "MotherWgtGain",
-                    "MotherHeight"
-                ], "brush": {
-                    "unselected": {
-                        "color": "lightgrey"
-                    }
-                }
-            }
-        }
-    ]
+      }
+    }
+  ]
 }

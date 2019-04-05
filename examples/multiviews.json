@@ -1,110 +1,94 @@
 {
-    "data" : {
-        "source": "data/NatalityUSA2015.csv",
-        "format": "csv",
-        "schema": {
-            "BirthMonth"   : "int",
-            "BabyGender"   : "string",
-            "BabyWeight"   : "float",
-            "MotherAge"    : "int",
-            "MotherRace"   : "string",
-            "MotherStatus" : "string",
-            "MotherEdu"    : "string",
-            "MotherHeight" : "float",
-            "MotherWeight" : "float",
-            "MotherWgtGain": "float"
-        }
+  "views": [
+    {
+      "id": "c1",
+      "width": 280,
+      "height": 250,
+      "padding": {"left": 60, "right": 10, "top": 10, "bottom": 50},
+      "offset": [300, 0]
     },
-    "views": [
-        {
-            "id": "c1",
-            "width": 280,
-            "height": 250,
-            "padding": {"left": 60, "right": 10, "top": 10, "bottom": 50},
-            "offset": [300, 0]
-        },
-        {
-            "id": "c2",
-            "width": 280,
-            "height": 250,
-            "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
-            "offset": [0, 0]
-        },
-        {
-            "id": "c3",
-            "width": 600,
-            "height": 200,
-            "padding": {"left": 50, "right": 30, "top": 30, "bottom": 10},
-            "offset": [0, 250]
+    {
+      "id": "c2",
+      "width": 280,
+      "height": 250,
+      "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
+      "offset": [0, 0]
+    },
+    {
+      "id": "c3",
+      "width": 600,
+      "height": 200,
+      "padding": {"left": 50, "right": 30, "top": 30, "bottom": 10},
+      "offset": [0, 250]
+    }
+  ],
+  "operations": [
+    {
+      "$visualize": {
+        "id": "c1",
+        "mark": "circle",
+        "size": 8,
+        "color": "orange",
+        "opacity": "auto",
+        "x": "MotherWeight",
+        "y": "BabyWeight"
+      }
+    },
+    {
+      "$visualize": {
+        "id": "c3",
+        "mark": "line",
+        "color": "steelblue",
+        "opacity": "auto",
+        "y": [
+          "BabyWeight",
+          "MotherWeight",
+          "MotherWgtGain",
+          "MotherHeight"
+        ]
+      }
+    },
+    {
+      "$aggregate" : {
+        "$group": "MotherAge",
+        "$collect": {
+          "Babies": { "$count": "*"}
         }
-    ],
-    "operations": [
-        {
-            "$visualize": {
-                "id": "c1",
-                "mark": "circle",
-                "size": 8,
-                "color": "orange",
-                "opacity": "auto",
-                "x": "MotherWeight",
-                "y": "BabyWeight"
-            }
-        },
-        {
-            "$visualize": {
-                "id": "c3",
-                "mark": "line",
-                "color": "steelblue",
-                "opacity": "auto",
-                "y": [
-                    "BabyWeight",
-                    "MotherWeight",
-                    "MotherWgtGain",
-                    "MotherHeight"
-                ]
-            }
-        },
-        {
-            "$aggregate" : {
-                "$group": "MotherAge",
-                "$reduce" : {
-                    "Babies": { "$count": "*"}
-                }
-            }
-        },
-        {
-            "$visualize": {
-                "id": "c2",
-                "mark": "bar",
-                "color": "steelblue",
-                "x": "MotherAge",
-                "height": "Babies",
-                "brush": {
-                    "condition": {"x": "true"},
-                    "selected": {
-                        "color": "orange"
-                    }
-                }
-            }
-        },
-        {
-            "$interact": {
-                "event": "brush",
-                "from": ["c1", "c3"],
-                "response" : {
-                    "c1": {
-                        "unselected": {"color": "gray"}
-                    },
-                    "c2": {
-                        "selected": {"color": "orange"}
-                    },
-                    "c3": {
-                        "unselected": {
-                            "opacity": 0
-                        }
-                    }
-                }
-            }
+      }
+    },
+    {
+      "$visualize": {
+        "id": "c2",
+        "mark": "bar",
+        "color": "steelblue",
+        "x": "MotherAge",
+        "height": "Babies",
+        "brush": {
+          "condition": {"x": "true"},
+          "selected": {
+            "color": "orange"
+          }
         }
-    ]
+      }
+    },
+    {
+      "$interact": {
+        "event": "brush",
+        "from": ["c1", "c3"],
+        "response" : {
+          "c1": {
+            "unselected": {"color": "gray"}
+          },
+          "c2": {
+            "selected": {"color": "orange"}
+          },
+          "c3": {
+            "unselected": {
+              "opacity": 0
+            }
+          }
+        }
+      }
+    }
+  ]
 }

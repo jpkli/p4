@@ -1,0 +1,59 @@
+{
+    "data" : {
+        "source": "data/NatalityUSA2015.csv",
+        "format": "csv",
+        "schema": {
+            "BirthMonth"   : "int",
+            "BabyGender"   : "string",
+            "BabyWeight"   : "float",
+            "MotherAge"    : "int",
+            "MotherRace"   : "string",
+            "MotherStatus" : "string",
+            "MotherEdu"    : "string",
+            "MotherHeight" : "float",
+            "MotherWeight" : "float",
+            "MotherWgtGain": "float"
+        }
+    },
+    "views": [
+        {
+            "id": "c1",
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 50, "right": 10, "top": 10, "bottom": 50},
+            "offset": [380, 0]
+        },
+        {
+            "id": "c2",
+            "width": 360,
+            "height": 360,
+            "padding": {"left": 120, "right": 10, "top": 10, "bottom": 50},
+            "offset": [0, 0]
+        }
+    ],
+    "operations": [
+        {
+            "$visualize": {
+                "id": "c1",
+                "mark": "circle",
+                "size": 8,
+                "color": "orange",
+                "opacity": "auto",
+                "x": "MotherWeight",
+                "y": "BabyWeight"
+            }
+        },
+        {
+            "$visualize": {
+                "id": "c2",
+                "mark": "circle",
+                "color": "red",
+                "y": "MotherHeight",
+                "brush": {
+                    "unselected": {"opacity": 0}
+                },
+                "x": "MotherWeight"
+            }
+        }
+    ]
+}
