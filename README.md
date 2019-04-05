@@ -23,7 +23,7 @@ or include the following line in your html:
 
 ## Example
 
-<img style="width: 400px; float: right; margin-top: 100px;" src="./docs/images/colorbars.png">
+
 ```javascript
 p4({container: '#p4-div', viewport:[800, 600]})
 .data({
@@ -47,9 +47,9 @@ p4({container: '#p4-div', viewport:[800, 600]})
   color: 'AvgWeight'
 })
 ```
+The above codes process a dataset with 100K records and visualize the result as a bar chart shown below.
 
-
-
+<img width=300 src="./docs/images/colorbars.png">
 
 ## Reference Paper
 
