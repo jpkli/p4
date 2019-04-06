@@ -5,9 +5,13 @@ P4 is JavaScript library for accelerating data processing and visualization usin
 For data processing, P4 is more than 10X faster than codes based on JavaScript Array functions. For visualizing large data, P4 is at least 10X faster than Canvas, and 20X faster than SVG.
 
 ## Table of Contents
-[Installation](#installation)
-[Example](#example)
-[Reference Paper](#reference-paper)
+- [P4: Portable Parallel Processing Pipelines](#p4-portable-parallel-processing-pipelines)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Example](#example)
+  - [Current Limitations and Known Issues](#current-limitations-and-known-issues)
+  - [Reference Paper](#reference-paper)
+
 
 ## Installation
 
@@ -25,7 +29,7 @@ or include the following line in your html:
 
 
 ```javascript
-p4({container: '#p4-div', viewport:[800, 600]})
+p4({container: 'body', viewport:[800, 600]})
 .data({
   type: 'json',
   data: [{BabyWeight: 9, Gender: 'Girl', MotherAge: 28, FatherAge: 32}, ...]
@@ -50,6 +54,10 @@ p4({container: '#p4-div', viewport:[800, 600]})
 The above codes process a dataset with 100K records and visualize the result as a bar chart shown below.
 
 <img width=300 src="./docs/images/colorbars.png">
+
+## Current Limitations and Known Issues
+ - Only 24-bit, single floating point precision is supported.
+ - Data size cannot be larger than the max size supported by WebGL texture, which is typically 8096 x 8096.
 
 ## Reference Paper
 
