@@ -7,10 +7,9 @@ export const Aggregate = {
 
     i = (this.aDataIdx + 0.5) / this.uDataDim.x;
     j = (this.aDataIdy + 0.5) / this.uDataDim.y;
-    this.vResult = 0.0;
+
     if (this.aDataIdy * this.uDataDim.x + this.aDataIdx >= this.uDataSize) {
-       
-        this.vIsFiltered = 1.0;
+        this.vResult = 0.0;
     } else {
         if(this.uAggrOpt != 2.0) {
             this.vResult = this.getData(this.uFieldId, i, j);
@@ -19,10 +18,9 @@ export const Aggregate = {
         }
     }
 
-   
     if (this.uFilterFlag == 1) {
         if (texture2D(this.fFilterResults, vec2(i, j)).a < this.uVisLevel - 0.01) {
-            this.vIsFiltered = 1.0;
+            this.vResult = 0.0;
         }
     }
 
@@ -40,10 +38,10 @@ export const Aggregate = {
             }
             if (this.uIndexCount == 0 || gid > 1) {
                 var d = new Vec2();
-                var w = float(this.uFieldWidths[gid]);
+                var w = this.getFieldWidth(gid);
                 var value = this.getData(gid, i, j);
 
-                d = this.uFieldDomains[gid];
+                d = this.getFieldDomain(gid);
 
                 if(this.uBinCount[ii] > 0) {
                     value = max(ceil((value - d[0]) / this.uBinIntervals[ii]), 1.0);
@@ -70,7 +68,7 @@ export const Aggregate = {
   },
 
   fragmentShader() {
-    if (this.vIsFiltered == 1.0) discard;
+    if (this.vResult == 0.0) discard;
     if (this.uAggrOpt == 2.0)
         gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     else

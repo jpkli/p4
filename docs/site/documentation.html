@@ -1,0 +1,23 @@
+<div>
+  <Menu></Menu>
+  <div class="container" id="main">
+    <br />
+    <div class="row">
+      <div class="col side-nav">
+          <ul>
+            <li 
+              v-for="doc in docs"
+              :class="{active: doc.active}"
+              v-on:click="fetchDoc(doc.file)"
+            >
+            {{ doc.name }}
+            </li>
+          </ul>
+      </div>
+      <div class="col-10">
+          <div id="docs">
+            </div>
+      </div>
+    </div>
+  </div>
+</div>

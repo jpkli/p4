@@ -47,6 +47,8 @@ export default function($p) {
         }
         if(Object.keys($p.crossfilters).length) {
             $p.uniform.uFilterFlag = 1;
+            // operations.match({})
+            // $p.crossfilters = {}
         }
         if (!kernels.hasOwnProperty('aggregate')) {
             kernels.aggregate = programs.aggregate($p, spec);
@@ -108,8 +110,6 @@ export default function($p) {
                     }
                 })
                 .sort((a, b) => b.value - a.value )
-
-                console.log(sorted)
                 spec[sortAttr] = sorted.map(r => r.name);;
             }
             let encodings = Object.keys(vmap).filter(k => k !== 'facets')
@@ -187,7 +187,7 @@ export default function($p) {
                 $p.respond();
             }
         })
-        // $p.reset();
+        $p.reset();
     }
 
     return operations;

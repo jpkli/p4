@@ -110,7 +110,7 @@ export function encode($p, vmap, colorManager) {
     $p.uniform.uMarkSpace.data = markSpace;
     $p.uniform.uIsXYCategorical.data = isXYCategorical;
 
-    if(!$p._update) {
+    // if(!$p._update) {
         if(!vmap.width && vmap.x) {
             $p.uniform.uDefaultWidth.data = 1.0 / ($p.fieldWidths[$p.fields.indexOf(vmap.x)]);
         } else if(vmapIndex[4] === -1 && typeof(vmap.width) == 'number') {
@@ -122,6 +122,6 @@ export function encode($p, vmap, colorManager) {
         } else if(vmapIndex[5] === -1 && typeof(vmap.width) == 'number') {
             $p.uniform.uDefaultHeight.data = vmap.height / height;
         }
-    }
+    // }
     return viewSetting;
 }

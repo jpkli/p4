@@ -142,7 +142,7 @@ export default function match($p) {
         return filterRanges;
     }
 
-    match.execute = function(spec) {
+    match.execute = function(spec, skipUpdateDomain = false) {
         filterControls = new Array($p.fields.length).fill(0);
         visControls = new Array($p.fields.length).fill(0);
         var filterSpec = spec;

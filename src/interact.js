@@ -42,7 +42,7 @@ export default function interact($p, options) {
           .attr("x", 0)
           .attr("y", 0)
           .attr("width", w)
-          .attr("height", h/2)
+          .attr("height", h)
           .attr("fill-opacity", 0)
           .attr("stroke", "none");
 

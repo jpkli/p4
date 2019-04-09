@@ -139,7 +139,7 @@ export default function visualize($p) {
             }
 
             colorManager.updateColors(colorMap, colorMode);
-
+            
         } else {
             // $p.uniform.uVisDomains.data = pv.domains;
             if(pv.updateDomain === true) {
@@ -208,6 +208,11 @@ export default function visualize($p) {
         
         if(!$p.skipRender) {
             renderers[renderer].render(primitive);
+        } else {
+            if(!$p._update) {
+                gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+            }
         }
         $p.skipRender = false;
         if($p.revealDensity) enhance({

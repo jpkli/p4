@@ -97,6 +97,7 @@ export default function p4(options) {
         configPipeline($p);
         $p.getResult = dataOptions.export;
         $p.getRawData = dataOptions.export;
+        $p.match = api.match;
         return api;
     }
 
@@ -138,20 +139,31 @@ export default function p4(options) {
         return asyncPipeline;
     }
 
+    api.runJSON = function(jsonSpec) {
+        let inputSpec = jsonSpec[0];
+        if (!inputSpec.hasOwnProperty('input')) {
+            throw Error('Error: No specification for input!');
+        }
+        let asyncPipeline = api.input(inputSpec)
+        jsonSpec.slice(1).forEach(spec => {
+            let opt = Object.keys(spec)[0];
+            asyncPipeline[opt](spec[opt]);
+        })
+
+        return api;
+    }
+
     api.getResult = function (d) {
         return $p.getResult(d);
     }
 
     api.clearWebGLBuffers = function() {
-        $p.bindFramebuffer("offScreenFBO");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer("visStats");
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
-        $p.bindFramebuffer(null);
-        $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        let frameBuffers = ['offScreenFBO', 'visStats', null];
+        frameBuffers.forEach(fb => {
+            $p.bindFramebuffer(fb);
+            $p.ctx.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            $p.ctx.clear( $p.ctx.COLOR_BUFFER_BIT | $p.ctx.DEPTH_BUFFER_BIT );
+        })
     }
 
     api.runSpec = function(specs) {

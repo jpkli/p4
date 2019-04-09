@@ -18,6 +18,7 @@ export default {
                 value = (fieldId == 0) ? indexedValue0 : indexedValue1;
             }
             d = this.uVisDomains[fieldId];
+
             value = (value - d.x) / (d.y - d.x);
             if (this.uScaleExponents[channelId] != 0.0) {
                 value = pow(value, this.uScaleExponents[channelId]);

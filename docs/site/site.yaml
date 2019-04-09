@@ -1,0 +1,62 @@
+menu:
+  - name: Home
+    path: /
+    file: home.md
+  - name: Usage
+    path: /usage
+    file: overview.md
+  - name: Tutorials
+    path: /tutorial
+    file: tutorial.md
+  - name: Examples
+    path: /examples
+    file: examples.md
+  - name: Documentation
+    path: /documentation
+    file: docs.md
+
+docs:
+  - name: Overview
+    file: overview.md
+  - name: Data I/O
+    file: data.md
+  - name: Transformation
+    file: transformation.md
+  - name: Visualization
+    file: visualization.md
+  - name: Interaction
+    file: interaction.md
+  - name: Annotation
+    file: annotation.md
+  - name: Extension
+    file: extension.md
+
+examples:
+  - name: Basic Charts
+    examples:
+    - name: Parallel Coordinates
+      image: https://jpkli.github.io/demos/p4/images/parallel-coordinates.png
+      url: /demos/p4#parallel-coordinates
+    - name: Scatterplot
+      image: https://jpkli.github.io/demos/p4/images/scatter-plot.png
+      url: /demos/p4#scatter-plot
+    - name: 2D Heatmap
+      image: https://jpkli.github.io/demos/p4/images/heatmap.png
+      url: /demos/p4#heatmap2D
+    - name: Brushing and Linking
+      image: https://jpkli.github.io/demos/p4/images/brush-link.png
+      url: /demos/p4#brush-link
+    - name: Enhanced Perception
+      image: https://jpkli.github.io/demos/p4/images/perception-line.png
+      url: /demos/p4#perception-line
+    - name: Colored Bar Chart
+      image: https://jpkli.github.io/demos/p4/images/colorbars.png
+      url: /demos/p4#derive-match-group
+  - name: Colors
+    examples:
+    - name: Enhanced Perception
+      image: https://jpkli.github.io/demos/p4/images/perception-line.png
+      url: /demos/p4#perception-line
+    - name: Colored Bar Chart
+      image: https://jpkli.github.io/demos/p4/images/colorbars.png
+      url: /demos/p4#derive-match-group

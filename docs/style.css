@@ -116,3 +116,13 @@ i {
     color: #000;
     font-weight: bolder;
 }
+
+.home-buttons {
+    margin: 0.5em;
+    border-radius: 0;
+}
+
+.jumbotron {
+    padding: 4rem 7rem 2rem 7rem;
+    border-radius: 0;
+}
