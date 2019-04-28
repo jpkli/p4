@@ -47,7 +47,7 @@ export default function({
         });
     
         it('result should be closely equal with delta = ' + precision, function() {
-            validate(data[0], gpuData[0], precision);
+            validate(data.slice(0, 100), gpuData.slice(0, 100), precision);
         });
     
     });

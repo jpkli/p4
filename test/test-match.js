@@ -28,53 +28,48 @@ export default function({
         }
     ];
 
-    let groupByInteger = [
+    let matchNumeric = [
         {
-            $aggregate: {
-                $group: ['MotherAge'],
-                $reduce: {
-                    maxMotherWeight: {$max: 'MotherWeight'},
-                    sumWeight: {$sum: 'BabyWeight'},
-                    minMotherWeight: {$min: 'MotherWeight'},
-                    maxMotherWeight: {$max: 'MotherWeight'},
-                    averageAge: {$avg: 'MotherAge'},
-                    count: {$count: '*'}
-                }
+            $match: {
+                MotherAge: [33, 35],
+                FatherAge: [35, 38],
+                MotherWeight: [160, 200]
             }
         }
     ]
 
-    let groupByCategoricalKey = [
+    let matchCategorical = [
         {
-            $aggregate: {
-                $group: ['MotherEdu'],
-                $reduce: {
-                    sumWeight: {$sum: 'BabyWeight'},
-                }
+            $match: {
+                FatherEdu: {$in: ['Master']},
+                FatherRace: {$in: ['Asian']},
+                MotherRace: {$in: ['White']},
+                MotherEdu: {$in: ['Master', 'Doctorate']},
             }
         }
     ]
 
-    let groupByMultipleKeys = [
+    let matchMix = [
         {
-            $aggregate: {
-                $group: ['MotherEdu'],
-                $reduce: {
-                    sumWeight: {$sum: 'BabyWeight'},
-                }
+            $match: {
+
+                MotherAge: [33, 35],
+                FatherAge: [35, 38],
+                FatherEdu: {$in: ['Master']},
+                MotherEdu: {$in: ['Master']},
             }
         }
     ]
 
     let gpu = p4(config).data(db.data()).view(views);
     let cpu = p3.pipeline(data);
-    let sortMethod = (a,b)=> a.sumWeight - b.sumWeight; //sort for comparing results
+    let sortMethod = (a,b)=> a.MotherWeight - b.MotherWeight; //sort for comparing results
     
-    describe('Aggregation', function() {
+    describe('Match', function() {
         
-        describe('Group-by integer attribute', function() {
-            let gpuResult = gpu.runSpec(groupByInteger).toJson().sort(sortMethod);
-            let cpuResult = cpu.runSpec(groupByInteger).sort(sortMethod);
+        describe('Match integer attributes', function() {
+            let gpuResult = gpu.runSpec(matchNumeric).toJson().sort(sortMethod);
+            let cpuResult = cpu.runSpec(matchNumeric).sort(sortMethod);
             console.log(gpuResult);
             console.log(cpuResult);
             it('result size should equal ' + cpuResult.length, function() {
@@ -86,10 +81,10 @@ export default function({
             });
         });
 
-        describe('Group-by categorical attribute', function() {
+        describe('Match categorical attributes', function() {
             cpu = p3.pipeline(data);
-            let gpuResult = gpu.runSpec(groupByCategoricalKey).toJson().sort(sortMethod);
-            let cpuResult = cpu.runSpec(groupByCategoricalKey).sort(sortMethod);
+            let gpuResult = gpu.runSpec(matchCategorical).toJson().sort(sortMethod);
+            let cpuResult = cpu.runSpec(matchCategorical).sort(sortMethod);
             console.log(gpuResult);
             console.log(cpuResult);
             it('result size should equal ' + cpuResult.length, function() {
@@ -101,10 +96,10 @@ export default function({
             });
         });
 
-        describe('Group-by multiple attributes', function() {
+        describe('Match mixed attributes', function() {
             cpu = p3.pipeline(data);
-            let gpuResult = gpu.runSpec(groupByMultipleKeys).toJson().sort(sortMethod);
-            let cpuResult = cpu.runSpec(groupByMultipleKeys).sort(sortMethod);
+            let gpuResult = gpu.runSpec(matchMix).toJson().sort(sortMethod);
+            let cpuResult = cpu.runSpec(matchMix).sort(sortMethod);
             console.log(gpuResult);
             console.log(cpuResult);
             it('result size should equal ' + cpuResult.length, function() {
@@ -115,6 +110,7 @@ export default function({
                 validate(cpuResult, gpuResult, precision);
             });
         });
+
     });
 
 }

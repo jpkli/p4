@@ -5,6 +5,7 @@ import TimeSeries from './data-timeseries';
 import testCheck from './test-check';
 import testCache from './test-cache';
 import testAggregate from './test-aggregate';
+import testMatch from './test-match';
 import testTS from './test-timeseries';
 import testDataInput from './test-input';
 import testMap from './test-map';
@@ -21,6 +22,13 @@ let testInput = {
     precision
 }
 
+function runMochaTest(testBed) {
+    mocha.setup('bdd');
+    testBed(testInput);
+    mocha.checkLeaks();
+    mocha.run();
+}
+
 if (url.searchParams.get('check') !== null) {
     testCheck(testInput);
 } else if (url.searchParams.get('ts') !== null) {
@@ -31,12 +39,10 @@ if (url.searchParams.get('check') !== null) {
     testMap();
 } else if (url.searchParams.get('vis') !== null) {
     testVis(testInput);
+} else if (url.searchParams.get('match') !== null) {
+    runMochaTest(testMatch);
+} else if (url.searchParams.get('cache') !== null) {
+    runMochaTest(testCache);
 } else {
-    mocha.setup('bdd');
-
-    // testCache(testInput);
-    testAggregate(testInput);
-
-    mocha.checkLeaks();
-    mocha.run();
+    runMochaTest(testAggregate);
 }
