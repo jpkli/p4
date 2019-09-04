@@ -18,7 +18,7 @@
   "operations": [
     {
       "$visualize": {
-        "id": "c2",
+        "id": "c1",
         "mark": "circle",
         "size": 8,
         "color": "orange",
@@ -37,7 +37,7 @@
     },
     {
       "$visualize": {
-        "id": "c1",
+        "id": "c2",
         "mark": "bar",
         "color": "steelblue",
         "y": "MotherEdu",

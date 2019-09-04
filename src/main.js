@@ -1,20 +1,18 @@
-import allocate  from './allocate';
-import input    from './io/input';
-import output    from './io/output';
-import initialize    from './initialize';
-import interact  from './interact';
+import allocate from './allocate';
+import input from './io/input';
+import output from './io/output';
+import initialize from './initialize';
+import interact from './interact';
 import control from './control';
 import pipeline from './pipeline';
 import operate from './operate';
 import kernels from './kernels';
 import extensions from './extensions';
 import Grid from './grid';
-import cstore from './cstore'
-
+import cstore from './cstore';
 
 export default function p4(options) {
-    let $p;
-    $p = initialize(options);
+    let $p = initialize(options);
     $p.views = [];
     $p.interactions = [];
     $p.histograms = [];
@@ -36,10 +34,10 @@ export default function p4(options) {
     let api = pipeline($p);
     api.ctx = $p;
     api.addModule(control);
-    // api.addModule(output);
+    api.assignMethods(output);
     // api.addModule(view);
-    let outputs = output($p)
-    api.result = outputs.result;
+    // let outputs = output($p)
+    // api.result = outputs.result;
     api.addOperation('head', function() {
         api.resume('__init__');
         if(Object.keys($p.crossfilters).length > 0) api.match({});
@@ -96,6 +94,7 @@ export default function p4(options) {
         allocate($p, dataOptions);
         configPipeline($p);
         $p.getResult = dataOptions.export;
+        $p.cache = api.cache;
         $p.getRawData = dataOptions.export;
         $p.match = api.match;
         return api;

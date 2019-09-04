@@ -1,35 +1,36 @@
-import {NumericalMatch, CategoricalMatch} from './gpgpu/Match.gl.js'
+import {IntervalMatch, DiscreteMatch} from './gpgpu/Match.gl.js'
 
 export default function match($p) {
     const SELECT_MAX = 100;
-    var match = {},
-        dataDimension = $p.uniform.uDataDim.data,
-        fieldCount = $p.fields.length,
-        filterControls = new Array(fieldCount).fill(0),
-        filterRanges = $p.fieldDomains,
-        visControls = new Array(fieldCount).fill(0),
-        visRanges = $p.fieldDomains,
-        inSelections = new Array(SELECT_MAX);
+    let match = {};
+    let dataDimension = $p.uniform.uDataDim.data;
+    let fieldCount = $p.fields.length;
+    let filterControls = new Array(fieldCount).fill(0);
+    let filterRanges = $p.fieldDomains;
+    let visControls = new Array(fieldCount).fill(0);
+    let visRanges = $p.fieldDomains;
+    let inSelections = new Array(SELECT_MAX);
+    let matchResultBuffer = null;
 
     $p.uniform('uInSelections', 'float', Float32Array.from(inSelections));
     $p.uniform('uSelectMax', 'int', SELECT_MAX);
     $p.uniform('uSelectCount', 'int', 0);
 
-    var filter = {
-        vs: $p.shader.vertex(NumericalMatch.vertexShader),
-        fs: $p.shader.fragment(NumericalMatch.fragmentShader)
+    let rangeMatch = {
+        vs: $p.shader.vertex(IntervalMatch.vertexShader),
+        fs: $p.shader.fragment(IntervalMatch.fragmentShader)
     };
 
-    var sel = {
-        vs: $p.shader.vertex(CategoricalMatch.vertexShader),
-        fs: $p.shader.fragment(CategoricalMatch.fragmentShader)
+    let inMatch = {
+        vs: $p.shader.vertex(DiscreteMatch.vertexShader),
+        fs: $p.shader.fragment(DiscreteMatch.fragmentShader)
     };
 
-    $p.program('filter', filter.vs, filter.fs);
-    $p.program('match', sel.vs, sel.fs);
+    $p.program('IntervalMatch', rangeMatch.vs, rangeMatch.fs);
+    $p.program('DiscreteMatch', inMatch.vs, inMatch.fs);
 
     match.control = function(ctrl) {
-        // filterControls = ctrl;
+        filterControls = ctrl;
     }
 
     function _execute(spec){
@@ -47,7 +48,7 @@ export default function match($p) {
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
         $p.ctx.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
         if(matchFields.length) {
-            gl = $p.program('match');
+            gl = $p.program('DiscreteMatch');
             if($p.deriveCount > 0) {
                 $p.framebuffer.enableRead('fDerivedValues');
             }
@@ -124,7 +125,13 @@ export default function match($p) {
             $p.uniform.uFilterRanges.data = filterRanges;
             $p.uniform.uVisControls.data = visControls;
             $p.uniform.uVisRanges.data = visRanges;
-            gl = $p.program('filter');
+
+            if (matchFields.length) {
+                matchResultBuffer= match.result();
+                $p.bindFramebuffer('fFilterResults');
+            }
+
+            gl = $p.program('IntervalMatch');
             if($p.deriveCount > 0) {
                 $p.framebuffer.enableRead('fDerivedValues');
             }
@@ -202,7 +209,13 @@ export default function match($p) {
         gl.readPixels(offset[0], offset[1], rowSize, colSize, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        return  bitmap.filter((d, i) => i % 4 === 3);
+        let result = bitmap.filter((d, i) => i % 4 === 3);
+        if(matchResultBuffer !== null) {
+            result = result.map((r,i) => r & matchResultBuffer[i])
+            matchResultBuffer = null
+        }
+        
+        return result;
     }
 
     return match;

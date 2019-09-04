@@ -1,4 +1,4 @@
-export const NumericalMatch = {
+export const IntervalMatch = {
   vertexShader() {
     var i, j, k, value;
     var filter = new Int(0);
@@ -42,7 +42,7 @@ export const NumericalMatch = {
   }
 }
 
-export const CategoricalMatch = {
+export const DiscreteMatch = {
   vertexShader() {
     var i, j, k, value;
     i = (this.aDataIdx+0.5) / this.uDataDim.x;

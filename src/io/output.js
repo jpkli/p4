@@ -11,6 +11,11 @@ export default function($p) {
         // $p.setInput(outputTag)
         // console.log($p.extraDimension)
         for(let edi = 0; edi < $p.extraDimension; edi++) { 
+
+            // if only match is performed and no other write ops, use cache to write source data to framebuffer.
+            if($p.getResultBuffer === undefined) { 
+                $p.cache('cachedData')
+            }
             let buf = $p.getResultBuffer({outputTag, offset: [edi * $p.resultDimension[0], 0]});
             let res = {};
             let offset = 0;
@@ -72,9 +77,15 @@ export default function($p) {
                 objectArray.push(obj);
             }
         }
+        if(objectArray.length > $p.dataSize) {
+            objectArray = objectArray.slice(0, $p.dataSize);
+        }
         return objectArray;
 
     }
+
+    output.toArray = () => output.result({format: 'array'})
+    output.toJson = () => output.result({format: 'json'})
 
     output.readPixels = function({
         offset = [0, 0],

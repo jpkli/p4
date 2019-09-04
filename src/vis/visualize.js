@@ -205,7 +205,11 @@ export default function visualize($p) {
             pv.chart.removeAxis();
             if($p.fields.indexOf(vmap.color)!==-1) pv.chart.removeLegend();
         }
-        
+
+        if (vmap.project) {
+            chartLayer.axisLabels.remove()
+        }
+
         if(!$p.skipRender) {
             renderers[renderer].render(primitive);
         } else {

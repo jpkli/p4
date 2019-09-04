@@ -36,6 +36,7 @@ export default function cache($p) {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         $p.framebuffer.enableRead(tag);
         $p.uniform.uDataInput = $p.framebuffer[tag].texture;
+        $p.getResultBuffer = cache.result;
     }
 
     cache.result =  function() {
@@ -46,6 +47,7 @@ export default function cache($p) {
         gl.readPixels(0, 0, dataDimension[0], dataDimension[1] * fieldCount, gl.RGBA, gl.FLOAT, result);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         result = result.filter(function(d, i){ return i%4===3;} );
+
         return result;
     }
 

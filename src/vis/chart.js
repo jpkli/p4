@@ -6,6 +6,7 @@ export default function chart(frontSvg, backSvg, arg) {
     var options = arg || {},
         plot = frontSvg.append('g'),
         metavis = backSvg.append('g'),
+        frontMetaVis = frontSvg.append('g'),
         width = options.width,
         height = options.height,
         top = options.top || 0,
@@ -79,7 +80,7 @@ export default function chart(frontSvg, backSvg, arg) {
     // For parallel coordinates
     if(Array.isArray(vmap.x)) {
         let axisDist = height / (vmap.x.length-1);
-
+        axisOption.x.container = frontMetaVis;
         vmap.x.forEach(function(d, i) {
             axisOption.x.position = i * axisDist + 1;
             axisOption.x.domain = domain[d];
@@ -113,7 +114,7 @@ export default function chart(frontSvg, backSvg, arg) {
 
     if(Array.isArray(vmap.y)) {
         var axisDist = width / (vmap.y.length-1);
-
+        axisOption.y.container = frontMetaVis;
         vmap.y.forEach(function(d, i) {
             axisOption.y.position = i * axisDist;
             axisOption.y.domain = domain[d];
@@ -190,8 +191,8 @@ export default function chart(frontSvg, backSvg, arg) {
             labels.append("g")
               .append("text")
                 .attr("transform", "rotate(-90)")
-                .attr("y", -padding.left/1.25 )
-                .attr("x", -height/2 )
+                .attr("y", -padding.left / 1.25)
+                .attr("x", -height / 2)
                 .attr("dy", "1em")
                 .css("text-anchor", "middle")
                 .css("font-size", "1.0em")
@@ -219,6 +220,7 @@ export default function chart(frontSvg, backSvg, arg) {
 
     plot.translate(padding.left+left, padding.top+top);
     metavis.translate(padding.left+left, padding.top+top);
+    frontMetaVis.translate(padding.left+left, padding.top+top);
 
     let chartLayer = {};
     chartLayer.updateAxisX =  function(newDomain) {
@@ -250,6 +252,9 @@ export default function chart(frontSvg, backSvg, arg) {
 
         labels.remove();
     }
+
+    chartLayer.axisLabels = labels;
+
     chartLayer.removeLegend = function() {
         if(showLegend) {
             colorLegend.remove();

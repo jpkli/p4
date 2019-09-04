@@ -18,6 +18,19 @@ export default function pipeline($p) {
         return pipeline;
     }
 
+    pipeline.assignMethods = function(mod) {
+        let newModule = mod($p)
+
+        Object.keys(newModule).forEach(name => {
+            if (typeof(newModule[name]) === 'function') {
+                pipeline[name] = function() {
+                    return newModule[name].apply(null, arguments);
+                }
+            }
+        })
+        return pipeline;
+    }
+
     pipeline.addToQueue = function (opt, arg) {
         if(!$p._update && !$p._progress) {
             let spec = {};
