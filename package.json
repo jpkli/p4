@@ -13,7 +13,7 @@
     "test": "webpack-dev-server --inline --progress --config build/webpack.test.config.js",
     "site": "webpack-dev-server --inline --progress --config build/webpack.site.config.js",
     "remote-test": "webpack-dev-server --inline --progress --host 0.0.0.0 --config build/webpack.test.config.js",
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.config.js",
+    "dev": "webpack-dev-server --config build/webpack.dev.config.js",
     "start": "npm run dev"
   },
   "repository": {
@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/jpkli/p4#readme",
   "devDependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "chai": "^4.1.2",
     "font-awesome": "^4.7.0",
     "highlight.js": "^9.14.2",
@@ -43,9 +43,10 @@
     "showdown": "^1.9.0",
     "showdown-highlight": "^2.1.3",
     "uglifyjs-webpack-plugin": "^1.3.0",
-    "webpack": "^3.12.0",
-    "webpack-bundle-analyzer": "^2.9.0",
-    "webpack-dev-server": "^2.11.3",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7",
+    "webpack-bundle-analyzer": "^3.4.1",
+    "webpack-dev-server": "^3.8.0",
     "webpack-merge": "^4.1.0"
   }
 }
