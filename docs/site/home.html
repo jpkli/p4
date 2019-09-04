@@ -1,22 +1,29 @@
 <div>
   <!-- <Menu></Menu> -->
-  <div class="jumbotron" style="background:linear-gradient(to bottom, rgb(0, 88, 160), rgb(2, 106, 170));">
+  <div class="jumbotron"  style="background: #fff;">
     <div class="container page" id="home">
-      <div class="page-header" style="text-align: center; margin: auto">
-        <h2 class="title" style="color: #fff; font-size: 2.8em">
-            <strong>P4</strong> -
-            <strong>P</strong>ortable
-            <strong>P</strong>arallel
-            <strong>P</strong>rocessing
-            <strong>P</strong>ipelines
-        </h2>
-        <p style="color: #fff; font-size: 1.36em;" class="lead">A GPU accelerated JavaScript library for data processing and interactive visualization.</p>
-      </div>
-      <div style=" text-align: center; margin: auto">
-          <router-link to="/documentation" style="color: steelblue" role="button" class="btn btn-lg btn-light home-buttons">Get Started</router-link>
-          <router-link to="/" role="button" class="btn btn-lg btn-outline-light home-buttons">Documentation</router-link>
-          <a href="/demo" role="button" class="btn btn-lg btn-outline-light home-buttons">Try Online</a>
+      <div class="page-header" style="text-align: center; margin-top: 6em;">
+        <div class="row justify-content-md-center">
+          <h1 class="page-title">P4</h1>
+          <div style="text-align:  left; vertical-align: middle; margin: auto 0;">
+              <p class="title" style="font-size: 2.8em; margin: 0;">
+                  <strong>P</strong>ortable
+                  <strong>P</strong>arallel
+                  <strong>P</strong>rocessing
+                  <strong>P</strong>ipelines
+              </p>
+              <p style="font-size: 1.36em;" class="lead">GPU accelerated JavaScript for big data processing and interactive visualizations</p>
+      
+          </div>
 
+        </div>
+
+        <div style=" text-align: center; margin: 2em;">
+            <router-link to="/documentation" role="button" class="btn btn-lg btn-light home-buttons">Get Started</router-link>
+            <a href="/demo" role="button" class="btn btn-lg btn-light home-buttons"><i class="fas fa-laptop-code"></i>Try Online</a>
+            <router-link to="/" role="button" class="btn btn-lg btn-light home-buttons"><i class="fas fa-book"></i>Documentation</router-link>
+            <a href="https://github.com/jpkli/p4" role="button" class="btn btn-lg btn-light home-buttons"><i class="fab fa-github"></i>Github</a>
+        </div>
       </div>
     </div>
   </div>
@@ -25,7 +32,8 @@
       <div class="row" style="text-align: center; margin: auto">
           <div class="col-sm">
             <div class="card">
-              <img class="card-img-top" src="https://jpkli.github.io/demos/p4/images/parallel-coordinates.png" alt="Card image cap">
+              <div id="word-clouds" style="padding: 0; margin: 0; min-height: 180px;"></div>
+              <!-- <img class="card-img-top" src="https://jpkli.github.io/demos/images/Transformations.png" alt="Card image cap"> -->
               <div class="card-body">
                 <h5 class="card-title"></h5>
                 <p class="card-text"></p>
@@ -34,7 +42,7 @@
           </div>
           <div class="col-sm">
             <div class="card">
-              <img class="card-img-top" src="https://jpkli.github.io/demos/p4/images/parallel-coordinates.png" alt="Card image cap">
+              <img style="height: 180px;" class="card-img-top" src="https://jpkli.github.io/demos/images/Visualizations.png" alt="Card image cap">
               <div class="card-body">
                 <h5 class="card-title"></h5>
                 <p class="card-text"></p>
@@ -42,13 +50,14 @@
             </div>
           </div>
           <div class="col-sm">
-              <div class="card">
-                <img class="card-img-top" src="https://jpkli.github.io/demos/p4/images/parallel-coordinates.png" alt="Card image cap">
-                <div class="card-body">
-                  <h5 class="card-title"></h5>
-                  <p class="card-text"></p>
-                </div>
+            <div class="card">
+              <img style="height: 180px;" class="card-img-top" src="https://jpkli.github.io/demos/images/Interactions.png" alt="Card image cap">
+              <div class="card-body">
+                <h5 class="card-title"></h5>
+                <p class="card-text"></p>
               </div>
             </div>
+          </div>
+      </div>
   </div>
 </div>

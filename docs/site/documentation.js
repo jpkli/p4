@@ -31,7 +31,6 @@ export default {
 
   },
   mounted() {
-
     axios.get('docs.md').then((text) => {
       let html = converter.makeHtml(text.data);
       document.getElementById('docs').innerHTML = html;

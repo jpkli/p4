@@ -119,10 +119,19 @@ i {
 
 .home-buttons {
     margin: 0.5em;
-    border-radius: 0;
+    border: 1px solid steelblue;
+    /* border-radius: 10px; */
+    color: steelblue;
 }
 
 .jumbotron {
     padding: 4rem 7rem 2rem 7rem;
     border-radius: 0;
+}
+
+.page-title {
+    font-size: 6.8em;
+    font-weight: bolder;
+    color: steelblue;
+    margin-right: 0.3em;
 }
