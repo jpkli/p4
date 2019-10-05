@@ -4,9 +4,9 @@ const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
 const webpack = require('webpack')
-const webpackDevConfig = require('./webpack.dev.config')
+const webpackDevConfig = require('./webpack.config')
 // const webpackTestConfig = require('./webpack.test.config')
-const package = require(path.resolve(__dirname, '../package.json'));
+const npmPackage = require(path.resolve(__dirname, '../package.json'));
 
 
 let webpackConfig = webpackDevConfig;
@@ -32,9 +32,9 @@ webpack(webpackConfig, (err, stats) => {
   console.log(chalk.cyan('  Build complete.\n'))
 
   let dir = path.resolve(__dirname, "../dist")
-  let version = package.version.split('.').slice(0, 2).join('.')
-  fs.copyFile(path.join(dir, 'p4.js'), path.join(dir, 'p4' + version + '.js'), (err) => {
+  let version = npmPackage.version
+  fs.copyFile(path.join(dir, 'p4.js'), path.join(dir, 'p4.v' + version + '.js'), (err) => {
     if (err) throw err;
-    console.log('dist file: ', 'p4' + version + '.js');
+    console.log('dist file: ', 'p4.v' + version + '.js');
   })
 })
