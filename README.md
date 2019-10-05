@@ -53,7 +53,7 @@ p4({container: 'body', viewport:[800, 600]})
 ```
 The above codes process a dataset with 100K records and visualize the result as a bar chart shown below.
 
-<img width=300 src="./docs/images/colorbars.png">
+<img width=300 src="https://jpkli.github.io/demos/p4/images/colorbars.png">
 
 ## Current Limitations and Known Issues
  - Only 24-bit, single floating point precision is supported.
