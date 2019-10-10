@@ -1,4 +1,4 @@
-import {IntervalMatch, DiscreteMatch} from './gpgpu/Match.gl.js'
+import {IntervalMatch, DiscreteMatch} from '../gljs/Match.gl'
 
 export default function match($p) {
     const SELECT_MAX = 100;
@@ -110,7 +110,6 @@ export default function match($p) {
             });
 
             viewSelections.forEach(function(k){
-                
                 var fieldId = $p.fields.indexOf(k);
                 if(fieldId === -1) {
                     console.log('Skipped: Matching on invalid data field ' + k);

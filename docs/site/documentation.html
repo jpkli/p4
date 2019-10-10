@@ -1,6 +1,6 @@
 <div>
   <Menu></Menu>
-  <div class="container" id="main">
+  <div class="container" id="docs">
     <br />
     <div class="row">
       <div class="col side-nav">
@@ -8,15 +8,22 @@
             <li 
               v-for="doc in docs"
               :class="{active: doc.active}"
-              v-on:click="fetchDoc(doc.file)"
+              style="padding: 0.25em 0;"
             >
-            {{ doc.name }}
+            <router-link :to='doc.path'>
+              {{ doc.name }}
+            </router-link>
+            <ul v-if="doc.sections">
+              <li v-for="sec in doc.sections">
+                <router-link :to='doc.path'>{{sec.name}}</router-link>
+              </li>
+            </ul>
             </li>
           </ul>
       </div>
       <div class="col-10">
-          <div id="docs">
-            </div>
+          <div ref="docContainer">
+          </div>
       </div>
     </div>
   </div>

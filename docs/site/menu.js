@@ -10,7 +10,7 @@ export default {
   },
   created() {
     this.tabs.forEach(tab => tab.active = false);
-    this.tabs.find(tab => tab.path === this.$route.path).active = true;
+    this.tabs.filter(tab => this.$route.path.includes(tab.path)).reverse()[0].active = true;
 
   },
   mounted() {

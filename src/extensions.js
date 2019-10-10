@@ -1,5 +1,5 @@
-import pplot from 'p.plot';
-import animation from '../src/animate';
+import { vis } from 'p3';
+// import animation from '../src/animate';
 
 export default [
     {
@@ -11,7 +11,7 @@ export default [
         compute: true,
         condition: vmap => vmap.mark === 'spline', 
         type: 'class',
-        function: pplot.Spline
+        function: vis.Spline
     },
     {
         name: 'area',
@@ -21,7 +21,7 @@ export default [
         restartOnUpdate: false,
         condition: vmap => vmap.mark === 'area', 
         type: 'class',
-        function: pplot.AreaChart
+        function: vis.AreaChart
     },
     {
         name: 'column',
@@ -31,7 +31,7 @@ export default [
         restartOnUpdate: false,
         condition: vmap => vmap.mark === 'column', 
         type: 'class',
-        function: pplot.BarChart
+        function: vis.BarChart
     },
     // {
     //     name: 'animate',

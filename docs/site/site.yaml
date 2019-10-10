@@ -5,9 +5,9 @@ menu:
   - name: Usage
     path: /usage
     file: overview.md
-  - name: Tutorials
-    path: /tutorial
-    file: tutorial.md
+  # - name: Tutorials
+  #   path: /tutorial
+  #   file: tutorial.md
   - name: Examples
     path: /examples
     file: examples.md
@@ -18,21 +18,45 @@ menu:
 docs:
   - name: Overview
     file: overview.md
+    desc: Overview
+    path: /documentation/overview
+
   - name: Data I/O
     file: data.md
+    desc: Upload data to GPU and get the data processing results back.
+    path: /documentation/data
+
   - name: Transformation
     file: transformation.md
+    desc: Process data using common transformations such as filter and group-by.
+    path: /documentation/transformation
+    sections:
+      - name: Match
+      - name: Derive
+      - name: Aggregate
+
   - name: Visualization
     file: visualization.md
+    desc: Setup views and plot the data processing results with various visualizations.
+    path: /documentation/visualization
+
   - name: Interaction
     file: interaction.md
+    desc: Enable user interactions for data transformations and visualizations.
+    path: /documentation/interaction
+
   - name: Annotation
     file: annotation.md
+    desc: Add annotations and marker on visualizations.
+    path: /documentation/annotation
+
   - name: Extension
     file: extension.md
+    desc: Extend or add custom data transformation and visualization operations.
+    path: /documentation/extension
 
 examples:
-  - name: Basic Charts
+  - name: Example Plots
     examples:
     - name: Bar Chart
       image: https://jpkli.github.io/demos/images/p4/barchart.png
@@ -58,19 +82,31 @@ examples:
       image: https://jpkli.github.io/demos/p4/images/parallel-coordinates.png
       url: /demos/p4#parallel-coordinates
 
-  - name: Colors
-    examples:
     - name: Colored Bar Chart
       image: https://jpkli.github.io/demos/p4/images/colorbars.png
       url: /demos/p4#derive-match-group
+
     - name: Enhanced Perception
       image: https://jpkli.github.io/demos/p4/images/perception-line.png
       url: /demos/p4#perception-line
-    - name: Colored Bar Chart
-      image: https://jpkli.github.io/demos/p4/images/colorbars.png
-      url: /demos/p4#derive-match-group
-  - name: Multiple Views
-    examples:
-      - name: Brushing and Linking
-        image: https://jpkli.github.io/demos/p4/images/brush-link.png
-        url: /demos/p4#brush-link
+
+    - name: Brushing and Linking
+      image: https://jpkli.github.io/demos/p4/images/brush-link.png
+      url: /demos/p4#brush-link
+
+  # - name: Colors
+  #   examples:
+  #   - name: Colored Bar Chart
+  #     image: https://jpkli.github.io/demos/p4/images/colorbars.png
+  #     url: /demos/p4#derive-match-group
+  #   - name: Enhanced Perception
+  #     image: https://jpkli.github.io/demos/p4/images/perception-line.png
+  #     url: /demos/p4#perception-line
+  #   - name: Colored Bar Chart
+  #     image: https://jpkli.github.io/demos/p4/images/colorbars.png
+  #     url: /demos/p4#derive-match-group
+  # - name: Multiple Views
+  #   examples:
+  #     - name: Brushing and Linking
+  #       image: https://jpkli.github.io/demos/p4/images/brush-link.png
+  #       url: /demos/p4#brush-link

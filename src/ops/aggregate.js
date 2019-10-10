@@ -1,5 +1,5 @@
 import {seqFloat} from '../utils';
-import {Aggregate, GetStats, FillValues} from './gpgpu/Aggregation.gl';
+import {Aggregate, GetStats, FillValues} from '../gljs/Aggregation.gl';
 
 const VEC_IDS = ['x', 'y', 'z'];
 const METRICS = ['$min', '$max', '$count', '$sum', '$avg', '$var', '$std'];

@@ -106,15 +106,23 @@ i {
     margin: 0;
 }
 
-.side-nav ul li {
-    cursor: pointer;
+.side-nav ul li a{
+    /* cursor: pointer; */
     color: #333;
 }
 
 
-.side-nav ul li.active, .side-nav ul li:hover {
-    color: #000;
+.side-nav ul li.active > a{
     font-weight: bolder;
+}
+
+.side-nav ul li a{
+    /* color: #000; */
+    font-weight: normal;
+}
+
+.side-nav > ul > li > ul {
+    border-left: 1px solid #EEE;
 }
 
 .home-buttons {

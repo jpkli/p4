@@ -1,4 +1,4 @@
-P4 provides a flexible and easy-to-use programming interface for specifying data-parallel operations in a *pipeline* that runs efficiently on the GPU.
+P4 provides declarative grammar for specifying data-parallel operations in a *pipeline* that runs efficiently on the GPU.
 
 #### JSON Syntax
 ```json

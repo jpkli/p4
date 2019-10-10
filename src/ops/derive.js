@@ -1,4 +1,4 @@
-import {getHour, getDayOfWeek, getMonth, getYear} from './datetime'
+import {getHour, getDayOfWeek, getMonth, getYear} from '../gljs/datetime.gl'
 
 export default function derive($p, spec) {
 

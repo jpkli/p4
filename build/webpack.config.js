@@ -31,7 +31,7 @@ module.exports = {
     },
     node: {
         fs: "empty"
-    }
+    },
     // plugins: [
     //     new UglifyJsPlugin({
     //         include: /\.min\.js$/,
