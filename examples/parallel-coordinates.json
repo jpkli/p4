@@ -1,13 +1,4 @@
 {
-  "views": [
-    {
-      "id": "chart",
-      "width": 600,
-      "height": 360,
-      "padding": {"left": 50, "right": 10, "top" : 50, "bottom": 10},
-      "offset": [0, 200]
-    }
-  ],
   "operations": [
     {
       "$match": {

@@ -92,9 +92,7 @@ export default function p4(options) {
   }
   
   api.data = function(dataOptions) {
-
     if (dataOptions.type === 'json') {
-      
       let columns = cstore({
         schema: dataOptions.schema,
         size: dataOptions.source.length
@@ -394,7 +392,6 @@ export default function p4(options) {
     asyncPipeline.input = asyncInput;
     return asyncPipeline;
   } else {
-    console.log(api)
     return api;
   }
 }

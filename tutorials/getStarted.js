@@ -1,4 +1,4 @@
-import p4 from '../';
+// import p4 from '../'; //p4 is loaded globally
 
 export default function() {
   let dataset = new p4.datasets.Babies(10000);

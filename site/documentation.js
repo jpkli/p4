@@ -5,7 +5,6 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import site from './site.yaml';
 import json from 'highlight.js/lib/languages/json';
 
-
 site.docs.forEach(doc => doc.active = false);
 site.docs[0].active = true;
 

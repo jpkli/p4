@@ -8,7 +8,7 @@
       "gridlines": {"y": true},
       "offset": [0, 0],
       "color": {
-        "range": ["red", "steelblue"],
+        "range": ["red", "steelblue", "green", "orange"],
         "interpolate": false
       }
     }
@@ -16,7 +16,7 @@
   "operations": [
     {
       "$aggregate": {
-        "$group": ["BabyMonth", "BabyGender"],
+        "$group": ["BabyMonth", "MotherRace"],
         "$collect": {
           "Babies": {"$count": "*"}
         }
@@ -25,7 +25,7 @@
     {
       "$visualize": {
         "mark": "line",
-        "color": "BabyGender",
+        "color": "MotherRace",
         "size": 2,
         "x": "BabyMonth",
         "y": "Babies"

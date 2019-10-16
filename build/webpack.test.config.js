@@ -10,10 +10,7 @@ module.exports = {
     devtool: "source-map",
     target: 'web',
     resolve: {
-        modules: [path.resolve(__dirname, '../..'), '../node_modules'],
-        alias: {
-            'p.3$': 'p3'
-        }
+      modules: [path.resolve(__dirname, '../..'), '../node_modules'],
     },
     output: {
         path: path.resolve(__dirname, "../dist"),
@@ -29,7 +26,7 @@ module.exports = {
           },
           {
             test: /\.css$/,
-            use: ['style-loader', 'css-loader',]
+            use: ['style-loader', 'css-loader']
           }
         ]
     },

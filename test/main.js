@@ -14,35 +14,45 @@ import testVis from './test-vis';
 let url = new URL(window.location.href);
 let precision = 1e-5;
 
-let babies = new Babies(100000);
+let babies = new Babies(200000);
 
 let testInput = {
-    data: babies.data,
-    schema: babies.schema,
-    precision
+  data: babies.data,
+  schema: babies.schema,
+  precision
 }
 
 function runMochaTest(testBed) {
-    mocha.setup('bdd');
+  mocha.setup('bdd');
+  if (Array.isArray(testBed)) {
+    testBed.forEach(test => {
+      test(testInput);
+    })
+  } else {
     testBed(testInput);
-    mocha.checkLeaks();
-    mocha.run();
+  }
+  // mocha.checkLeaks();
+  mocha.run();
 }
 
 if (url.searchParams.get('check') !== null) {
-    testCheck(testInput);
+  testCheck(testInput);
 } else if (url.searchParams.get('ts') !== null) {
-    testTS();
+  testTS();
 } else if (url.searchParams.get('input') !== null) {
-    testDataInput();
+  testDataInput();
 } else if (url.searchParams.get('map') !== null) {
-    testMap();
+  testMap();
 } else if (url.searchParams.get('vis') !== null) {
-    testVis(testInput);
+  testVis(testInput);
 } else if (url.searchParams.get('match') !== null) {
-    runMochaTest(testMatch);
+  runMochaTest(testMatch);
 } else if (url.searchParams.get('cache') !== null) {
-    runMochaTest(testCache);
+  runMochaTest(testCache);
 } else {
-    runMochaTest(testAggregate);
+  runMochaTest([
+    testCache,
+    testMatch,
+    testAggregate
+  ]);
 }

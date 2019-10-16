@@ -8,7 +8,7 @@ module.exports = {
     entry: {
         "p4": "./index.js",
         "p4-test": "./test/main.js",
-	      "site": "./docs/main.js"
+	      "site": "./site/main.js"
     },
     devtool: "source-map",
     target: 'web',
@@ -29,13 +29,18 @@ module.exports = {
           {
             test: /\.yaml$/,
             loader: 'js-yaml-loader',
-            include: [resolve('docs')]
+            include: [resolve('site')]
           },
           {
             test: /\.(html)$/,
             loader: 'html-loader',
+            include: [resolve('site')]
+          },
+          {
+            test: /\.md$/i,
+            use: 'raw-loader',
             include: [resolve('docs')]
-          }
+          },
         ]
     },
     devServer: {

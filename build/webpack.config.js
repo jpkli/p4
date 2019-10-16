@@ -5,7 +5,7 @@ module.exports = {
     entry: {
         "p4": "./index.js"
     },
-    // devtool: "source-map",
+    mode: 'production',
     target: 'web',
     resolve: {
         modules: [path.resolve(__dirname, '../..'), '../node_modules']
@@ -32,10 +32,12 @@ module.exports = {
     node: {
         fs: "empty"
     },
-    // plugins: [
-    //     new UglifyJsPlugin({
-    //         include: /\.min\.js$/,
-    //         sourceMap: true
-    //     })
-    // ]
+    optimization: {
+        minimize: false,
+        // minimizer: [
+        //     new UglifyJsPlugin({
+        //         exclude: /\.glsl.js/,
+        //     }),
+        // ],
+    }
 };

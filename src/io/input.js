@@ -2,7 +2,7 @@ import * as ajax from './ajax';
 import cstore from '../cstore';
 import parse from './parse';
 
-const INPUT_TYPES = [
+const INPUT_FORMATS = [
     'json',
     'csv',
     'text',
@@ -23,7 +23,7 @@ export default function input({
     onready,
     uniqueKeys = []
 }) {
-    if(INPUT_TYPES.indexOf(type) === -1) {
+    if(INPUT_FORMATS.indexOf(type) === -1) {
         throw Error('Invalid input type ', type)
     }
 

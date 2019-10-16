@@ -4,16 +4,17 @@ P4 is JavaScript library for accelerating data processing and visualization usin
 
 For data processing, P4 is more than 10X faster than codes based on JavaScript Array functions. For visualizing large data, P4 is at least 10X faster than Canvas, and 20X faster than SVG.
 
-## Table of Contents
+<!-- ### Table of Contents
 - [P4: Portable Parallel Processing Pipelines](#p4-portable-parallel-processing-pipelines)
-  - [Table of Contents](#table-of-contents)
-  - [Installation](#installation)
+    - [Installation](#installation)
   - [Example](#example)
-  - [Current Limitations and Known Issues](#current-limitations-and-known-issues)
-  - [Reference Paper](#reference-paper)
+      - [Match](#match)
+      - [Aggregate](#aggregate)
+    - [Current Limitations and Known Issues](#current-limitations-and-known-issues)
+    - [Reference Paper](#reference-paper)
+-->
 
-
-## Installation
+### Installation
 
 Install using npm
 ```bash
@@ -26,7 +27,6 @@ or include the following line in your html:
 ```
 
 ## Example
-
 
 ```javascript
 p4({container: 'body', viewport:[800, 600]})
@@ -55,10 +55,36 @@ The above codes process a dataset with 100K records and visualize the result as 
 
 <img width=300 src="https://jpkli.github.io/demos/p4/images/colorbars.png">
 
-## Current Limitations and Known Issues
+
+#### Match
+*Match* can be used to filer the data based on multiple data attributes, including both numeric and categorical.
+```javascript
+match({
+  NumericAttribute1: [start, end],
+  NumericAttribute2: {$in: [number1, number2, ...]},
+  CategoricalAttribute1: {$in: [string1, string2, ...]}
+  ...
+})
+```
+
+#### Aggregate
+Group and bin data based on attributes to obtain specified metrics.
+```javascript
+aggregate({
+  $group: [attr1, attr2], // up to 3 attributes (current limitation),
+  $collect: {
+    newAttr1Name: {$opt: 'attr3'}, 
+    newAttr2Name: {$opt: 'attr4'}, 
+  }
+})
+```
+Supported \$opt: \$count, \$sum, \$avg
+
+### Current Limitations and Known Issues
  - Only 24-bit, single floating point precision is supported.
  - Data size cannot be larger than the max size supported by WebGL texture, which is typically 8096 x 8096.
 
-## Reference Paper
+### Reference Paper
+P4 was first developed to leverage WebGL for GPU-accelerated data processing. The support for interactive visualizations is added based on research work documented in this paper.
 
 Li JK, Ma KL. [P4: Portable Parallel Processing Pipelines for Interactive Information Visualization](https://ieeexplore.ieee.org/abstract/document/8468065). IEEE transactions on visualization and computer graphics. 2018 Sep 19.

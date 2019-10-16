@@ -52,7 +52,6 @@ export default function({
     let matchMix = [
         {
             $match: {
-
                 MotherAge: [33, 35],
                 FatherAge: [35, 38],
                 FatherEdu: {$in: ['Master']},
