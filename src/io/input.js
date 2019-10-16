@@ -17,7 +17,7 @@ export default function input({
     type = 'cstore',
     method = 'memory',
     delimiter = ',',
-    size,
+    size = 0,
     schema,
     source,
     onready,
@@ -42,14 +42,15 @@ export default function input({
     let dataHandlers = {
         json: function(data) {
             cache = cstore({schema, size})
-            cache.import((method == 'websocket') ? JSON.parse(data) : data);
+            cache.import({data: (method == 'websocket') ? JSON.parse(data) : data});
             createIndexes();
             return cache.data();
         },
         csv: function(text) {
             let data = parse(text, delimiter);
-            let fields = data.shift();
-            cache = cstore({keys: fields, types: fields.map(() => 'float')})
+            // let fields = data.shift();
+            // cache = cstore({keys: fields, types: fields.map(() => 'float')})
+            cache = cstore({schema, size})
             cache.addRows(data);
             createIndexes();
             return cache.data();

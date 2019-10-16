@@ -34,7 +34,7 @@ export default function match($p) {
     }
 
     function _execute(spec){
-        var fields = $p.fields
+        var fields = $p.fields;
         var gl;
         var matchFields = Object.keys(spec).filter(function(s){
             return spec[s].hasOwnProperty('$in');
@@ -171,7 +171,7 @@ export default function match($p) {
             }
         });
 
-        $p.uniform.uFilterFlag = 1;
+        $p.uniform.uFilterFlag.data = 1;
         if(!$p._update) {
            
             $p.framebuffer('fFilterResults', 'unsigned_byte', $p.dataDimension);
