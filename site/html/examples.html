@@ -1,0 +1,18 @@
+<div>
+  <Menu></Menu>
+  <div class="container" style="padding: 2em;">
+    <div v-for="type in examples" style="clear: both;">
+      <h4 style="padding-top: 20px;">{{type.name}}</h4>
+      <div 
+        v-for="(example, index) in type.examples"
+        style="float: left; text-align: center; margin: auto;" >
+          <div style="margin: 1rem;">
+              <h5>{{example.name}} </h5>
+              <router-link :to="example.url">
+                <img height="160" :src="example.image" />
+              </router-link>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

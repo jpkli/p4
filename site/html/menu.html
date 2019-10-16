@@ -1,0 +1,40 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div :class="menuClass" class="w-100">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#P4WebSiteNavBar"
+      aria-controls="P4WebSiteNavBar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse w-100" id="P4WebSiteNavBar" >
+      <a class="navbar-brand" :class="{'ml-5': fullWidth}" href="#">P4</a>
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+        <li v-for="tab in leftTabs"  class="nav-item">
+          <router-link 
+            class="nav-link"
+            :class="{active: tab.active}"
+            :to="tab.path"
+          >
+            {{ tab.name }}
+          </router-link>
+        </li>
+      </ul>
+      
+      <ul class="navbar-nav ml-auto">
+        <li v-for="tab in rightTabs" class="nav-item">
+            <a class="nav-link" v-if="tab.link" :href="tab.link">
+              <i v-if="tab.icon" :class="tab.icon"></i>
+              {{tab.name}}
+            </a>
+            <router-link
+              v-if="tab.path"
+              class="nav-link" 
+              :class="{active: tab.active}"
+              :to="tab.path"
+            >
+              <i v-if="tab.icon" :class="tab.icon"></i>
+              {{tab.name}}
+            </router-link>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

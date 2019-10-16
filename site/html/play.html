@@ -1,0 +1,28 @@
+<div>
+  <Menu :fullWidth="true"></Menu>
+  <div>
+    <div class="example-sidenav">
+      <h5 class="m-2">Data Attributes</h5>
+      <ul class="list-group">
+        <li 
+          v-for="attr in dataAttributes"
+          style="font-size: 0.8em; border: none;"
+          class="list-group-item d-flex justify-content-between align-items-center"
+        >
+          {{attr[0]}}
+          <span class="badge badge-light badge-pill">{{attr[1]}}</span>
+        </li>
+      </ul>
+    </div>
+    <div style="display: flex; position: absolute; left: 10%; top: 60px; bottom: 30px; width: 90%;">
+      <div class="split" id="P4-Editor">
+      </div>
+      <div class="split" id="P4-Results">
+        <nav class="p-2 navbar navbar-light bg-white" style="border-bottom: 1px solid #eee;">
+            <button class="ml-3 btn btn-outline-primary btn-sm" @click="updateSpec">Update</button>
+        </nav>
+        <div class="p-3" ref="visContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>

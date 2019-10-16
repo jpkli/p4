@@ -5,7 +5,7 @@ Here is an overview of the documentation for P4.
 
 * [Data I/O](#/documentation/data) - Upload data to GPU and get the data processing results back.
 * [Transformation](#/documentation/transformation) - Process data using common transformations such as filter and group-by.
-* [Visualization](#/documentation/visualization) -Setup views and plot the data processing results with various visualizations.
+* [Visualization](#/documentation/visualization) - Setup views and plot the data processing results with various visualizations.
 * [Interaction](#/documentation/interaction) - Enable user interactions for data transformations and visualizations.
 * [Annotation](#/documentation/annotation) - Add annotations and marker on visualizations.
 * [Extension](#/documentation/extension) - Extend or add custom data transformation and visualization operations.
@@ -16,9 +16,14 @@ P4's declarative grammar can be used in JavaScript for developing web-base appli
 
 ##### JavaScript
 ```javascript
-let p = p4.pipeline().data({...}).views({...}); //configurations
-p.derive({...}).match({...}).aggregate({...});  //data transformations
-p.visualize({...}).interact({...});             //interactive visualizations
+// setup
+let p = p4(config).data({...}).views({...});
+
+// data transformations
+p.derive({...}).match({...}).aggregate({...});
+
+//interactive visualizations
+p.visualize({...}).interact({...});             
 
 ```
 
