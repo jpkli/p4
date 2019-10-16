@@ -3,7 +3,6 @@ import Menu from './menu';
 import site from './site.yaml';
 import Split from 'split.js';
 import Editor from './Editor';
-// import p4 from '../';
 
 const defaultViews = [{
   id: 'chart',
@@ -24,18 +23,18 @@ export default {
       toolkit: null,
       inputData: null,
       dataAttributes: null,
+      dataSize: 100000,
       spec: null
     }
   },
   watch: {
     $route () {
-      console.log(this.$route.params.example)
       this.example = this.$route.params.example || 'bar-chart';
       this.getSpec()
     }
   },
   created() {
-    let data = this.generateSimData(80000);
+    let data = this.generateSimData(this.dataSize);
     this.dataAttributes= Object.entries(data.schema);
     this.inputData = data.data;
   },
@@ -48,10 +47,12 @@ export default {
         this.editor.resize()
       }
     })
-    this.editor = Editor({containerId: 'P4-Editor'})
+
+    this.editor = Editor({containerId: 'P4-Editor', dataAttributes: this.dataAttributes.map(a => a[0])});
     this.example = this.$route.params.example || 'bar-chart';
     this.getSpec();
 
+    // p4 is loaded externally
     this.toolkit = p4({
       container: this.$refs.visContainer,
       viewport: [800, 650],
