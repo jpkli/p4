@@ -47,7 +47,7 @@ export default {
     fetchDoc (docFile) {
       this.docs.forEach(doc => doc.active = false)
       this.docs.filter(doc => doc.file == docFile)[0].active = true; 
-      axios.get('/docs/' + docFile).then((res) => {
+      axios.get('docs/' + docFile).then((res) => {
         this.$refs.docContainer.innerHTML = converter.makeHtml(res.data);;
         this.highlightCode();
       })

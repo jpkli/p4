@@ -35,7 +35,7 @@ export default {
     }
   },
   created() {
-    let data = this.generateSimData(100000);
+    let data = this.generateSimData(80000);
     this.dataAttributes= Object.entries(data.schema);
     this.inputData = data.data;
   },
@@ -75,10 +75,9 @@ export default {
     },
 
     getSpec () {
-      console.log(this.example)
       if (this.example) {
         p4.ajax.get({
-          url: '../examples/' + this.example + '.json',
+          url: 'examples/' + this.example + '.json',
           dataType: 'text'
         }).then(text => {
           this.editor.setValue('');

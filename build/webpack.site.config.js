@@ -8,7 +8,7 @@ module.exports = {
   entry: {
     "site": "./site/main.js"
   },
-  mode: 'development',
+  mode: 'production',
   target: 'web',
   resolve: {
     modules: [path.resolve(__dirname, '../..'), '../node_modules'],

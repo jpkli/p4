@@ -39,7 +39,7 @@ export default function() {
   })
   
   let res = app.result('json');
-  console.log(res);
+  // console.log(res);
 
   app.view([
     {
