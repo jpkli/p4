@@ -11,7 +11,7 @@ menu:
   - name: Documentation
     path: /documentation
     position: left
-  - name: Try Online
+  - name: Play Online
     path: /play
     position: right
     icon: fas fa-laptop-code
