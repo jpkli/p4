@@ -36,20 +36,20 @@ docs:
     desc: Process data using common transformations such as filter and group-by.
     path: /documentation/transformation
 
-  - name: Match
-    path: /documentation/match
-    file: match.md
-    parent: 'Transformation'
+  # - name: Match
+  #   path: /documentation/match
+  #   file: match.md
+  #   parent: 'Transformation'
 
-  - name: Derive
-    path: /documentation/derive
-    file: derive.md
-    parent: 'Transformation'
+  # - name: Derive
+  #   path: /documentation/derive
+  #   file: derive.md
+  #   parent: 'Transformation'
 
-  - name: Aggregate
-    path: /documentation/aggregate
-    file: aggregate.md
-    parent: 'Transformation'
+  # - name: Aggregate
+  #   path: /documentation/aggregate
+  #   file: aggregate.md
+  #   parent: 'Transformation'
 
   - name: Visualization
     file: visualization.md
@@ -102,13 +102,17 @@ examples:
       image: https://jpkli.github.io/demos/p4/images/colorbars.png
       url: /play/derive-match-group
 
-    - name: Enhanced Perception
-      image: https://jpkli.github.io/demos/p4/images/perception-line.png
-      url: /play/perception-line
-
     - name: Brushing and Linking
       image: https://jpkli.github.io/demos/p4/images/brush-link.png
       url: /play/brush-link
+
+    # - name: Enhanced Perception
+    #   image: https://jpkli.github.io/demos/p4/images/perception-line.png
+    #   url: /play/perception-line
+
+    # - name: Facets
+    #   image: https://jpkli.github.io/demos/p4/images/brush-link.png
+    #   url: /play/facets
 
   # - name: Colors
   #   examples:

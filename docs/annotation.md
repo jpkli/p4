@@ -1,10 +1,9 @@
 ### Annotation
-To annotate visualizations, P4 provides a set of annotation functions. 
-
+Annotations on visualizations can be added using the *annotate* function.
 The example below adds a vertical line to a visualization. 
 
 ```javascript
-let plot = p4.pipeline().data()
+let plot = p4(config).data()
   .view({id: 'chart1', ... })
   .visualize({ ... })
 

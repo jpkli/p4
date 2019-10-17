@@ -1,5 +1,6 @@
 import template from './html/play.html';
 import Menu from './menu';
+import Footer from './footer';
 import site from './site.yaml';
 import Split from 'split.js';
 import Editor from './Editor';
@@ -13,7 +14,7 @@ const defaultViews = [{
 
 export default {
   name: 'Examples',
-  components: {Menu},
+  components: {Menu, Footer},
   template,
   data() {
     return {

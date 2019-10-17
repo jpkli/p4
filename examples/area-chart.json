@@ -4,13 +4,8 @@
       "id": "chart",
       "width": 640,
       "height": 420,
-      "padding": {"left": 60, "right": 10, "top" : 10, "bottom": 60},
-      "gridlines": {"y": true},
-      "offset": [0, 0],
-      "color": {
-        "range": ["red", "steelblue"],
-        "interpolate": false
-      }
+      "padding": {"left": 80, "right": 80, "top" : 10, "bottom": 60},
+      "gridlines": {"y": true}
     }
   ],
   "operations": [

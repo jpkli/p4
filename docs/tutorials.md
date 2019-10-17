@@ -1,13 +1,11 @@
-
 ## Introduction
-__P4__ is designed for building high-performance and interactive system for exploratory analysis and visualization of big data. It provides high performance by leveraging GPU computing to accelerate both data processing and rendering, while offering a simple programming interface with declarative grammars for rapid specification of data transformations, visualizations, and interactions.
+P4 is designed for building high-performance and interactive systems for exploratory analysis and visualization of big data. It provides high performance by leveraging GPU computing to accelerate both data processing and rendering, while offering a simple programming interface with declarative grammars for rapid specification of data transformations, visualizations, and interactions.
 
-The mission of P4 is to help more people use data analytics and visualization with GPU computing. P4 makes it possible for visualization designers and system developers with little or no knowledge in parallel programming and GPU computing to develop data analytics and visualization applications that efficiently run on the GPU.
-
+<!-- The mission of P4 is to help more people use data analytics and visualization with GPU computing. P4 makes it possible for visualization designers and system developers with little or no knowledge in parallel programming and GPU computing to develop data analytics and visualization applications that efficiently run on the GPU. -->
 
 
 ### Getting Started
-This guide will walk through the process of using P4 for processing and visualizing large data on the web.
+This guide will walk through the steps for using P4 to process and visualize large data on the web.
 
 #### Usage
 To use P4 in a web page, just load the script as following.
@@ -25,7 +23,6 @@ yarn add p4.js
 ```
 
 Then P4 can be used with *ES6/ES2015 import* for building web apps:
-
 
 
 ```javascript
@@ -53,10 +50,6 @@ BirthMonth,BabyGender,BabyWeight,MotherAge,MotherRace,MotherStatus,MotherEdu,Mot
 01,F,7.7492393,33,White,Married,Bachelor,62,160,18,34,White,Some College
 01,M,4.98023658,30,Asian,Married,High School,60,110,09,62,Asian,High School
 01,F,7.0217147,29,Mixed,Married,Bachelor,63,164,18,31,White,Some College
-01,F,7.35020308,28,Asian,Unmarried,High School,61,196,00,30,White,High School
-01,F,7.03053318,23,White,Married,High School,63,109,27,23,White,8th Grade
-01,F,7.3634308,24,Asian,Unmarried,High School,63,120,21,29,Asian,High School
-01,M,8.73470444,34,White,Married,Bachelor,66,155,39,33,White,Master
 ...
 ```
 
@@ -64,8 +57,8 @@ If the data are in JSON format , it can be loaded by specifying it as 'json' typ
 
 ```javascript
 app.data({
-  type: 'json',
-  source: jsonData,
+  format: 'json',
+  values: jsonData,
   schema: {
     BabyMonth: "int",
     BabyGender: "string",
@@ -106,6 +99,7 @@ To get the results back in JSON format:
 
 ```javascript
 let res = app.result('json');
+console.log(res);
 ```
 
 Output:
@@ -138,4 +132,8 @@ app.view([
 })
 ```
 
-<div id="p4-example" style="border: 1px solid #ccc"></div>
+<div id="p4-example" style="border: 1px solid #ccc; margin-bottom: 2em;"></div>
+
+### Next Step
+
+Please see our [examples](#/examples) and [documentation](#/documentation).

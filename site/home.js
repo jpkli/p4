@@ -1,10 +1,11 @@
 import site from './site.yaml'
 import template from './html/home.html'
 import Menu from './menu'
+import Footer from './footer'
 
 export default {
   name: 'Home',
-  components: {Menu},
+  components: {Menu, Footer},
   template,
   data() {
     return {

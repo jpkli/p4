@@ -54,7 +54,7 @@ export default function axis(arg) {
             tickLabelAlign = option.tickLabelAlign || "end";
             break;
         case "right":
-            labelPos = {
+            labelPos = option.labelPos || {
                 x: tickLength,
                 y: -5
             };

@@ -4,8 +4,9 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import json from 'highlight.js/lib/languages/json';
 import html from 'highlight.js/lib/languages/xml';
 import Menu from './menu';
+import Footer from './footer';
 import tutorialText from '../docs/tutorials.md';
-import tutorialGetStarted from '../tutorials/getStarted';
+import quickStart from '../tutorials/quickstart';
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('json', json);
@@ -15,16 +16,17 @@ showdown.setFlavor('github');
 let converter = new showdown.Converter();
 let template  = `
 <div>
-  <Menu />
+  <Menu></Menu>
   <div class="container p-3">
     <div id="tutorials" ref="tutorialDiv"></div>
   </div>
+  <Footer></Footer>
 </div>
 `;
 
 export default {
   name: 'Tutorial',
-  components: {Menu},
+  components: {Menu, Footer},
   template,
   created() {
   },
@@ -34,6 +36,6 @@ export default {
       if (i === 0) block.className = 'xml';
       hljs.highlightBlock(block);
     });
-    tutorialGetStarted()
+    quickStart()
   }
 }

@@ -15,10 +15,11 @@ let converter = new showdown.Converter();
 
 import template from './html/documentation.html';
 import Menu from './menu';
+import Footer from './footer';
 
 export default {
   name: 'Documentation',
-  components: {Menu},
+  components: {Menu, Footer},
   template,
   data() {
     return {

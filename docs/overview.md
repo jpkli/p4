@@ -1,4 +1,4 @@
-## Introduction
+## Overview
 P4 leverages GPU computing via WebGL to accelerate data processing and visualization. It provides declarative grammar for specifying data-parallel operations that runs efficiently on the GPU.
 
 Here is an overview of the documentation for P4.

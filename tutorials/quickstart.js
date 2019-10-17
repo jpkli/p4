@@ -9,8 +9,8 @@ export default function() {
   })
   
   app.data({
-    type: 'json',
-    source: dataset.data,
+    format: 'json',
+    values: dataset.data,
     schema: {
       BabyMonth: "int",
       BabyGender: "string",
@@ -46,7 +46,7 @@ export default function() {
       id: 'bar-chart',
       width: 400,
       height: 300, 
-      padding: {left: 150, right: 20, top: 50, bottom: 40}
+      padding: {left: 150, right: 20, top: 20, bottom: 60}
     },
   ])
   .visualize({

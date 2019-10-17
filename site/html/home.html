@@ -16,7 +16,7 @@
       </div>
     </div>
     <div style=" text-align: center; margin: 2em 0 0 0;">
-      <router-link to="/tutorials" role="button" class="btn btn-lg btn-light home-buttons">Get Started</router-link>
+      <router-link to="/tutorials" role="button" class="btn btn-lg home-buttons" style="background-color: steelblue; color: #fff;">Get Started</router-link>
       <router-link to="/play" role="button" class="btn btn-lg btn-light home-buttons"><i class="fas fa-laptop-code"></i>Play Online</router-link>
       <router-link to="/documentation" role="button" class="btn btn-lg btn-light home-buttons"><i class="fas fa-book"></i>Documentation</router-link>
       <a href="https://github.com/jpkli/p4" role="button" class="btn btn-lg btn-light home-buttons"><i class="fab fa-github"></i>Github</a>
@@ -41,38 +41,46 @@
     </div><!-- /.col-lg-4 -->
     <div class="col-lg-3 col-md-6">
       <h4>Extensible</h4>
-      <p>Extensions can be easily added to support more data processing and rendering operations.</p>
+      <p>Allow extensions to be added to support more data processing and rendering operations.</p>
     </div><!-- /.col-lg-4 -->
     </div><!-- /.row -->
     <div class="row" style="text-align: center; margin: auto">
       <div class="col-lg">
-      <div class="card p-2">
+      <div class="card p-2 home-cards"  @click="$router.push('/documentation/transformation')">
         <div id="word-clouds" style="padding: 0; margin: 0; min-height: 180px;"></div>
         <!-- <img class="card-img-top" src="https://jpkli.github.io/demos/images/Transformations.png" alt="Card image cap"> -->
         <div class="card-body">
         <h5 class="card-title">Data Transformations</h5>
-        <p class="card-text"></p>
         </div>
       </div>
       </div>
       <div class="col-lg">
-      <div class="card p-2">
-        <img style="min-height: 180px;" class="card-img-top" src="https://jpkli.github.io/demos/images/Visualizations.png" alt="Card image cap">
-        <div class="card-body">
-        <h5 class="card-title">Plots and Visualizations</h5>
-        <p class="card-text"></p>
+        <div class="card p-2 home-cards" @click="$router.push('/documentation/visualization')">
+          <img style="min-height: 180px;" class="card-img-top" src="https://jpkli.github.io/demos/images/Visualizations.png" alt="Card image cap" to="/visualization">
+          <div class="card-body">
+          <h5 class="card-title">Visualizations</h5>
+          </div>
         </div>
-      </div>
-      </div>
-      <div class="col-lg">
-      <div class="card p-2">
-        <img style="min-height: 180px;" class="card-img-top" src="https://jpkli.github.io/demos/images/Interactions.png" alt="Card image cap">
-        <div class="card-body">
-        <h5 class="card-title">User Interactions</h5>
-        <p class="card-text"></p>
         </div>
-      </div>
+        <div class="col-lg">
+        <div class="card p-2 home-cards"  @click="$router.push('/documentation/interaction')">
+          <img style="min-height: 180px;" class="card-img-top" src="https://jpkli.github.io/demos/images/Interactions.png" alt="Card image cap">
+          <div class="card-body">
+          <h5 class="card-title">User Interactions</h5>
+        </div>
+        </div>
       </div>
     </div>
+    <div class="m-3 mt-5 mb-5">
+      <p>
+         P4 is designed to help more people use data analytics and visualization with GPU computing.
+         P4 makes it possible for visualization designers and system developers with little or 
+         no knowledge in parallel programming and GPU computing to develop data analytics and 
+         visualization applications that efficiently run on the GPU.
+      </p>
+    </div>
+
   </div>
+
+  <Footer></Footer>
 </div>

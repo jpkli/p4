@@ -55,7 +55,7 @@ export default function p4(options) {
     $p.views = $p.grid.views;
     return api;
   }
-
+  api.views = api.view;
   api.getViews = function () {
     return $p.views;
   }
@@ -92,12 +92,13 @@ export default function p4(options) {
   }
   
   api.data = function(dataOptions) {
-    if (dataOptions.type === 'json') {
+    if (dataOptions.format === 'json') {
       let columns = cstore({
-        schema: dataOptions.schema,
-        size: dataOptions.source.length
-      })
-      .import({data: dataOptions.source});
+          schema: dataOptions.schema,
+          size: dataOptions.values.length
+        })
+        .import({data: dataOptions.values});
+
       allocate($p, columns.data());
     } else {
       allocate($p, dataOptions);
@@ -192,7 +193,6 @@ export default function p4(options) {
         api[opt](arg);
       }
     })
- 
     return api;
   }
   
