@@ -1354,96 +1354,97 @@ var io_parse = __webpack_require__(14);
 
 
 
-const INPUT_TYPES = [
-    'json',
-    'csv',
-    'text',
-    'RowArrays',
-    'ColArrays',
-    'cstore',
+const INPUT_FORMATS = [
+  'json',
+  'csv',
+  'text',
+  'RowArrays',
+  'ColArrays',
+  'cstore'
 ];
 
 const INPUT_METHODS = ['memory', 'http', 'websocket', 'file'];
 
 function input_input({
-    type = 'cstore',
-    method = 'memory',
-    delimiter = ',',
-    size = 0,
-    schema,
-    source,
-    onready,
-    uniqueKeys = []
+  type = 'cstore',
+  format = 'cstore',
+  method = 'memory',
+  delimiter = ',',
+  size = 0,
+  schema,
+  source,
+  url,
+  onready,
+  uniqueKeys = []
 }) {
-    if(INPUT_TYPES.indexOf(type) === -1) {
-        throw Error('Invalid input type ', type)
+  if(INPUT_FORMATS.indexOf(type) === -1) {
+    throw Error('Invalid input type ', type)
+  }
+
+  if(INPUT_METHODS.indexOf(method) === -1) {
+    throw Error('Unknown method ', method)
+  }
+
+  let cache;
+  function createIndexes() {
+    uniqueKeys.forEach(function(uk){
+      cache.index(uk);
+    })
+  }
+  let dataFormat = format || type;
+  let dataHandlers = {
+    json: function(data) {
+      cache = Object(cstore["a" /* default */])({schema, size})
+      cache.import({data: (method == 'websocket') ? JSON.parse(data) : data});
+      createIndexes();
+      return cache.data();
+    },
+    csv: function(text) {
+      let data = Object(io_parse["a" /* default */])(text, delimiter);
+      // let fields = data.shift();
+      // cache = cstore({keys: fields, types: fields.map(() => 'float')})
+      cache = Object(cstore["a" /* default */])({schema, size})
+      cache.addRows(data);
+      createIndexes();
+      return cache.data();
+    },
+    cstore: function() {
+      if(Number.isInteger(source.size) && Array.isArray(source.types)) {
+        return source;
+      }
     }
+  }
 
-    if(INPUT_METHODS.indexOf(method) === -1) {
-        throw Error('Unknown method ', method)
-    }
+  dataHandlers.text = dataHandlers.csv;
+  let response = function(data) {
+    return new Promise(function(resolve, reject) {
+      if(typeof(dataHandlers[dataFormat]) === 'function') {
+        resolve(dataHandlers[dataFormat](data));
+      } else {
+        reject(Error('No handler for data type ', dataFormat));
+      }
+    })
+  }
 
-    let cache;
-
-    function createIndexes() {
-        uniqueKeys.forEach(function(uk){
-            cache.index(uk);
-        })
-    }
-
-    let dataHandlers = {
-        json: function(data) {
-            cache = Object(cstore["a" /* default */])({schema, size})
-            cache.import({data: (method == 'websocket') ? JSON.parse(data) : data});
-            createIndexes();
-            return cache.data();
-        },
-        csv: function(text) {
-            let data = Object(io_parse["a" /* default */])(text, delimiter);
-            // let fields = data.shift();
-            // cache = cstore({keys: fields, types: fields.map(() => 'float')})
-            cache = Object(cstore["a" /* default */])({schema, size})
-            cache.addRows(data);
-            createIndexes();
-            return cache.data();
-        },
-        cstore: function() {
-            if(Number.isInteger(source.size) && Array.isArray(source.types)) {
-                return source;
-            }
-        }
-    }
-
-    dataHandlers.text = dataHandlers.csv;
-
-    let response = function(data) {
-        return new Promise(function(resolve, reject) {
-            if(typeof(dataHandlers[type]) === 'function') {
-                resolve(dataHandlers[type](data));
-            } else {
-                reject(Error('No handler for data type ', type));
-            }
-        })
-    }
-
-    if(method === 'http') {
-        return ajax["get"]({url: source, dataType: type}).then(response);
-    } else if (method == 'websocket') {
-        return new Promise(function(resolve, reject) {
-            var socket = new WebSocket(source);
-            socket.onopen = function() {
-                if(typeof(onready) === 'function') onready(socket)
-            }
-            socket.onmessage = function(event) {
-                resolve(dataHandlers[type](event.data));
-            }
-            socket.onerror = function(err) {
-                reject(err);
-            }
-        });
-    } else {
-        return response(source);
-    }
+  if(method === 'http') {
+    let dataSource = url || source;
+    return ajax["get"]({url: dataSource, dataType: dataFormat}).then(response);
+  } else if (method == 'websocket') {
+    return new Promise(function(resolve, reject) {
+      var socket = new WebSocket(source);
+      socket.onopen = function() {
+        if(typeof(onready) === 'function') onready(socket)
+      }
+      socket.onmessage = function(event) {
+        resolve(dataHandlers[dataFormat](event.data));
+      }
+      socket.onerror = function(err) {
+        reject(err);
+      }
+    });
+  } else {
+    return response(source);
+  }
 }
 
 // CONCATENATED MODULE: ./src/io/output.js
@@ -2776,181 +2777,178 @@ function getMonth({ts = 'float'}) {
 
 function derive_derive($p, spec) {
 
-    var derive = {},
-        dataDimension = $p.uniform.uDataDim.data,
-        deriveMax = $p.uniform.uDeriveCount.data,
-        derivedFields = Object.keys(spec);
+  let derive = {};
+  let dataDimension = $p.uniform.uDataDim.data;
+  let deriveMax = $p.uniform.uDeriveCount.data;
+  let derivedFields = Object.keys(spec);
 
-    var fields = $p.fields;
-    if(derivedFields.length > $p.deriveMax) {
-        throw Error('Error: cannot derive more than ' + $p.deriveMax + ' new attributes');
+  let fields = $p.fields;
+  if(derivedFields.length > $p.deriveMax) {
+    throw Error('Error: cannot derive more than ' + $p.deriveMax + ' new attributes');
+  }
+
+  $p.subroutine("hour", "float", getHour);
+  $p.subroutine("month", "float", getMonth);
+  $p.subroutine("year", "float", getYear);
+  $p.subroutine("dayOfWeek", "float", getDayOfWeek);
+
+  let marco = "\t";
+
+  derivedFields.forEach(function(d, i){
+    let re = new RegExp("("+fields.join("|")+")","g");
+    // let formula = spec[d].replace(/@([\w|\d|_]+)/g, function(matched){
+    let formula = spec[d].replace(re, function(matched){
+      // console.log(matched);
+      let index = fields.indexOf(matched);
+      return 'this.getNonIndexedData ('  + index + ', pos.x, pos.y)';
+    });
+    marco += 'if (index == ' + i + ') return ' + formula + "; \n \telse ";
+  });
+
+  marco = marco.replace(/\$/g, 'this.') + " return 0.0;";
+
+  $p.uniform("uOptMode", "float", 0)
+    .uniform("uDeriveId", "int", 0)
+    .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
+
+  function vertexShader() {
+    gl_PointSize = 1.0;
+
+    var i, j;
+
+    i = (this.aDataIdx+0.5) / this.uDataDim.x;
+    j = (this.aDataIdy+0.5) / this.uDataDim.y;
+
+    this.vResult = this.getDerivedValue(this.uDeriveId, vec2(i, j));
+    if(this.uFilterFlag == 1) {
+      if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
+        this.vResult = 0.0;
+    }
+    var x, y;
+    if(this.uOptMode == 0.0){
+      x = 0.5;
+      y = 0.5;
+    } else {
+      x = i * 2.0 - 1.0;
+      y = j * 2.0 - 1.0;
     }
 
-    $p.subroutine("hour", "float", getHour);
-    $p.subroutine("month", "float", getMonth);
-    $p.subroutine("year", "float", getYear);
-    $p.subroutine("dayOfWeek", "float", getDayOfWeek);
+    gl_Position = vec4(x, y, 0.0, 1.0);
+  }
 
-    var marco = "\t";
+  function fragmentShader() {
+    if(this.vResult == 0.0) discard;
+    if(this.uOptMode > 0.0 || this.vResult >= 0.0)
+      gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
+    else
+      gl_FragColor = vec4(-1.0, this.vResult, 0.0, 0.0);
+  }
+
+  var vs = $p.shader.vertex(vertexShader),
+    fs = $p.shader.fragment(fragmentShader),
+    gl = $p.createProgram("derive", vs, fs);
+
+  // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+  // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+  // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+  // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
+
+  function _execute() {
+    var gl = $p.program("derive");
+    $p.framebuffer.enableRead("fFilterResults");
+    $p.bindFramebuffer("fDerivedValues");
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable( gl.BLEND );
+    gl.blendFunc( gl.ONE, gl.ONE );
+    gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
+    gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
+    
+    if($p.indexes.length > 0)
+      gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
+     
+    if($p.indexes.length > 1)
+      gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
+    $p.uniform.uOptMode = 0.0;
+    // $p.uniform.uDeriveCount = derivedFields.length;
+    var deriveDomains = [];
+    derivedFields.forEach(function(d, i){
+      $p.uniform.uDeriveId = i;
+      gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+      gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+      gl.viewport(0, 0, 1,  1);
+
+      var result = new Float32Array(8);
+
+      gl.blendEquation(gl.MAX_EXT);
+      gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
+      // gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
+
+      gl.viewport(1, 0, 1,  1);
+      gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
+
+      gl.blendEquation(gl.MIN_EXT);
+      gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
+      gl.readPixels(0, 0, 2, 1, gl.RGBA, gl.FLOAT, result);
+
+      var minValue = (result[4] < 0) ? result[5] : result[7],
+        maxValue = (result[2] > 0) ? result[3] : result[1];
+      deriveDomains[i] = [minValue, maxValue];
+
+      // deriveDomains[i] = [Math.min(min[0], min[3]), Math.max(max[0], max[3])];
+    });
+    gl.viewport(0, 0, dataDimension[0], dataDimension[1]*deriveMax);
+    gl.disable( gl.BLEND );
+    gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+
+    $p.uniform.uOptMode = 1.0;
 
     derivedFields.forEach(function(d, i){
-        var re = new RegExp("("+fields.join("|")+")","g");
-        // var formula = spec[d].replace(/@([\w|\d|_]+)/g, function(matched){
-        var formula = spec[d].replace(re, function(matched){
-            // console.log(matched);
-            var index = fields.indexOf(matched);
-            return 'this.getNonIndexedData ('  + index + ', pos.x, pos.y)';
-        });
-        marco += 'if (index == ' + i + ') return ' + formula + "; \n \telse ";
+      $p.uniform.uDeriveId = i;
+      gl.viewport(0, dataDimension[1]*i, dataDimension[0], dataDimension[1]);
+      gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
     });
 
-    marco = marco.replace(/\$/g, 'this.') + " return 0.0;";
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    $p.uniform("uOptMode", "float", 0)
-        .uniform("uDeriveId", "int", 0)
-        .subroutine("getDerivedValue", "float", new Function("$int_index", "$vec2_pos", marco));
+    return deriveDomains;
+  }
 
-    function vertexShader() {
-        gl_PointSize = 1.0;
-
-        var i, j;
-
-        i = (this.aDataIdx+0.5) / this.uDataDim.x;
-        j = (this.aDataIdy+0.5) / this.uDataDim.y;
-
-        this.vResult = this.getDerivedValue(this.uDeriveId, vec2(i, j));
-        if(this.uFilterFlag == 1) {
-            if(texture2D(this.fFilterResults, vec2(i, j)).a == 0.0)
-                this.vResult = 0.0;
+  derive.execute = function(spec) {
+    var derivedFields = Object.keys(spec);
+    var newDerivedDomains = _execute();
+    if(!$p._update) {
+      newDerivedDomains.forEach(function(d, i) {
+        var fieldId = $p.fields.indexOf(derivedFields[i]);
+        if(fieldId === -1) {
+          $p.fields.push(derivedFields[i]);
+          fieldId = $p.fields.indexOf(derivedFields[i]);
+          $p.deriveCount += 1;
         }
-        var x, y;
-        if(this.uOptMode == 0.0){
-            x = 0.5;
-            y = 0.5;
-        } else {
-            x = i * 2.0 - 1.0;
-            y = j * 2.0 - 1.0;
-        }
-
-        gl_Position = vec4(x, y, 0.0, 1.0);
+        $p.fieldDomains[fieldId] = d;
+        $p.fieldWidths[fieldId] = d[1] - d[0] + 1;
+      });
+      $p.uniform.uFieldDomains.value($p.fieldDomains);
+      $p.uniform.uFieldWidths.data = $p.fieldWidths;
     }
+  }
 
-    function fragmentShader() {
-        if(this.vResult == 0.0) discard;
-        if(this.uOptMode > 0.0 || this.vResult >= 0.0)
-            gl_FragColor = vec4(0.0, 0.0, 1.0, this.vResult);
-        else
-            gl_FragColor = vec4(-1.0, this.vResult, 0.0, 0.0);
-    }
+  derive.result = function(arg) {
+    var options = arg || {},
+      offset = options.offset || [0, 0],
+      resultSize = options.size || $p.dataDimension[0]* $p.dataDimension[1],
+      fid = options.fieldId || options.deriveFieldId || 0,
+      rowSize = Math.min(resultSize, $p.dataDimension[0]),
+      colSize = Math.ceil(resultSize/$p.dataDimension[0]);
+    
+    $p.bindFramebuffer('DerivedValues');
+    var result = new Float32Array(rowSize * colSize * 4);
+    gl.readPixels(0, dataDimension[1]*fid, rowSize, colSize, gl.RGBA, gl.FLOAT, result);
+    return result.filter(function(d, i){ return i%4===3;} ); //return channel alpha in rgba
+  }
 
-    var vs = $p.shader.vertex(vertexShader),
-        fs = $p.shader.fragment(fragmentShader),
-        gl = $p.createProgram("derive", vs, fs);
-
-    // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
-    // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
-    // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
-    // gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
-
-    function _execute() {
-
-        var gl = $p.program("derive");
-        $p.framebuffer.enableRead("fFilterResults");
-        $p.bindFramebuffer("fDerivedValues");
-        gl.disable(gl.CULL_FACE);
-        gl.disable(gl.DEPTH_TEST);
-        gl.enable( gl.BLEND );
-        gl.blendFunc( gl.ONE, gl.ONE );
-        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdx.location, 0);
-        gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataIdy.location, 1);
-        
-        if($p.indexes.length > 0)
-            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValx.location, 0);
-       
-        if($p.indexes.length > 1)
-            gl.ext.vertexAttribDivisorANGLE($p.attribute.aDataValy.location, 1);
-        $p.uniform.uOptMode = 0.0;
-        // $p.uniform.uDeriveCount = derivedFields.length;
-        var deriveDomains = [];
-        derivedFields.forEach(function(d, i){
-            $p.uniform.uDeriveId = i;
-            gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-            gl.viewport(0, 0, 1,  1);
-
-            var result = new Float32Array(8);
-
-            gl.blendEquation(gl.MAX_EXT);
-            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-            // gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, max);
-
-            gl.viewport(1, 0, 1,  1);
-            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-
-            gl.blendEquation(gl.MIN_EXT);
-            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-            gl.readPixels(0, 0, 2, 1, gl.RGBA, gl.FLOAT, result);
-
-            var minValue = (result[4] < 0) ? result[5] : result[7],
-                maxValue = (result[2] > 0) ? result[3] : result[1];
-            deriveDomains[i] = [minValue, maxValue];
-
-            // deriveDomains[i] = [Math.min(min[0], min[3]), Math.max(max[0], max[3])];
-        });
-        gl.viewport(0, 0, dataDimension[0], dataDimension[1]*deriveMax);
-        gl.disable( gl.BLEND );
-        gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-
-        $p.uniform.uOptMode = 1.0;
-
-        derivedFields.forEach(function(d, i){
-            $p.uniform.uDeriveId = i;
-            gl.viewport(0, dataDimension[1]*i, dataDimension[0], dataDimension[1]);
-            gl.ext.drawArraysInstancedANGLE(gl.POINTS, 0, dataDimension[0], dataDimension[1]);
-        });
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-        return deriveDomains;
-    }
-
-    derive.execute = function(spec) {
-        var derivedFields = Object.keys(spec);
-        var newDerivedDomains = _execute();
-        if(!$p._update) {
-            newDerivedDomains.forEach(function(d, i) {
-                var fieldId = $p.fields.indexOf(derivedFields[i]);
-                if(fieldId === -1) {
-                    $p.fields.push(derivedFields[i]);
-                    fieldId = $p.fields.indexOf(derivedFields[i]);
-                    $p.deriveCount += 1;
-                }
-
-                $p.fieldDomains[fieldId] = d;
-                $p.fieldWidths[fieldId] = d[1] - d[0] + 1;
-                console.log(derivedFields[i], $p.fieldWidths[fieldId], d[1], d[0])
-            });
-            $p.uniform.uFieldDomains.value($p.fieldDomains);
-            $p.uniform.uFieldWidths.data = $p.fieldWidths;
-        }
-    }
-
-    derive.result = function(arg) {
-        var options = arg || {},
-            offset = options.offset || [0, 0],
-            resultSize = options.size || $p.dataDimension[0]* $p.dataDimension[1],
-            fid = options.fieldId || options.deriveFieldId || 0,
-            rowSize = Math.min(resultSize, $p.dataDimension[0]),
-            colSize = Math.ceil(resultSize/$p.dataDimension[0]);
-        
-        $p.bindFramebuffer('DerivedValues');
-        var result = new Float32Array(rowSize * colSize * 4);
-        gl.readPixels(0, dataDimension[1]*fid, rowSize, colSize, gl.RGBA, gl.FLOAT, result);
-        return result.filter(function(d, i){ return i%4===3;} ); //return channel alpha in rgba
-    }
-
-    return derive;
+  return derive;
 }
 
 // CONCATENATED MODULE: ./src/ops/extent.gl.js
@@ -4310,7 +4308,7 @@ function axis_axis(arg) {
             tickLabelAlign = option.tickLabelAlign || "end";
             break;
         case "right":
-            labelPos = {
+            labelPos = option.labelPos || {
                 x: tickLength,
                 y: -5
             };
@@ -4583,149 +4581,149 @@ const defaultSize = 20;
 var gradID = 0;
 
 function legend_color(arg){
-    var gradientID = gradID++;
+  var gradientID = gradID++;
 
-    var option = arg || {},
-        container = option.container || null,
-        width = option.width || null,
-        height = option.height || null,
-        pos = option.pos ||[0, 0],
-        dim = option.dim || 'x',
-        padding = option.padding || {left: 0, right: 0, top: 0, bottom: 0},
-        vmap = option.vmap || {},
-        label = option.label || false,
-        colors = option.colors || defaultColors,
-        domain = option.domain || ['min', 'max'],
-        format = option.format || printformat('.3s');
-
-
-    if(colors.length < 2) colors = defaultColors;
-    width -= padding.left + padding.right;
-    height -= padding.top + padding.bottom;
-
-    var legend = (container === null)
-        ? new Svg({width: width, height: height, padding: padding})
-        : container.append('g');
-
-    var gradDirection;
-    if(dim == 'x') {
-        gradDirection = {x1: 0, x2: 1, y1: 0, y2: 0};
-        if(height === null) height = defaultSize;
-    } else {
-        gradDirection = {x1: 0, x2: 0, y1: 0, y2: 1};
-        if(width === null) width = defaultSize;
-    }
-
-    function linearGradient(colors) {
-        var gradient = legend.append('defs')
-            .append('linearGradient')
-                .attr('id', 'gradlegend'+gradientID)
-                .attr(gradDirection);
-
-        colors.forEach(function(c, i){
-            gradient.append('stop')
-                .attr('offset', i / (colors.length-1) )
-                .attr('stop-color', colors[colors.length-i-1]);
-        });
-        return gradient;
-    }
-
-    var grad = linearGradient(colors);
-
-    var rect = legend.append('g');
-
-    var colorScale = rect.append('rect')
-        .attr('width', width-padding.left)
-        .attr('height', height)
-        .style('fill','url(#gradlegend' + gradientID + ')');
-
-    var domainLabel = legend.append('text');
-    if(label) {
-        label.append('text')
-            .attr('x', pos[0] - 5)
-            .attr('y', pos[1] + height/2 + 5)
-            .style('fill', '#222')
-            .style('text-anchor', 'end')
-            .text(printformat('2s')(domain[0]));
-
-        legend.append('text')
-            .attr('x', pos[0] + width - padding.left + 5)
-            .attr('y', pos[1] + height/2 + 5)
-            .style('fill', '#222')
-            .style('text-anchor', 'begin')
-            // .style('font-size', '.9em')
-            .text(printformat('2s')(domain[1]));
-    }
-
-    if(option.title) {
-        legend.append('g')
-          .append('text')
-            .attr('y', pos[1] - padding.top)
-            .attr('x', pos[0] + width/2)
-            .attr('dy', '1em')
-            .style('text-anchor', 'middle')
-            .text(option.title);
-    }
-
-    if(dim == 'x') {
-        new axis_axis({
-            dim: 'x',
-            domain: domain,
-            container: legend,
-            align: 'bottom',
-            ticks: Math.floor(width / 30),
-            height: height,
-            width: width,
-            labelPos: {x: 0, y: -20},
-            format: format,
-        });
-    } else {
-        new axis_axis({
-            dim: 'y',
-            domain: domain,
-            container: legend,
-            align: 'right',
-            ticks: Math.floor(height / 30),
-            height: height,
-            width: width,
-            labelPos: {x: 0, y: -20},
-            format: format,
-        });
-    }
+  var option = arg || {},
+    container = option.container || null,
+    width = option.width || null,
+    height = option.height || null,
+    pos = option.pos ||[0, 0],
+    dim = option.dim || 'x',
+    padding = option.padding || {left: 0, right: 0, top: 0, bottom: 0},
+    label = option.label || false,
+    colors = option.colors || defaultColors,
+    domain = option.domain || ['min', 'max'],
+    format = option.format || printformat('.3s');
 
 
-    // legend.appendChild(xAxis);
+  if(colors.length < 2) colors = defaultColors;
+  width -= padding.left + padding.right;
+  height -= padding.top + padding.bottom;
 
-    legend.translate(pos[0]+padding.left, pos[1]+padding.top);
+  var legend = (container === null)
+    ? new Svg({width: width, height: height, padding: padding})
+    : container.append('g');
 
-    // legend.update = function(newDomain, newColors) {
-    //
-    //     legend.removeChild(xAxis);
-    //     xAxis = new Axis({
-    //         dim: 'x',
-    //         domain: newDomain,
-    //         container: legend,
-    //         align: 'bottom',
-    //         ticks: 4,
-    //         // tickInterval: 10000000,
-    //         labelPos: {x: -5, y: -20},
-    //          padding: padding,
-    //         width: width-padding.left,
-    //         format: format,
-    //     }).show();
-    //
-    //     if(typeof(newColors) != 'undefined') {
-    //         grad.remove();
-    //         grad = linearGradient(newColors);
-    //         colorScale.css('fill','url(#gradlegend' + gradientID + ')');
-    //
-    //     }
-    //     // legend.appendChild(xAxis);
-    //
-    //     return legend;
-    // }
+  var gradDirection;
+  if(dim == 'x') {
+    gradDirection = {x1: 0, x2: 1, y1: 0, y2: 0};
+    if(height === null) height = defaultSize;
+  } else {
+    gradDirection = {x1: 0, x2: 0, y1: 0, y2: 1};
+    if(width === null) width = defaultSize;
+  }
 
-    return legend;
+  function linearGradient(colors) {
+    var gradient = legend.append('defs')
+      .append('linearGradient')
+        .attr('id', 'gradlegend'+gradientID)
+        .attr(gradDirection);
+
+    colors.forEach(function(c, i){
+      gradient.append('stop')
+        .attr('offset', i / (colors.length-1))
+        .attr('stop-color', colors[colors.length-i-1]);
+    });
+    return gradient;
+  }
+
+  var grad = linearGradient(colors);
+
+  var rect = legend.append('g');
+
+  var colorScale = rect.append('rect')
+    .attr('width', width-padding.left)
+    .attr('height', height)
+    .style('fill','url(#gradlegend' + gradientID + ')');
+
+  var domainLabel = legend.append('text');
+  if(label) {
+    label.append('text')
+      .attr('x', pos[0] - 5)
+      .attr('y', pos[1] + height/2 + 5)
+      .style('fill', '#222')
+      .style('text-anchor', 'end')
+      .text(printformat('2s')(domain[0]));
+
+    legend.append('text')
+      .attr('x', pos[0] + width - padding.left + 5)
+      .attr('y', pos[1] + height/2 + 5)
+      .style('fill', '#222')
+      .style('text-anchor', 'begin')
+      // .style('font-size', '.9em')
+      .text(printformat('2s')(domain[1]));
+  }
+
+  if(option.title) {
+    legend.append('g')
+      .append('text')
+      .attr('y', pos[1] - padding.top)
+      .attr('x', pos[0] + width/2)
+      .attr('dy', '1em')
+      .style('text-anchor', 'middle')
+      .text(option.title);
+  }
+
+  if(dim == 'x') {
+    new axis_axis({
+      dim: 'x',
+      domain: domain,
+      container: legend,
+      align: 'bottom',
+      ticks: Math.floor(width / 30),
+      height: height,
+      width: width,
+      labelPos: {x: 0, y: -20},
+      format: format,
+    });
+  } else {
+    new axis_axis({
+      dim: 'y',
+      domain: domain,
+      container: legend,
+      align: 'right',
+      ticks: Math.floor(height / 30),
+      height: height,
+      width: width,
+      labelPos: {x: 10, y: -5},
+      tickPosition: [5, 0],
+      format: format,
+    });
+  }
+
+
+  // legend.appendChild(xAxis);
+
+  legend.translate(pos[0]+padding.left, pos[1]+padding.top);
+
+  // legend.update = function(newDomain, newColors) {
+  //
+  //     legend.removeChild(xAxis);
+  //     xAxis = new Axis({
+  //         dim: 'x',
+  //         domain: newDomain,
+  //         container: legend,
+  //         align: 'bottom',
+  //         ticks: 4,
+  //         // tickInterval: 10000000,
+  //         labelPos: {x: -5, y: -20},
+  //          padding: padding,
+  //         width: width-padding.left,
+  //         format: format,
+  //     }).show();
+  //
+  //     if(typeof(newColors) != 'undefined') {
+  //         grad.remove();
+  //         grad = linearGradient(newColors);
+  //         colorScale.css('fill','url(#gradlegend' + gradientID + ')');
+  //
+  //     }
+  //     // legend.appendChild(xAxis);
+  //
+  //     return legend;
+  // }
+
+  return legend;
 }
 
 // CONCATENATED MODULE: ./src/vis/chart.js
@@ -19911,7 +19909,7 @@ function p4(options) {
     $p.views = $p.grid.views;
     return api;
   }
-
+  api.views = api.view;
   api.getViews = function () {
     return $p.views;
   }
@@ -19948,14 +19946,13 @@ function p4(options) {
   }
   
   api.data = function(dataOptions) {
-
-    if (dataOptions.type === 'json') {
-      
+    if (dataOptions.format === 'json') {
       let columns = Object(cstore["a" /* default */])({
-        schema: dataOptions.schema,
-        size: dataOptions.source.length
-      })
-      .import({data: dataOptions.source});
+          schema: dataOptions.schema,
+          size: dataOptions.values.length
+        })
+        .import({data: dataOptions.values});
+
       allocate($p, columns.data());
     } else {
       allocate($p, dataOptions);
@@ -20050,7 +20047,6 @@ function p4(options) {
         api[opt](arg);
       }
     })
- 
     return api;
   }
   
