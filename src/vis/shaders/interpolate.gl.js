@@ -24,7 +24,7 @@ export default {
                 value = pow(value, this.uScaleExponents[channelId]);
             }
 
-            if (this.uGeoProjection == 1) {
+            if (this.uGeoProjection == 1 && channelId == 1) {
                 value = log(tan((value / 90.0 + 1.0) * 3.14159 / 4.0)) * 180.0 / 3.14159;
             }
         } else {

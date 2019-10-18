@@ -43,6 +43,7 @@ export default function visualize($p) {
         .uniform('uMaxRGBA',        'vec4',  [0, 0, 0, 0])
         .uniform('uDefaultColor',   'vec3',  [0.8, 0, 0])
         .uniform('uGeoProjection',   'int',  0)
+        .uniform('uDropZeros',   'int',  0)
         .uniform('uColorMode',      'int',   1)
         .uniform('uIsXYCategorical','ivec2', [0, 0])
         .varying('vColorRGBA',      'vec4'   );
@@ -149,7 +150,9 @@ export default function visualize($p) {
         }
         $p.uniform.uVisDomains.data = Object.keys(pv.domains).map(f=>pv.domains[f]);
         $p.uniform.uVisMark.data = visMarks.indexOf(mark);
-        $p.uniform.uGeoProjection.data = (vmap.projection) ? 1 : 0;
+        $p.uniform.uGeoProjection.data = (vmap.project) ? 1 : 0;
+        $p.uniform.uDropZeros.data = (vmap.dropZeros) ? 1 : 0;
+
         //Check if need interleaving data attributes(e.g.,parallel coordinates)
         if(Array.isArray(vmap.x) || Array.isArray(vmap.y)) {
             renderer = 'interleave';
@@ -204,10 +207,6 @@ export default function visualize($p) {
         if($p.skipRender || vmap.project) {
             pv.chart.removeAxis();
             if($p.fields.indexOf(vmap.color)!==-1) pv.chart.removeLegend();
-        }
-
-        if (vmap.project) {
-            chartLayer.axisLabels.remove()
         }
 
         if(!$p.skipRender) {

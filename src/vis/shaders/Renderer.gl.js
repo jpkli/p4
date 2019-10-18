@@ -10,7 +10,7 @@ export default class Renderer {
   }
 
   vertexShader () {
-    gl_Position = vec4(this._square, 0, 1);
+    gl_Position = vec4(this._square, 0.0, 1.0);
   }
 
   fragmentShader () {

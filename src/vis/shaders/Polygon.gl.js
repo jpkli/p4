@@ -53,6 +53,9 @@ export default class Polygon extends Renderer{
     }
 
     rgb = this.mapColorRGB(this.uVisualEncodings[2], color);
+    if (this.uDropZeros == 1 && color == 0.0) {
+      alpha = 0.0;
+    }
     this.vColorRGBA = vec4(rgb * alpha, alpha);
     gl_Position = vec4(posX, posY, 0.0, 1.0);
   }
