@@ -137,3 +137,4 @@ app.view([
 ### Next Step
 
 Please see our [examples](#/examples) and [documentation](#/documentation).
+You can also join our [discussion group](https://groups.google.com/forum/#!forum/p4js). 
