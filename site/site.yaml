@@ -78,6 +78,10 @@ examples:
       image: https://jpkli.github.io/demos/images/p4/barchart.png
       url: /play/bar-chart
 
+    - name: Column Chart
+      image: https://jpkli.github.io/demos/images/p4/column-chart.png
+      url: /play/column-chart
+
     - name: Scatterplot
       image: https://jpkli.github.io/demos/images/p4/scatterplot.png
       url: /play/scatter-plot
@@ -85,6 +89,10 @@ examples:
     - name: Line Chart
       image: https://jpkli.github.io/demos/images/p4/line-chart.png
       url: /play/line-chart
+
+    - name: Color Lines
+      image: https://jpkli.github.io/demos/images/p4/color-lines.png
+      url: /play/color-lines
 
     - name: Area Chart
       image: https://jpkli.github.io/demos/images/p4/area-chart.png
