@@ -1,0 +1,35 @@
+{
+  "views": [
+    {
+      "id": "chart",
+      "width": 640,
+      "height": 420,
+      "padding": {"left": 60, "right": 10, "top" : 10, "bottom": 60},
+      "gridlines": {"y": true},
+      "offset": [0, 0],
+      "color": {
+        "range": ["red", "steelblue", "green", "orange"],
+        "interpolate": false
+      }
+    }
+  ],
+  "operations": [
+    {
+      "$aggregate": {
+        "$group": ["MotherAge", "MotherRace"],
+        "$collect": {
+          "Babies": {"$count": "*"}
+        }
+      }
+    },
+    {
+      "$visualize": {
+        "mark": "spline",
+        "color": "MotherRace",
+        "size": 2,
+        "x": "MotherAge",
+        "y": "Babies"
+      }
+    }
+  ]
+}

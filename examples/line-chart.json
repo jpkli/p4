@@ -1,34 +1,20 @@
 {
-  "views": [
-    {
-      "id": "chart",
-      "width": 640,
-      "height": 420,
-      "padding": {"left": 60, "right": 10, "top" : 10, "bottom": 60},
-      "gridlines": {"y": true},
-      "offset": [0, 0],
-      "color": {
-        "range": ["red", "steelblue", "green", "orange"],
-        "interpolate": false
-      }
-    }
-  ],
   "operations": [
     {
       "$aggregate": {
-        "$group": ["BabyMonth", "MotherRace"],
+        "$group": ["BabyMonth"],
         "$collect": {
-          "Babies": {"$count": "*"}
+          "AvgWeight": {"$avg": "BabyWeight"}
         }
       }
     },
     {
       "$visualize": {
         "mark": "line",
-        "color": "MotherRace",
+        "color": "steelblue",
         "size": 2,
         "x": "BabyMonth",
-        "y": "Babies"
+        "y": "AvgWeight"
       }
     }
   ]
