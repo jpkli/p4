@@ -5,8 +5,8 @@ import json from 'highlight.js/lib/languages/json';
 import html from 'highlight.js/lib/languages/xml';
 import Menu from './menu';
 import Footer from './footer';
-import tutorialText from '../docs/tutorials.md';
 import quickStart from '../tutorials/quickstart';
+import axios from 'axios';
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('json', json);
@@ -31,11 +31,13 @@ export default {
   created() {
   },
   mounted() {
-    this.$refs.tutorialDiv.innerHTML = converter.makeHtml(tutorialText);
-    this.$refs.tutorialDiv.querySelectorAll('pre code').forEach((block, i) => {
-      if (i === 0) block.className = 'xml';
-      hljs.highlightBlock(block);
-    });
-    quickStart()
+    axios.get('docs/tutorials.md').then((res) => {
+      this.$refs.tutorialDiv.innerHTML = converter.makeHtml(res.data);
+      this.$refs.tutorialDiv.querySelectorAll('pre code').forEach((block, i) => {
+        if (i === 0) block.className = 'xml';
+        hljs.highlightBlock(block);
+      });
+      quickStart()
+    })
   }
 }
