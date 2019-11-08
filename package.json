@@ -1,6 +1,6 @@
 {
   "name": "p4.js",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Portable parallel processing pipelines",
   "main": "index.js",
   "directories": {
