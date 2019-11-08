@@ -19,3 +19,4 @@ p4.datasets = {Babies, TimeSeries};
 
 root.p4 = p4;
 export default root.p4;
+export const datasets = {Babies, TimeSeries}
