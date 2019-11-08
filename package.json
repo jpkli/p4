@@ -55,5 +55,8 @@
     "webpack-cli": "^3.3.7",
     "webpack-dev-server": "^3.8.0",
     "webpack-merge": "^4.1.0"
+  },
+  "dependencies": {
+    "p3.js": "^0.3.3"
   }
 }

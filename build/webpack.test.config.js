@@ -10,7 +10,8 @@ module.exports = {
     devtool: "source-map",
     target: 'web',
     resolve: {
-      modules: [path.resolve(__dirname, '../..'), '../node_modules'],
+      modules: [path.resolve(__dirname, '../..'), '../node_modules'],,
+      alias: {p3$: 'p3.js'}
     },
     output: {
         path: path.resolve(__dirname, "../dist"),
