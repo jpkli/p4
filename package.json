@@ -1,6 +1,6 @@
 {
   "name": "p4.js",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Portable parallel processing pipelines",
   "main": "index.js",
   "directories": {
@@ -38,6 +38,7 @@
     "css-loader": "^3.2.0",
     "file-loader": "^4.2.0",
     "font-awesome": "^4.7.0",
+    "gl": "^4.4.0",
     "highlight.js": "^9.14.2",
     "html-loader": "^0.5.5",
     "jStat": "^1.7.1",

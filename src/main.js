@@ -250,6 +250,7 @@ export default function p4(options) {
     if(newData._p4_cstore_version) {
       data = newData
     } else {
+      
       let cache = cstore({
         schema: $p.dataSchema,
         strValues: $p.strValues

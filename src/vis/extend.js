@@ -11,6 +11,8 @@ export default function ($p, vmap, viewIndex, domains) {
         if ($p.uniqueValues.hasOwnProperty(f)) {
           let last = $p.uniqueValues[f].length - 1;
           dataDomains[f] = [$p.uniqueValues[f][0], $p.uniqueValues[f][last]];
+        } else if($p.strLists.hasOwnProperty(f)) {
+          dataDomains[f] = $p.strLists[f];
         } else {
           dataDomains[f] = domains[f];
         }
