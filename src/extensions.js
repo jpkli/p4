@@ -1,4 +1,4 @@
-import { vis } from 'p3';
+import { vis } from 'p3.js';
 // import animation from '../src/animate';
 
 export default [
