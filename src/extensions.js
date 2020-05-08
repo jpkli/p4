@@ -1,6 +1,5 @@
-import { vis } from 'p3.js';
+import { vis } from 'p3';
 // import animation from '../src/animate';
-
 export default [
     {
         name: 'spline',

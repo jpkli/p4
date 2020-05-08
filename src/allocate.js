@@ -11,7 +11,7 @@ export default function($p, dataProps) {
     $p.dtypes =  data.dtypes || data.types || [];
     $p.intervals =  data.intervals || {};
     $p.uniqueValues = data.uniqueValues;
-    $p.dataSchema = data.struct;
+    $p.dataSchema = data.struct || data.schema;
 
     let dkeys = $p.dkeys;
     let dtypes = $p.dtypes;

@@ -37,9 +37,9 @@ export default function ColumnStore(arg){
                     cstore.intervalize(c, intervals[c]);
                 }
 
-                if(strValues[c] && Object.keys(strValues[c]).length > 0) {
-                    strLists[c] = Object.keys(strValues[c]);
-                }
+                // if(strValues[c] && Object.keys(strValues[c]).length > 0) {
+                //     strLists[c] = Object.keys(strValues[c]);
+                // }
 
             });
             columns.attributes = attributes;
@@ -80,6 +80,11 @@ export default function ColumnStore(arg){
         var f = attributes[cid];
         colAlloc[f] = ctypes[types[cid]];
         var columnType = types[cid]
+        
+        if(strValues[f] && Object.keys(strValues[f]).length > 0) {
+            strLists[f] = Object.keys(strValues[f]);
+        }
+
         if(columnType === 'string' || columnType === 'str'){
             if (!strValues.hasOwnProperty(f)) {
                 strValues[f] = {};
@@ -103,7 +108,7 @@ export default function ColumnStore(arg){
                 return Math.floor(ts);
             };
         } else {
-            throw new Error("Invalid data type for TypedArray data!")
+            throw new Error('Invalid data type (' + columnType + ') for TypedArray data!')
         }
     }
 

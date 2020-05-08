@@ -85,7 +85,7 @@ export default function interact($p, options) {
             }
 
             Object.keys(selection).forEach(k => {
-              if ($p.uniqueValues.hasOwnProperty(k)) {
+              if ($p.uniqueValues && $p.uniqueValues.hasOwnProperty(k)) {
                 let values = $p.uniqueValues[k]
                 let start = Math.floor(selection[k][0]);
                 let end = Math.floor(selection[k][1]);

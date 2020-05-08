@@ -59,6 +59,7 @@ export default function p4(options) {
   api.getViews = function () {
     return $p.views;
   }
+  api.generateViews = $p.grid.generateViews
   
   $p.reset = api.head;
   $p.exportResult = api.result;
@@ -117,6 +118,7 @@ export default function p4(options) {
   }
 
   let asyncPipeline = {};
+  api.operations = Object.keys(kernels)
   let asyncInput = function(arg) {
     let inputReady = false;
     for(let program of Object.keys(api).concat(Object.keys(kernels))) {
@@ -244,8 +246,8 @@ export default function p4(options) {
     })
   }
   $p.respond = api.interact;
-
-  api.updateData = function(newData) {
+  api.replaceData = (newData) => { return api.updateData(newData, false)}
+  api.updateData = function(newData, accumulate = true) {
     let data;
     if(newData._p4_cstore_version) {
       data = newData
@@ -258,7 +260,6 @@ export default function p4(options) {
       cache.addRows(newData)
       data = cache.data()
     }
-
     //update and combine all strValues
     Object.keys(data.strValues).forEach((attr) => {
       $p.strValues[attr] = Object.assign($p.strValues[attr], data.strValues[attr]);
@@ -271,17 +272,20 @@ export default function p4(options) {
     .slice($p.indexes.length)
     .forEach((attr, ai) => {
       let buf = new Float32Array($p.dataDimension[0] * $p.dataDimension[1]);
-      if(data[attr] === undefined) debugger;
       for (let i = 0, l = data[attr].length; i < l; i++) {
         buf[i] = data[attr][i];
       }
       $p.texture.tData.update(
         buf, [0, $p.dataDimension[1] * ai], $p.dataDimension
       );
-      $p.fieldDomains[ai] = [
-        Math.min(data.stats[attr].min, $p.fieldDomains[ai][0]),
-        Math.max(data.stats[attr].max, $p.fieldDomains[ai][1])
-      ]
+      if (accumulate) {
+        $p.fieldDomains[ai] = [
+          Math.min(data.stats[attr].min, $p.fieldDomains[ai][0]),
+          Math.max(data.stats[attr].max, $p.fieldDomains[ai][1])
+        ]
+      } else {
+        $p.fieldDomains[ai] = [data.stats[attr].min, data.stats[attr].max]
+      }
       $p.fieldWidths[ai] = $p.fieldDomains[ai][1] - $p.fieldDomains[ai][0] + 1;
       if(data.strLists.hasOwnProperty(attr)){
         $p.fieldDomains[ai] = [0, data.strLists[attr].length - 1];
@@ -341,13 +345,15 @@ export default function p4(options) {
       $p.extensions.push(extOptions);
     }
   }
-
+  api.operations.push('annotate')
   api.annotate = function ({
     id = 0,
-    mark = 'vline',
+    mark = 'rule',
     color = 'red',
-    size = 3,
-    position = {values: []}
+    size = 1,
+    x = null,
+    y = null,
+    style = {'stroke-dasharray': '5,5'}
   }) {
     let view = $p.views[0];
     if (Number.isInteger(id) && id < $p.views.length) {
@@ -358,31 +364,37 @@ export default function p4(options) {
         view = view[0];
       }
     }
-    if (mark === 'vline') {
-      let values = position[view.vmap.x || view.vmap.width] || position.values;
-      values.forEach(val => {
-        let x = view.chart.x(val);
-        view.chart.svg.append('line')
-          .attr('x1', x)
-          .attr('x2', x)
+    
+    let values = x.call(null)
+    values.forEach(val => {
+      let ruler = view.chart.svg.append('line')
+        .attr('stroke', color)
+        .attr('stroke-width', size);
+
+      if (typeof x === 'function') {
+        let getScale = (view.extChart) ? view.extChart.scales.x : view.chart.x;
+        let x = getScale(val);
+        ruler.attr('x1', x).attr('x2', x)
           .attr('y1', 0)
-          .attr('y2', view.height - view.padding.top - view.padding.bottom)
-          .attr('stroke', color)
-          .attr('stroke-width', size)
+          .attr('y2', view.height - view.padding.top - view.padding.bottom);
+
+      } else if (typeof y === 'function') {
+        let getScale = (view.extChart) ? view.extChart.scales.y : view.chart.y;
+        let y = getScale(val);
+        let values = y.call(null)
+        values.forEach(val => {
+          let y = view.chart.y(val);
+          ruler.attr('y1', y).attr('y2', y)
+            .attr('x1', 0).attr('x2', view.width - view.padding.left - view.padding.height);
+        }) 
+      }
+
+      Object.keys(style).forEach(prop => {
+        ruler.style(prop, style[prop])
       })
-    } else if (mark === 'hline') {
-      let values = position[view.vmap.y || view.vmap.height] || position.values;
-      values.forEach(val => {
-        let y = view.chart.y(val);
-        view.chart.svg.append('line')
-          .attr('x1', 0)
-          .attr('x2', view.width - view.padding.left - view.padding.height)
-          .attr('y1', y)
-          .attr('y2', y)
-          .attr('stroke', color)
-          .attr('stroke-width', size)
-      }) 
-    }
+
+    })
+
   }
 
   let inputDataOptions = options.data || options.input;

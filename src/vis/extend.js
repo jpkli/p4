@@ -2,13 +2,13 @@ export default function ($p, vmap, viewIndex, domains) {
   let chart = $p.views[viewIndex];
   let width = chart.width;
   let height = chart.height;
-  let padding = chart.padding;
+  let padding = chart.padding || $p.padding;
 
   $p.extensions.forEach((ext) => {
     if (ext.condition.call(null, vmap)) {
       let dataDomains = {};
       Object.keys(domains).forEach(f => {
-        if ($p.uniqueValues.hasOwnProperty(f)) {
+        if ($p.uniqueValues && $p.uniqueValues.hasOwnProperty(f)) {
           let last = $p.uniqueValues[f].length - 1;
           dataDomains[f] = [$p.uniqueValues[f][0], $p.uniqueValues[f][last]];
         } else if($p.strLists.hasOwnProperty(f)) {
@@ -35,11 +35,21 @@ export default function ($p, vmap, viewIndex, domains) {
       view.encodings = vmap;
       view.svg = chart.chart.svg.svg;
       view.canvas = $p.canvas;
+      view.gridlines = view.gridlines;
 
       if (ext.exportData) {
         data.json = $p.exportResult({format: 'row', outputTag: vmap.in});
       }
 
+      if ($p.dataSchema) {
+        data.json.forEach(row => {
+          Object.keys($p.dataSchema).forEach(key => {
+            if ($p.dataSchema[key] === 'time') {
+              row[key] = new Date(row[key])
+            }
+          })
+        })
+      }
       if (typeof ext.onready === 'function') {
         ext.onready.call($p, data, view);
       }
@@ -47,6 +57,9 @@ export default function ($p, vmap, viewIndex, domains) {
       let execution = (ext.type == 'class')
         ? function (data, view) {
           chart.plot = new ext.function(data, view)
+          if (typeof chart.plot.render === 'function') {
+            chart.plot.render()
+          }
           return chart.plot;
         } 
         : ext.function;
@@ -55,7 +68,7 @@ export default function ($p, vmap, viewIndex, domains) {
         execution.call(ext, data, view);
       } else {
         if (!$p._update) {
-          execution.call(ext, data, view);
+          chart.extChart = execution.call(ext, data, view);
         }
       }
     }

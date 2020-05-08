@@ -118,9 +118,9 @@ examples:
     #   image: https://jpkli.github.io/demos/p4/images/perception-line.png
     #   url: /play/perception-line
 
-    # - name: Facets
-    #   image: https://jpkli.github.io/demos/p4/images/brush-link.png
-    #   url: /play/facets
+    - name: Facets
+      image: https://jpkli.github.io/demos/p4/images/brush-link.png
+      url: /play/facets
 
   # - name: Colors
   #   examples:

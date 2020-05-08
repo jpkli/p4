@@ -90,8 +90,9 @@ export default function($p) {
         // if(Object.keys($p.crossfilters).length > 0)
         //     operations.match({});
         let vmaps;
-        if(vmap.facets) {
-            let facet = vmap.facets;
+        let facet = vmap.facets
+
+        if(facet) {
             let spec = facet.rows || facet.columns;
             if(facet.sortBy !== undefined) {
                 let sortOpt = Object.keys(facet.sortBy)[0];
@@ -112,7 +113,7 @@ export default function($p) {
                 .sort((a, b) => b.value - a.value )
                 spec[sortAttr] = sorted.map(r => r.name);;
             }
-            let encodings = Object.keys(vmap).filter(k => k !== 'facets')
+            let encodings = Object.keys(vmap).filter(k => k !== 'facets' && k !== 'transform')
             let variables = Object.keys(spec)
             let minLoopCount = Math.min(...variables.map(v => spec[v].length))
 
@@ -140,6 +141,7 @@ export default function($p) {
         if($p.grid.views.length < vmaps.length) {
             $p.grid.reset();  
             $p.views = $p.grid.generateViews({
+                layout:  facet.rows ? 'rows' : 'columns',
                 count: vmaps.length, 
                 width: $p.viewport[0],
                 height: $p.viewport[1],

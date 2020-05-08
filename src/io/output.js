@@ -57,15 +57,15 @@ export default function($p) {
           obj[fieldName] = ($p.strLists.hasOwnProperty(fieldName)) ?  $p.strLists[fieldName][edi] : edi + 1;
         } 
         fields.forEach(function(f, fi) {
-          let kid = $p.dkeys.indexOf(f);
-          let dtype = $p.dtypes[kid];
+          // let kid = $p.dkeys.indexOf(f);
+          // let dtype = $p.dtypes[kid];
           let key = (format == 'array') ? fi : f;
 
-          if (dtype == 'string' && $p.strLists.hasOwnProperty(f)) {
+          if ($p.strLists.hasOwnProperty(f)) {
             obj[key] = $p.strLists[f][res[f][i]];
           } else if ($p.intervals.hasOwnProperty(f) && $p.intervals[f].dtype == 'histogram') {
             obj[key] = $p.intervals[f].min + res[f][i] * $p.intervals[f].interval;
-          } else if ($p.uniqueValues.hasOwnProperty(f)) {
+          } else if ($p.uniqueValues && $p.uniqueValues.hasOwnProperty(f)) {
             obj[key] = $p.uniqueValues[f][res[f][i]];
           } else {
             obj[key] = res[f][i];

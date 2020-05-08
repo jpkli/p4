@@ -17,7 +17,6 @@
             {
                 "name": "Heatmap",
                 "file": "heatmap.json"
-<<<<<<< HEAD
             }
         ],
         "views": [
@@ -35,8 +34,6 @@
             {
                 "name": "Histogram",
                 "file": "histogram.json"
-=======
->>>>>>> a8d931264e00ccbcd54bb2862117bbf40c6044f3
             },
             {
                 "name": "Derive New Variable",

@@ -120,14 +120,18 @@ export default function visualize($p) {
             } 
 
             // pv.domains = Object.keys(visDomain).map(f=>visDomain[f]);
-            pv.domains = visDomain;
+            if (!vmap.append) {
+                pv.domains = visDomain;
+            }
             // $p.uniform.uVisDomains.data = pv.domains;
             if((vmap.append !== true ) && pv.hasOwnProperty('chart')) {
                 pv.chart.svg.remove();
                 pv.chart.removeAxis();
             }
-            pv.chart = vis.addChart(viewSetting);
-            pv.svg = pv.chart.svg.node();
+            // if (!pv.hasOwnProperty('chart')) {
+                pv.chart = vis.addChart(viewSetting);
+                pv.svg = pv.chart.svg.node();
+            // }
             if(typeof(colorInfo) === 'object') {
                 if(Array.isArray(colorInfo)) {
                     colorMap = colorInfo;
@@ -202,21 +206,21 @@ export default function visualize($p) {
             gl.lineWidth(vmap.size || 1.0);
         }
 
-        extend($p, vmap, viewIndex, visDomain);
+        extend($p, vmap, viewIndex, pv.domains);
 
-        if($p.skipRender || vmap.project) {
+        if($p.skipRender || vmap.project || vmap.append) {
             pv.chart.removeAxis();
             if($p.fields.indexOf(vmap.color)!==-1) pv.chart.removeLegend();
         }
-
-        if(!$p.skipRender) {
+        if(!$p.skipRender || vmap.append) {
             renderers[renderer].render(primitive);
-        } else {
-            if(!$p._update) {
-                gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
-                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-            }
-        }
+        } 
+        // else {
+            // if(!$p._update) {
+            //     gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
+            //     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+            // }
+        // }
         $p.skipRender = false;
         if($p.revealDensity) enhance({
             viewIndex: viewIndex,

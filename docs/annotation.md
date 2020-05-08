@@ -7,11 +7,12 @@ let plot = p4(config).data()
   .view({id: 'chart1', ... })
   .visualize({ ... })
 
+// create vertical lines
 plot.annotate({
   id: 'chart1',
-  mark: 'vline',
+  mark: 'rule',
   size: 3,
   color: 'red',
-  position: {values: [...]} // this set the positions of the vlines
+  x: {field: 'attribute for x', values: [...]}
 })
 ```
