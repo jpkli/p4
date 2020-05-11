@@ -157,10 +157,14 @@ export default function($p) {
                 $p.setInput(vmap.in);
             }
             if (vmap.view) {
-                let viewId = (vmap.view.id) ? vmap.view.id : 'p4-view-id-' + $p.views.length
-                vmap.view.id = viewId
-                vmap.id = viewId
-                $p.views.push(vmap.view)
+                let viewId = (vmap.id) ? vmap.id : 'p4-view-id-' + $p.views.length;
+                vmap.view.id = viewId;
+                const vid = $p.views.map(d => d.id).indexOf(viewId);
+                if (vid === -1) {
+                    $p.views.push(vmap.view);
+                } else {
+                    $p.views[vid] = vmap.view;
+                }
             }
 
             let viewIndex = vi;
