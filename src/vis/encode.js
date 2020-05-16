@@ -71,7 +71,7 @@ export function encode($p, vmap, colorManager) {
             viewSetting.scale.x = 'ordinal';
             viewSetting.domainX = new Array(len).fill(0).map((d,i) => ext[0] + i);
          }
-         markSpace[0] = 0.02;
+         markSpace[0] = vmap.markSpace || 0.02;
 
     }
     if(vmapIndex[1] > -1) {
@@ -88,7 +88,7 @@ export function encode($p, vmap, colorManager) {
             viewSetting.scale.y = 'ordinal';
             viewSetting.domainY = new Array(len).fill(0).map((d,i)=>ext[0] + i);
         }
-        markSpace[1] = 0.1;
+        markSpace[1] = vmap.markSpace || 0.1;
     }
 
     if(vmapIndex[0] > -1 && vmapIndex[1] > -1) {

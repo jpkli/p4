@@ -36,7 +36,7 @@ export default function visualize($p) {
         .uniform('uPosOffset',      'vec2',  [0.0, 0.0])
         .uniform('uFeatureCount',   'int',   0)
         .uniform('uMarkSize',       'float', 16.0)
-        .uniform('uMarkSpace',      'vec2',  [0.02, 0.02])
+        .uniform('uMarkSpace',      'vec2',  [0.1, 0.1])
         .uniform('uDefaultAlpha',   'float', 1.0)
         .uniform('uDefaultWidth',   'float', 1.0 / $p.viewport[0])
         .uniform('uDefaultHeight',  'float', 1.0 / $p.viewport[1])
