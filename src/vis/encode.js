@@ -100,7 +100,7 @@ export function encode($p, vmap, colorManager) {
             let histMin = $p.intervals[vmap[dim]].min;
             let histMax = $p.intervals[vmap[dim]].max;
             let histIntv = $p.intervals[vmap[dim]].interval;
-            let histBin = (histMax - histMin) / histIntv + 1;
+            let histBin = Math.ceil((histMax - histMin) / histIntv);
             let d = (dim == 'x') ? 'domainX' : 'domainY';
             viewSetting.histogram[dim] = true;
             viewSetting[d] = new Array(histBin).fill(histMin).map((h, i) => h + i*histIntv);

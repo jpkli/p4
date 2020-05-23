@@ -150,7 +150,7 @@ export default function interact($p, options) {
         vis.updateDomain = true;
         let delta = {x: null, y: null};
         let scale = 0.05;
-        svg.onmousewheel = function(e) {
+        svg.onwheel = function(e) {
           let dir = (e.deltaY > 0) ? 1 : -1;
           let selection = {};
           let proportion = {
