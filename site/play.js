@@ -4,6 +4,7 @@ import Footer from './footer';
 import site from './site.yaml';
 import Split from 'split.js';
 import Editor from './Editor';
+import p4 from '../'
 
 const defaultViews = [{
   id: 'chart',

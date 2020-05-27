@@ -26,7 +26,7 @@ Then P4 can be used with *ES6/ES2015 import* for building web apps:
 
 
 ```javascript
-import p4 from 'p4';
+import p4 from 'p4.js';
 ```
 
 #### Initialization

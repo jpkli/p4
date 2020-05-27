@@ -1,6 +1,6 @@
 {
   "name": "p4.js",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "description": "Portable parallel processing pipelines",
   "main": "index.js",
   "directories": {
@@ -57,6 +57,6 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
-    "p3.js": "^0.8.6"
+    "p3.js": "^0.8.8"
   }
 }
