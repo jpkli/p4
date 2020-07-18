@@ -15,8 +15,8 @@ p4.ajax = ajax;
 p4.cstore = cstore;
 p4.ctypes = ctypes;
 p4.parse = parse;
-p4.datasets = {Babies, TimeSeries};
+// p4.datasets = {Babies, TimeSeries};
 
 root.p4 = p4;
 export default root.p4;
-export const datasets = {Babies, TimeSeries}
+// export const datasets = {Babies, TimeSeries}
