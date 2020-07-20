@@ -1,6 +1,6 @@
 {
   "name": "p4.js",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "description": "Portable parallel processing pipelines",
   "main": "index.js",
   "directories": {
@@ -35,7 +35,7 @@
     "ace-builds": "^1.4.1",
     "axios": "^0.18.1",
     "chai": "^4.1.2",
-    "css-loader": "^3.2.0",
+    "css-loader": "^3.6.0",
     "file-loader": "^4.2.0",
     "font-awesome": "^4.7.0",
     "gl": "^4.4.0",
