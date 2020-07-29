@@ -30,10 +30,10 @@ export default class Polygon extends Renderer{
     posX = posX * (this.uFieldWidths[this.uVisualEncodings[0]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[0]];
     posY = posY * (this.uFieldWidths[this.uVisualEncodings[1]] - 1.0) / this.uFieldWidths[this.uVisualEncodings[1]];
 
-    width *= 1.0 - this.uMarkSpace.x * 2.0;
-    height *= 1.0 - this.uMarkSpace.y * 2.0;
-    posX += this.uMarkSpace.x * width;
-    posY += this.uMarkSpace.y * height;
+    width *= 1.0 - this.uMarkSpace.x;
+    height *= 1.0 - this.uMarkSpace.y;
+    posX += this.uMarkSpace.x * 0.5 * width;
+    posY += this.uMarkSpace.y * 0.5 * height;
 
     if (this.aVertexId == 0.0 || this.aVertexId == 3.0) {
       posX = posX * 2.0 - 1.0;
