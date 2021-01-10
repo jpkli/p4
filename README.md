@@ -201,7 +201,10 @@ See this example in [Online Editor](#/play/brush-link).
  - Only 24-bit, single floating point precision is supported.
  - Data size cannot be larger than the max size supported by WebGL texture, which is typically 8096 x 8096.
 
-### Reference Paper
-P4 was first developed to leverage WebGL for GPU-accelerated data processing. The support for interactive visualizations is added based on research work documented in this paper.
+### Publication
+P4 was first developed to leverage WebGL for GPU-accelerated data processing. The support for interactive visualizations is added based on the research work documented in the following paper:
 
 Li JK, Ma KL. [P4: Portable Parallel Processing Pipelines for Interactive Information Visualization](https://ieeexplore.ieee.org/abstract/document/8468065). IEEE transactions on visualization and computer graphics. 2018 Sep 19.
+
+## Acknowledgement
+This research was sponsored in part by the U.S. National Science Foundation through grant NSF IIS-1528203 and U.S. Department of Energy through grant DE-SC0014917.
